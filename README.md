@@ -1,5 +1,6 @@
 # nifty-watch
 Dashboard for monitoring NFT floor prices
 
-## Deployment
-Super simple page with all javascript running in the browser. Just open the index.html in the browser and it should go.
+## How to use
+1. Edit the script.js to include the template ids for NFTs you care about
+2. Open the local index.html file in a browser
