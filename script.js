@@ -11,8 +11,12 @@ async function getWAXPrice() {
 async function populatePage() {
     // Reset the table
     exchangeTable.innerHTML = '';
+    
+    const now = new Date();
+    document.getElementById('timestamp').innerText = now.toLocaleTimeString();
 
     const waxPrice = await getWAXPrice();
+    document.getElementById("waxPrice").innerText = waxPrice
 
     for (const templateID of templateIDs) {
         console.log("TEMPLATE: ", templateID)
@@ -45,7 +49,7 @@ async function populatePage() {
                     <span style="color: orange">${Math.round(price * 100) / 100}</span> WAX
                 </td>
                 <td>
-                    <span  style="color: green">$${(price * waxPrice).toFixed(2)}</span>
+                    $<span  style="color: green">${(price * waxPrice).toFixed(2)}</span>
                 </td>
                 <td>
                 <a href="${saleLink}" target="_blank">buy</a> | <a href="${salesLink}" target="_blank">sales</a>  | <a href="${listingsLink}" target="_blank">listings</a>
@@ -56,13 +60,8 @@ async function populatePage() {
         }
     }
 
-    const now = new Date();
-    document.getElementById('timestamp').innerText = now.toLocaleTimeString();
-
     setTimeout(populatePage, refreshInterval)
 }
-
-const refreshInterval = 5 * 60 * 1000;
 
 (async () => {
     await populatePage();
