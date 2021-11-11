@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <title>NFT Watchlist</title>
     <link rel="stylesheet" href="milligram.css">
     <link rel="stylesheet" href="index.css">
 </head>
@@ -20,7 +21,10 @@
                 </a>
             </div>
         </div>
-        <div class="row">
+        <div id="noResults" class="row hidden">
+          <p>You have entered no template IDs.  Click the button below to set some up.</p>
+        </div>
+        <div id="results" class="row hidden">
             <div class="column">
                 <table>
                     <thead>
@@ -45,7 +49,11 @@
                 <button id="refreshTableButton">Refresh</button>
                 <span id="refreshStatus"></span>
             </div>
-        </div>
+            <div class="column buttons-right">
+              <button id="setWalletButton">...</button>
+              <button id="setTemplateIDsButton">...</button>
+            </div>
+      </div>
         <div class="row">
             <div class="column">
                 WAX = $<span id="waxPrice"></span>
