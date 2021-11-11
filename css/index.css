@@ -30,3 +30,15 @@ body {
 .hidden {
   display: none;
 }
+
+.price .higher {
+    color: green;
+}
+
+.price .lower {
+    color: red;
+}
+
+.price .lower, .price .higher {
+    cursor: help
+}

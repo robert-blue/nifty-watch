@@ -25,3 +25,9 @@ String.prototype.toHSL = function(opts) {
 
     return `hsl(${h}, ${s}%, ${l}%)`;
 }
+
+function parseTokenValue(precision, amount) {
+    const left = amount.substring(0, amount.length - precision)
+    const right = amount.substring(amount.length - precision)
+    return parseFloat(`${left}.${right}`)
+}

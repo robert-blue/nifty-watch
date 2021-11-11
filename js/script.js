@@ -32,63 +32,87 @@ async function populatePage() {
     display('noResults', false);
     display('results', true);
 
-    const results = []
+    // This is a very neive implementation. Needs some refactoring love to parse the results into a more resiliant data structure
+    
+    const lowestListed = []
 
     for (var i = 0; i < templateIDs.length; i++) {
         const templateID = templateIDs[i]
-        document.getElementById("refreshStatus").innerText = `retrieving template ${i}/${templateIDs.length}`
+        document.getElementById("refreshStatus").innerText = `retrieving floor prices ${i}/${templateIDs.length}`
 
-        const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales/templates?symbol=WAX&template_id=${templateID}&order=asc&sort=price`;
+        const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales/templates?symbol=WAX&state=1&max_assets=1&template_id=${templateID}&order=asc&sort=price`;
         const response = await fetch(url);
         const data = await response.json();
-        results.push(data)
+        lowestListed.push(data)
+    }    
+    
+    const lastSold = []
+
+    for (var i = 0; i < templateIDs.length; i++) {
+        const templateID = templateIDs[i]
+        document.getElementById("refreshStatus").innerText = `retrieving latest sales data ${i}/${templateIDs.length}`
+
+        const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?symbol=WAX&state=3&max_assets=1&template_id=${templateID}&page=1&limit=1&order=desc&sort=updated`;
+        const response = await fetch(url);
+        const data = await response.json();
+        console.log(`LAST SOLD ${templateID}`, data)
+        lastSold.push(data)
     }
 
     // Reset the table
     exchangeTable.innerHTML = '';
 
-    for (data of results) {
-        for (const d of data.data) {
-            console.log("DATA:", d)
+    for (var i = 0; i < templateIDs.length; i++) {
+        const lowest = lowestListed[i].data[0]
+        const last = lastSold[i].data[0]
 
-            const precision = d.price.token_precision
-            const left = d.price.amount.substring(0, d.price.amount.length - precision)
-            const right = d.price.amount.substring(d.price.amount.length - precision)
-            const price =  parseFloat(`${left}.${right}`)
+        const floorPrice = parseTokenValue(lowest.price.token_precision, lowest.price.amount)
+        const lastPrice = parseTokenValue(last.price.token_precision, last.price.amount)
 
-            const saleId = d.sale_id
-            const collectionName = d.collection_name
-            const schemaName = d.assets[0].schema.schema_name
-            const cardName = d.assets[0].name
-            const templateId = d.assets[0].template.template_id
+        const saleId = lowest.sale_id
+        const collectionName = lowest.collection_name
+        const schemaName = lowest.assets[0].schema.schema_name
+        const cardName = lowest.assets[0].name
+        const templateId = lowest.assets[0].template.template_id
 
-            const salesLink = `https://wax.atomichub.io/market/history?collection_name=${collectionName}&data:text.name=${cardName}&order=desc&schema_name=${schemaName}&sort=updated&symbol=WAX`
-            const saleLink = `https://wax.atomichub.io/market/sale/${saleId}`
-            const listingsLink = `https://wax.atomichub.io/market?collection_name=${collectionName}&data:text.name=${cardName}&order=asc&schema_name=${schemaName}&sort=price&symbol=WAX`
-            const collectionLink = `https://wax.atomichub.io/explorer/collection/${collectionName}`
-            const templateLink = `https://wax.atomichub.io/explorer/template/${collectionName}/${templateId}`
-            const inventoryLink = `https://wax.atomichub.io/profile/${waxAddress}?collection_name=${collectionName}&match=${cardName}&order=desc&sort=transferred`
+        const salesLink = `https://wax.atomichub.io/market/history?collection_name=${collectionName}&data:text.name=${cardName}&order=desc&schema_name=${schemaName}&sort=updated&symbol=WAX`
+        const saleLink = `https://wax.atomichub.io/market/sale/${saleId}`
+        const listingsLink = `https://wax.atomichub.io/market?collection_name=${collectionName}&data:text.name=${cardName}&order=asc&schema_name=${schemaName}&sort=price&symbol=WAX`
+        const collectionLink = `https://wax.atomichub.io/explorer/collection/${collectionName}`
+        const templateLink = `https://wax.atomichub.io/explorer/template/${collectionName}/${templateId}`
+        const inventoryLink = `https://wax.atomichub.io/profile/${waxAddress}?collection_name=${collectionName}&match=${cardName}&order=desc&sort=transferred`
 
-            const output = `
+        const isLower = (floorPrice < lastPrice) 
+        let priceDiff = 0
+        let priceDirectionClass = ''
+
+        if (isLower) {
+          priceDiff = Math.round(lastPrice * 10 / floorPrice) / 10
+          priceDirectionClass = 'lower'
+        } else {
+          priceDiff = Math.round(floorPrice * 10 / lastPrice) / 10
+          priceDirectionClass = 'higher'
+        }
+
+        const output = `
 <tr>
-    <td><a href="${templateLink}" class="templateId" target="_blank">${templateId}</a></td>
-    <td><a href="${collectionLink}" target="_blank" style="color: ${collectionName.toHSL()}">${collectionName}</a> - <span class="cardName">${cardName}</span></td>
-    <td>
-        <span style="color: orange">${Math.round(price * 100) / 100}</span> WAX
-    </td>
-    <td>
-        $<span  style="color: green">${(price * waxPrice).toFixed(2)}</span>
-    </td>
-    <td>
-        <a href="${saleLink}" target="_blank">buy</a> 
-        | <a href="${salesLink}" target="_blank">sales</a> 
-        | <a href="${listingsLink}" target="_blank">listings</a>
-        | <a href="${inventoryLink}" target="_blank">${waxAddress ?? ""}</a>
-    </td>
+<td><a href="${templateLink}" class="templateId" target="_blank">${templateId}</a></td>
+<td><a href="${collectionLink}" target="_blank" style="color: ${collectionName.toHSL()}">${collectionName}</a> - <span class="cardName">${cardName}</span></td>
+<td class="price">
+    <span style="color: orange">${Math.round(floorPrice * 100) / 100}</span> WAX <span class="${priceDirectionClass}" title="Price difference since last sold. Last sold for ${lastPrice} WAX.">${isLower ? "-" : "+"}${priceDiff}%</span>
+</td>
+<td>
+    $<span  style="color: green">${(floorPrice * waxPrice).toFixed(2)}</span>
+</td>
+<td>
+    <a href="${saleLink}" target="_blank">buy</a> 
+    | <a href="${salesLink}" target="_blank">sales</a> 
+    | <a href="${listingsLink}" target="_blank">listings</a>
+    | <a href="${inventoryLink}" target="_blank">${waxAddress ?? ""}</a>
+</td>
 </tr>`
 
-            exchangeTable.insertAdjacentHTML('afterbegin', output)
-        }
+        exchangeTable.insertAdjacentHTML('afterbegin', output)
     }
 
     document.getElementById("refreshStatus").innerText = ""
