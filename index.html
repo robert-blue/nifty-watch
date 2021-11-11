@@ -1,39 +1,64 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
     <link rel="stylesheet" href="milligram.css">
     <link rel="stylesheet" href="index.css">
 </head>
+
 <body>
+    <div class="container">
+        <div class="row header">
+            <div class="column">
+                <h1>NFT Watchlist</h1>
+            </div>
+            <div class="column">
+                <!-- <img class="float-right" style="height: 5em;" src="https://images.squarespace-cdn.com/content/v1/60a371d1411b97685077e895/1621325641828-UT4QLOCRE0AJUGSJSRPN/AKlogo23D.png"/> -->
+                <a href="https://atomikings.com" target="_blank" class="logoLink float-right">
+                    <img style="height: 5em;"
+                        src="https://images.squarespace-cdn.com/content/v1/60a371d1411b97685077e895/1621363944622-Q6J56U0TVH53KQY3M54S/AKlogobanner.png" />
+                </a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="column">
+                <table>
+                    <thead>
+                        <tr>
+                            <td>ID</td>
+                            <td>Collection - Name</td>
+                            <td>Floor Price</td>
+                            <td>USD</td>
+                            <td></td>
+                        </tr>
+                    </thead>
+                    <tbody id="exchangeTable">
+                        <tr>
+                            <td colspan=6>Loading....</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="column">
+                <button id="refreshTableButton">Refresh</button>
+                <span id="refreshStatus"></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="column">
+                WAX = $<span id="waxPrice"></span>
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                <span id="timestamp"></span>
+            </div>
+        </div>
+    </div>
 
-<div class="container">
-    <h2>NFT Watchlist</h2>
-    <table>
-        <thead>
-        <tr>
-            <td>Collection</td>
-            <td>Name</td>
-            <td>Floor Price</td>
-            <td>USD</td>
-            <td></td>
-        </tr>
-
-        </thead>
-        <tbody id="exchangeTable">
-
-        </tbody>
-    </table>
-    <button id="refreshTableButton">Refresh</button>
-    <br/><br/>
-    <div>
-        WAX = $<span id="waxPrice"></span>
-        &nbsp;&nbsp;|&nbsp;&nbsp;
-        <span id="timestamp"></span>
-    </div> 
-</div>
-
-<script src="include.js"></script>
-<script src="settings.js"></script>
-<script src="script.js"></script>
+    <script src="include.js"></script>
+    <script src="settings.js"></script>
+    <script src="script.js"></script>
 
 </body>
+
 </html>

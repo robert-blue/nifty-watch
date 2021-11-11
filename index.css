@@ -1,8 +1,23 @@
-html {
-    /*font-size: 100%;*/
+body {
+    /* background-color: rgb(15, 29, 10); */
+    background-color: black;
 }
 
-body {
-    /*margin: 1em;*/
-    background-color: black;
+.row.header H1 {
+    color: white;
+    margin-top: 1rem;
+    margin-bottom: auto;
+}
+
+#refreshStatus {
+    color: hotpink;
+    margin-left: 1rem;
+}
+
+.cardName {
+    color: darkcyan;
+}
+
+.templateId {
+    color: #606c76;
 }
