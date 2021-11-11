@@ -87,10 +87,10 @@ async function populatePage() {
         let priceDirectionClass = ''
 
         if (isLower) {
-          priceDiff = Math.round(lastPrice * 10 / floorPrice) / 10
+          priceDiff = Math.round(((lastPrice - floorPrice) / lastPrice * 100) * 10) / 10
           priceDirectionClass = 'lower'
         } else {
-          priceDiff = Math.round(floorPrice * 10 / lastPrice) / 10
+          priceDiff = Math.round(((floorPrice - lastPrice) / floorPrice * 100) * 10) / 10
           priceDirectionClass = 'higher'
         }
 
