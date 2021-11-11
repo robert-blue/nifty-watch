@@ -83,7 +83,7 @@ async function populatePage() {
         <a href="${saleLink}" target="_blank">buy</a> 
         | <a href="${salesLink}" target="_blank">sales</a> 
         | <a href="${listingsLink}" target="_blank">listings</a>
-        | <a href="${inventoryLink}" target="_blank">${waxAddress}</a>
+        | <a href="${inventoryLink}" target="_blank">${waxAddress ?? ""}</a>
     </td>
 </tr>`
 
