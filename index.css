@@ -21,3 +21,12 @@ body {
 .templateId {
     color: #606c76;
 }
+
+.buttons-right > button {
+  float: right;
+  margin-left: 1rem;
+}
+
+.hidden {
+  display: none;
+}

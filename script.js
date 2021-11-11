@@ -1,5 +1,10 @@
+const KEY_TEMPLATE_IDS = 'templateIDs';
+const KEY_WALLET = 'wallet';
+
 const exchangeTable = document.getElementById('exchangeTable');
 const refreshTableButton = document.getElementById('refreshTableButton');
+const setWalletButton = document.querySelector('#setWalletButton');
+const setTemplateIDsButton = document.querySelector('#setTemplateIDsButton');
 
 async function getWAXPrice() {
     const url = 'https://api.coingecko.com/api/v3/simple/price?ids=WAX&vs_currencies=USD'
@@ -12,8 +17,20 @@ async function populatePage() {
     const now = new Date();
     document.getElementById('timestamp').innerText = now.toLocaleTimeString();
 
+    loadWallet();
+    loadTemplateIDs();
+
     const waxPrice = await getWAXPrice();
     document.getElementById("waxPrice").innerText = waxPrice
+
+    if (templateIDs.length === 0) {
+      display('noResults', true);
+      display('results', false);
+      return;
+    }
+
+    display('noResults', false);
+    display('results', true);
 
     const results = []
 
@@ -79,8 +96,45 @@ async function populatePage() {
     setTimeout(populatePage, refreshInterval)
 }
 
+function loadWallet() {
+  waxAddress = localStorage.getItem(KEY_WALLET);
+  setWalletButton.innerText = waxAddress || 'No wallet set';
+}
+
+function loadTemplateIDs() {
+  const t = localStorage.getItem(KEY_TEMPLATE_IDS);
+  if (t) {
+    templateIDs = t.split(',').map(x => Number(x)).sort();
+    setTemplateIDsButton.innerText = `${templateIDs.length} template IDs`;
+  } else {
+    setTemplateIDsButton.innerText = 'No template IDs';
+  }
+}
+
+function setWallet() {
+  const wallet = prompt('Enter your wallet address', waxAddress || '');
+  if (wallet) {
+    localStorage.setItem(KEY_WALLET, wallet);
+    loadWallet();
+  }
+}
+
+function setTemplateIDs() {
+  const t = prompt('Enter your templateIDs delimited by commas', templateIDs.join(','));
+  if (t) {
+    localStorage.setItem(KEY_TEMPLATE_IDS, t);
+    populatePage();
+  }
+}
+
+function display(id, show) {
+  document.querySelector(`#${id}`).classList[show ? 'remove' : 'add']('hidden');
+}
+
 (async () => {
     await populatePage();
 })();
 
 refreshTableButton.addEventListener('click', populatePage);
+setWalletButton.addEventListener('click', setWallet);
+setTemplateIDsButton.addEventListener('click', setTemplateIDs);
