@@ -119,7 +119,17 @@ async function updateStats(lowestListed) {
     refreshStatusElem.innerText = `retrieving latest sales data ${i}/${templateIds.length}`
 
     const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?symbol=WAX&state=3&max_assets=1&template_id=${templateId}&page=1&limit=1&order=desc&sort=updated`;
-    const response = await fetch(url);
+    let response = await fetch(url);
+
+    while (response.status == 429) {
+      refreshStatusElem.innerText = "AtomicHub rate limit reached. Pausing updates."
+      await sleep(5*1000)
+      
+      response = await(fetch(url))
+    }
+
+    refreshStatusElem.innerText = `retrieving latest sales data ${i}/${templateIds.length}`
+
     const data = await response.json();
     console.log(`LAST SOLD ${templateId}`, data)
 

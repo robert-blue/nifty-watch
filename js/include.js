@@ -59,3 +59,9 @@ function formatTimespan(milliseconds) {
 
     return output
 }
+
+function sleep(ms) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  }
