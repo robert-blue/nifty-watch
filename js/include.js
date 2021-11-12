@@ -27,7 +27,35 @@ String.prototype.toHSL = function(opts) {
 }
 
 function parseTokenValue(precision, amount) {
-    const left = amount.substring(0, amount.length - precision)
-    const right = amount.substring(amount.length - precision)
-    return parseFloat(`${left}.${right}`)
+    const left = amount.substring(0, amount.length - precision);
+    const right = amount.substring(amount.length - precision);
+    return parseFloat(`${left}.${right}`);
+}
+
+function formatPrice(price) {
+    return Math.round(price * 100) / 100;
+}
+
+function formatTimespan(milliseconds) {
+    var msec = milliseconds;
+    var dd = Math.floor(msec / 1000 / 60 / 60 / 24);
+    msec -= dd * 1000 * 60 * 60 * 24;
+    var hh = Math.floor(msec / 1000 / 60 / 60);
+    msec -= hh * 1000 * 60 * 60;
+    var mm = Math.floor(msec / 1000 / 60);
+
+    let output = "";
+    if (dd) {
+        output = `<span class="day">${dd}d</span>`;
+    }
+
+    if (hh) {
+        output += `<span class="hour">${hh}h</span>`;
+    }
+
+    if (!dd && mm) {
+        output += `<span class="minute">${mm}m</span>`;
+    }
+
+    return output
 }

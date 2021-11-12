@@ -5,6 +5,8 @@
     <title>Floor Price Watchlist</title>
     <link rel="stylesheet" href="css/milligram.min.css">
     <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/fontawesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/solid.min.css">
 </head>
 
 <body>
@@ -27,16 +29,19 @@
                 <table>
                     <thead>
                         <tr>
-                            <td>ID</td>
-                            <td>Collection - Name</td>
-                            <td>Floor Price</td>
+                            <td title="template Id">ID</td>
+                            <td>Collection</td>
+                            <td>Name</td>
+                            <td title="price of lowest priced sales listing">Floor Price</td>
+                            <td title="percentage difference between last sold WAX price and floor WAX price">Gap</td>
+                            <td title="elapsed time since last sale">Lag</td>
                             <td>USD</td>
                             <td></td>
                         </tr>
                     </thead>
                     <tbody id="exchangeTable">
                         <tr>
-                            <td colspan=6>Loading....</td>
+                            <td colspan=7>Loading....</td>
                         </tr>
                     </tbody>
                 </table>

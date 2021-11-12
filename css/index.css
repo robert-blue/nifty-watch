@@ -14,7 +14,7 @@ body {
     margin-left: 1rem;
 }
 
-.cardName {
+.asset-name {
     color: darkcyan;
 }
 
@@ -27,18 +27,76 @@ body {
   margin-left: 1rem;
 }
 
-.hidden {
+.hidden, .fas.hidden {
   display: none;
 }
 
-.price .higher {
+.lag-value {
+    color: white;
+}
+
+.price-diff.higher {
     color: green;
 }
 
-.price .lower {
+.price-diff.lower {
     color: red;
 }
 
-.price .lower, .price .higher {
+.price-diff.lower, .price-diff.higher {
     cursor: help
+}
+
+.price-wax-value {
+    color: orange;
+}
+
+.price-usd-value {
+    color: white;
+}
+
+td[title] {
+    cursor: help;
+}
+
+td .fas.fa-fire {
+    color: orange;
+}
+
+.minute {
+    color: rgb(50,50,50)
+}
+
+.hour {
+    color: rgb(100,100,100)
+}
+
+.day {
+    color: rgb(150,150,150)
+}
+
+tr td.asset-name i.hot, tr td.asset-name i.dead, tr td.asset-name i.declining {
+    display: none;
+    color: gray;
+}
+
+
+tr td.asset-name i.hot {
+    color: orange;
+}
+
+tr td.asset-name i.declining {
+    color: red;
+}
+
+tr.hot td.asset-name i.hot {
+    display: inline-block;
+}
+
+tr.dead td.asset-name i.dead {
+    display: inline-block;
+}
+
+tr.declining td.asset-name i.declining {
+    display: inline-block;
 }
