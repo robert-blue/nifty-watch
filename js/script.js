@@ -59,8 +59,8 @@ async function populatePage() {
     const schemaName = lowest.assets[0].schema.schema_name
     const assetName = lowest.assets[0].name
 
-    const salesLink = `https://wax.atomichub.io/market/history?collection_name=${collectionName}&data:text.name=${assetName}&order=desc&schema_name=${schemaName}&sort=updated&symbol=WAX`
-    const saleLink = `https://wax.atomichub.io/market/sale/${saleId}`
+    const historyLink = `https://wax.atomichub.io/market/history?collection_name=${collectionName}&data:text.name=${assetName}&order=desc&schema_name=${schemaName}&sort=updated&symbol=WAX`
+    const buyLink = `https://wax.atomichub.io/market/sale/${saleId}`
     const listingsLink = `https://wax.atomichub.io/market?collection_name=${collectionName}&data:text.name=${assetName}&order=asc&schema_name=${schemaName}&sort=price&symbol=WAX`
     const collectionLink = `https://wax.atomichub.io/explorer/collection/${collectionName}`
     const templateLink = `https://wax.atomichub.io/explorer/template/${collectionName}/${templateId}`
@@ -69,30 +69,31 @@ async function populatePage() {
     const output = `
 <tr data-template-id="${templateId}">
 <td class="template-id">
-  <a href="${templateLink}" class="templateId" target="_blank">${templateId}</a>
+  <a href="${templateLink}" class="template-id-link" target="_blank">${templateId}</a>
 </td>
-<td class="collection-name">${collectionName}</td>
+<td class="collection-name">
+  <a href="${collectionLink}" class="collection-name-link" target="_blank">${collectionName}</a>
+</td>
 <td class="asset-name">
-  ${assetName}
-    <i class="fa-solid fa-fire-flame-curved hot" title="sale happening quickly and floor price is higher than last sales price"></i>
-    <i class="fa-solid fa-skull-crossbones dead" title="last sale was over ${DEAD_HOURS / 24} days ago"></i>
-    <i class="fa-solid fa-arrow-trend-down declining" title="floor price is lower than last sales price"></i>
+  <a href="${listingsLink}" target="_blank">${assetName}</a>
+  <i class="fa-solid fa-fire-flame-curved hot" title="last sale under ${HOT_HOURS} hours and floor price is higher than last sales price"></i>
+  <i class="fa-solid fa-skull-crossbones dead" title="last sale was over ${DEAD_HOURS / 24} days ago"></i>
+  <i class="fa-solid fa-arrow-trend-down declining" title="floor price is lower than last sales price"></i>
 </td>
 <td class="price-wax">
     <span class="price-wax-value">${formatPrice(floorPrice)}</span> WAX
 </td>
 <td class="price-diff"></td>
 <td class="lag">
-  <span class="lag-value"></span>
+  <span class="lag-value"></span> <a href="${historyLink}" target="_blank" class="float-right"><i class="fa-solid fa-timeline" title="show past sales"></i></a> 
 </td>
 <td class="price-usd">
     $<span class="price-usd-value">${(floorPrice * waxPrice).toFixed(2)}</span>
 </td>
 <td class="links">
-    <a href="${saleLink}" target="_blank">buy</a> 
-    | <a href="${salesLink}" target="_blank">sales</a> 
-    | <a href="${listingsLink}" target="_blank">listings</a>
-    | <a href="${inventoryLink}" target="_blank">${waxAddress ?? ""}</a>
+    <a href="${inventoryLink}" target="_blank" class="${waxAddress ? "" : "hidden"}"> 
+      <i class="fa-solid fa-boxes" title="show items from this template in your AtomicHub inventory"></i>
+    </a>
 </td>
 </tr>`
 
@@ -135,12 +136,12 @@ async function updateStats(lowestListed) {
 
     const lagHours = (Date.now() - lastSoldDate) / 1000 / 60 / 60;
     const isPriceDiscovery = lagHours <= HOT_HOURS && priceDiff > 0;
-    const isFalling = lagHours > DEAD_HOURS && priceDiff < 0;
+    const isFalling = lagHours <= DEAD_HOURS && priceDiff < 0;
 
-    if (isFalling) {
-      rowElem.classList.add('declining')
-    } else if (lagHours > DEAD_HOURS) {
+    if (lagHours > DEAD_HOURS) {
       rowElem.classList.add('dead')
+    } else if (isFalling) {
+      rowElem.classList.add('declining')
     }
     
     if (isPriceDiscovery) {
@@ -148,7 +149,7 @@ async function updateStats(lowestListed) {
     } 
     
     const mintNumber = last.assets[0].template_mint;
-    
+
     const target = rowElem.querySelector('td.price-diff');
     target.innerText = formatPercent(priceDiff);
     target.title = `mint #${mintNumber} last sold for ${lastPrice} WAX`;

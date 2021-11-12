@@ -18,7 +18,7 @@ body {
     color: darkcyan;
 }
 
-.templateId {
+.template-id-link, .collection-name-link {
     color: #606c76;
 }
 
