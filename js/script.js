@@ -139,18 +139,16 @@ async function updateStats(lowestListed) {
 
     if (isFalling) {
       rowElem.classList.add('declining')
-    } 
+    } else if (lagHours > DEAD_HOURS) {
+      rowElem.classList.add('dead')
+    }
     
     if (isPriceDiscovery) {
       rowElem.classList.add('hot')
     } 
     
-    if (lagHours > DEAD_HOURS) {
-      rowElem.classList.add('dead')
-    }
-
     const mintNumber = last.assets[0].template_mint;
-
+    
     const target = rowElem.querySelector('td.price-diff');
     target.innerText = formatPercent(priceDiff);
     target.title = `mint #${mintNumber} last sold for ${lastPrice} WAX`;
