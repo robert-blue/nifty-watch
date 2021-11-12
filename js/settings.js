@@ -8,4 +8,5 @@ let waxAddress = '';
 const refreshInterval = 5 * 60 * 1000; // 5 minutes
 
 const HOT_HOURS = 2;
+const FRESH_HOURS = 16;
 const DEAD_HOURS = 5 * 24;

@@ -76,9 +76,10 @@ async function populatePage() {
 </td>
 <td class="asset-name">
   <a href="${listingsLink}" target="_blank">${assetName}</a>
-  <i class="fa-solid fa-fire-flame-curved hot" title="last sale under ${HOT_HOURS} hours and floor price is higher than last sales price"></i>
-  <i class="fa-solid fa-skull-crossbones dead" title="last sale was over ${DEAD_HOURS / 24} days ago"></i>
-  <i class="fa-solid fa-arrow-trend-down declining" title="floor price is lower than last sales price"></i>
+  <i class="fa-solid fa-arrow-trend-up up" title="[trending] last sale under ${FRESH_HOURS} hours and floor price is higher than last sales price"></i>
+  <i class="fa-solid fa-fire-flame-curved hot" title="[hot] last sale under ${HOT_HOURS} hours and floor price is higher than last sales price"></i>
+  <i class="fa-solid fa-skull-crossbones dead" title="[stale] last sale over ${DEAD_HOURS / 24} days ago"></i>
+  <i class="fa-solid fa-arrow-trend-down down" title="[down] last sale under ${FRESH_HOURS} hours and floor price is lower than last sales price"></i>
 </td>
 <td class="price-wax">
     <span class="price-wax-value">${formatPrice(floorPrice)}</span> WAX
@@ -145,19 +146,8 @@ async function updateStats(lowestListed) {
     lagTarget.innerHTML = formatTimespan(Date.now() - lastSoldDate);
 
     const lagHours = (Date.now() - lastSoldDate) / 1000 / 60 / 60;
-    const isPriceDiscovery = lagHours <= HOT_HOURS && priceDiff > 0;
-    const isFalling = lagHours <= DEAD_HOURS && priceDiff < 0;
+    rowElem.classList.add(priceAction(lagHours, priceDiff))
 
-    if (lagHours > DEAD_HOURS) {
-      rowElem.classList.add('dead')
-    } else if (isFalling) {
-      rowElem.classList.add('declining')
-    }
-    
-    if (isPriceDiscovery) {
-      rowElem.classList.add('hot')
-    } 
-    
     const mintNumber = last.assets[0].template_mint;
 
     const target = rowElem.querySelector('td.price-diff');
@@ -169,8 +159,22 @@ async function updateStats(lowestListed) {
   refreshStatusElem.innerText = ""
 }
 
-function elem(id) {
-  return document.getElementById(id)
+function priceAction(lagHours, priceDiff) {
+  if (lagHours > DEAD_HOURS) {
+    return 'dead';
+  }
+  
+  if ( lagHours <= HOT_HOURS && priceDiff > 0) {
+    return 'hot';
+  } 
+
+  if (lagHours <= FRESH_HOURS && priceDiff < 0) {
+    return 'down';
+  }
+  
+  if (lagHours <= FRESH_HOURS && priceDiff > 0) {
+    return 'up';
+  }
 }
 
 function formatPercent(value) {

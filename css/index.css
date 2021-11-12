@@ -75,28 +75,26 @@ td .fas.fa-fire {
     color: rgb(150,150,150)
 }
 
-tr td.asset-name i.hot, tr td.asset-name i.dead, tr td.asset-name i.declining {
+tr td.asset-name i.hot, tr td.asset-name i.dead, tr td.asset-name i.down, tr td.asset-name i.up {
     display: none;
-    color: gray;
 }
-
 
 tr td.asset-name i.hot {
     color: orange;
 }
 
-tr td.asset-name i.declining {
+tr td.asset-name i.down {
     color: red;
 }
 
-tr.hot td.asset-name i.hot {
-    display: inline-block;
+tr td.asset-name i.up {
+    color: green;
 }
 
-tr.dead td.asset-name i.dead {
-    display: inline-block;
+tr td.asset-name i.dead {
+    color: gray;
 }
 
-tr.declining td.asset-name i.declining {
+tr.hot td.asset-name i.hot, tr.dead td.asset-name i.dead, tr.up td.asset-name i.up, tr.down td.asset-name i.down {
     display: inline-block;
 }
