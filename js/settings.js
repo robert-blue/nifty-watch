@@ -1,12 +1,29 @@
-// List of template IDs of NFTs to monitor
-let templateIds = [];
+import { KEY_TEMPLATE_IDS, KEY_WALLET } from './config.js';
+import { get, set } from './storage.js';
 
-// WAX Wallet address for creating the "inventory" link
-let waxAddress = '';
+export function getTemplateIds() {
+  return deserializeTemplateIds(get(KEY_TEMPLATE_IDS));
+}
 
-// Frequency in milliseconds to update the data
-const refreshInterval = 5 * 60 * 1000; // 5 minutes
+// Stores template IDs. Accepts an array or comma-delimited string.
+export function setTemplateIds(val) {
+  const idString = typeof val === 'string' ? val : serializeTemplateIds(val);
+  set(KEY_TEMPLATE_IDS, idString);
+  return deserializeTemplateIds(idString);
+}
 
-const HOT_HOURS = 2;
-const FRESH_HOURS = 16;
-const DEAD_HOURS = 5 * 24;
+export function getWallet() {
+  return get(KEY_WALLET) || '';
+}
+
+export function setWallet(address) {
+  return set(KEY_WALLET, address);
+}
+
+function serializeTemplateIds(array) {
+  return array.join(',');
+}
+
+function deserializeTemplateIds(str) {
+  return (str || '').split(',').map((x) => Number(x)).sort();
+}
