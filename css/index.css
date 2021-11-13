@@ -3,6 +3,11 @@ body {
     background-color: black;
 }
 
+td, th {
+    border-bottom-color: #222;
+    padding: .5rem 1.5rem;
+}
+
 .row.header H1 {
     color: white;
     margin-top: 1rem;
