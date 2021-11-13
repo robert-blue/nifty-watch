@@ -1,0 +1,18 @@
+{
+  "name": "nifty-watch",
+  "version": "1.0.0",
+  "description": "Floor Price Watchlist",
+  "main": "src/script.js",
+  "repository": "git@github.com/robert-blue/nifty-watch.git",
+  "author": "Robert Blue <robebl@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint js/*.js --fix",
+    "serve": "docker compose up"
+  },
+  "devDependencies": {
+    "eslint": "^8.2.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.3"
+  }
+}
