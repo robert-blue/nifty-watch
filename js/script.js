@@ -7,10 +7,10 @@ import * as util from './util.js';
 let wallet = '';
 let templateIds = [];
 
-const exchangeTable = document.getElementById('exchangeTable');
-const refreshTableButton = document.getElementById('refreshTableButton');
-const setWalletButton = document.querySelector('#setWalletButton');
-const setTemplateIDsButton = document.querySelector('#setTemplateIDsButton');
+let exchangeTable;
+let refreshTableButton;
+let setWalletButton;
+let setTemplateIDsButton;
 
 async function getWAXPrice() {
   const url = 'https://api.coingecko.com/api/v3/simple/price?ids=WAX&vs_currencies=USD';
@@ -42,7 +42,7 @@ async function refresh() {
 
   for (let i = 0; i < templateIds.length; i++) {
     const templateID = templateIds[i];
-    document.getElementById('refreshStatus').innerText = `retrieving floor prices ${i + 1}/${templateIds.length}`;
+    setRefreshStatus(`retrieving floor prices ${i + 1}/${templateIds.length}`);
 
     const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales/templates?symbol=WAX&state=1&max_assets=1&template_id=${templateID}&order=asc&sort=price`;
     const response = await fetch(url);
@@ -117,37 +117,31 @@ async function refresh() {
   </tr>`;
 
     exchangeTable.insertAdjacentHTML('beforeend', output);
-
-    document.getElementById('refreshStatus').innerText = '';
-
-    await updateStats(lowestListed);
-
-    setTimeout(refresh, REFRESH_INTERVAL);
   }
+
+  setRefreshStatus('');
+  await updateStats(lowestListed);
+
+  setTimeout(refresh, REFRESH_INTERVAL);
 }
 
 async function updateStats(lowestListed) {
-  const refreshStatusElem = document.getElementById('refreshStatus');
-
   for (let i = 0; i < templateIds.length; i++) {
     const templateId = templateIds[i];
-
     const rowSelector = `tr[data-template-id="${templateId}"]`;
     const rowElem = document.querySelector(rowSelector);
 
-    refreshStatusElem.innerText = `retrieving latest sales data ${i + 1}/${templateIds.length}`;
+    setRefreshStatus(`retrieving latest sales data ${i + 1}/${templateIds.length}`);
 
     const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?symbol=WAX&state=3&max_assets=1&template_id=${templateId}&page=1&limit=1&order=desc&sort=updated`;
     let response = await fetch(url);
 
     while (response.status === 429) {
-      refreshStatusElem.innerText = 'AtomicHub rate limit reached. Pausing updates.';
+      setRefreshStatus('AtomicHub rate limit reached. Pausing updates.');
       await util.sleep(5 * 1000);
 
-      response = await (fetch(url));
+      response = await fetch(url);
     }
-
-    refreshStatusElem.innerText = `retrieving latest sales data ${i}/${templateIds.length}`;
 
     const data = await response.json();
     const last = data.data[0];
@@ -177,7 +171,7 @@ async function updateStats(lowestListed) {
     }
   }
 
-  refreshStatusElem.innerText = '';
+  setRefreshStatus('');
 }
 
 function priceAction(lagHours, priceDiff) {
@@ -198,6 +192,10 @@ function priceAction(lagHours, priceDiff) {
   }
 
   return undefined;
+}
+
+function setRefreshStatus(msg) {
+  document.getElementById('refreshStatus').innerText = msg;
 }
 
 function setWallet() {
@@ -229,15 +227,22 @@ function setTemplateIDsButtonText() {
 }
 
 function display(selector, show) {
-  document.querySelector(`${selector}`).classList[show ? 'remove' : 'add']('hidden');
+  document.querySelector(selector).classList[show ? 'remove' : 'add']('hidden');
+}
+
+function bindUI() {
+  exchangeTable = document.querySelector('#exchangeTable');
+  refreshTableButton = document.querySelector('#refreshTableButton');
+  setWalletButton = document.querySelector('#setWalletButton');
+  setTemplateIDsButton = document.querySelector('#setTemplateIDsButton');
+  refreshTableButton.addEventListener('click', refresh);
+  setWalletButton.addEventListener('click', setWallet);
+  setTemplateIDsButton.addEventListener('click', setTemplateIDs);
 }
 
 (async () => {
   wallet = settings.getWallet();
   templateIds = settings.getTemplateIds();
+  bindUI();
   await refresh();
 })();
-
-refreshTableButton.addEventListener('click', refresh);
-setWalletButton.addEventListener('click', setWallet);
-setTemplateIDsButton.addEventListener('click', setTemplateIDs);
