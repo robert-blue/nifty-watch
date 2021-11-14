@@ -131,15 +131,15 @@ async function updateStats(lowestListed) {
     const rowSelector = `tr[data-template-id="${templateId}"]`;
     const rowElem = document.querySelector(rowSelector);
 
-    setRefreshStatus(`retrieving latest sales data ${i + 1}/${templateIds.length}`);
-
+    const statusMessage = `retrieving latest sales data ${i + 1}/${templateIds.length}`;
+    setRefreshStatus(statusMessage);
     const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?symbol=WAX&state=3&max_assets=1&template_id=${templateId}&page=1&limit=1&order=desc&sort=updated`;
     let response = await fetch(url);
 
     while (response.status === 429) {
       setRefreshStatus('AtomicHub rate limit reached. Pausing updates.');
       await util.sleep(5 * 1000);
-
+      setRefreshStatus(statusMessage);
       response = await fetch(url);
     }
 
