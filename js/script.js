@@ -87,9 +87,6 @@ function updateMarketListing(m, waxPrice) {
 }
 
 async function refresh() {
-  const now = new Date();
-  document.getElementById('timestamp').innerText = now.toLocaleTimeString();
-
   const waxPrice = await getWAXPrice();
   document.getElementById('waxPrice').innerText = waxPrice;
 
@@ -161,6 +158,9 @@ async function refresh() {
 
   setRefreshStatus('');
   await updateStats(lowestListed);
+
+  const now = new Date();
+  document.getElementById('timestamp').innerText = now.toLocaleTimeString();
 
   setTimeout(refresh, REFRESH_INTERVAL);
 }
