@@ -27,6 +27,11 @@ td, th {
     color: #606c76;
 }
 
+tr.updating td {
+    background-color: rgba(10, 10, 10);
+    opacity: 100%;
+}
+
 .buttons-right > button {
   float: right;
   margin-left: 1rem;
@@ -40,15 +45,15 @@ td, th {
     color: white;
 }
 
-.price-diff.higher {
+.price-gap-value.higher {
     color: green;
 }
 
-.price-diff.lower {
+.price-gap-value.lower {
     color: red;
 }
 
-.price-diff.lower, .price-diff.higher {
+.price-gap-value.lower, .price-gap-value.higher {
     cursor: help
 }
 
@@ -96,7 +101,7 @@ tr td.asset-name i.up {
     color: green;
 }
 
-tr.dead td, tr.dead td span {
+tr.dead td a, tr.dead td span {
     opacity: 50%;
 }
 

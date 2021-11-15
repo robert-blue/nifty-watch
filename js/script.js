@@ -19,6 +19,67 @@ async function getWAXPrice() {
   return data.wax.usd;
 }
 
+async function drawTable() {
+    if (templateIds.length === 0) {
+      return;
+    }
+
+    // Reset the table
+    exchangeTable.innerHTML = '';
+
+    for (let templateId of templateIds) {
+    const output = `
+  <tr data-template-id="${templateId}">
+  <td class="template-id"><a href="" class="template-id-link" target="_blank">${templateId}</a></td>
+  <td class="collection-name"><a href="" class="collection-name-link" target="_blank"></a></td>
+  <td class="asset-name">
+    <a href="" target="_blank" class="asset-name-link"></a>
+    <i class="fa-solid fa-arrow-trend-up up" title="[trending] last sale under ${FRESH_HOURS} hours and floor price is higher than last sales price"></i>
+    <i class="fa-solid fa-fire-flame-curved hot" title="[hot] last sale under ${HOT_HOURS} hours and floor price is higher than last sales price"></i>
+    <i class="fa-solid fa-skull-crossbones dead" title="[stale] last sale over ${DEAD_HOURS / 24} days ago"></i>
+    <i class="fa-solid fa-arrow-trend-down down" title="[down] last sale under ${FRESH_HOURS} hours and floor price is lower than last sales price"></i>
+  </td>
+  <td class="price-wax" style="text-align:right"><span class="price-wax-value"></span> WAX</td>
+  <td class="price-gap" style="text-align:right"><span class="price-gap-value"></span></td>
+  <td class="lag">
+    <span class="lag-value"></span>
+    <a href="" target="_blank" class="history-link float-right"><i class="fa-solid fa-timeline" title="show past sales"></i></a> 
+  </td>
+  <td class="price-usd" style="text-align:right">
+      $<span class="price-usd-value"></span>
+  </td>
+  <td class="links">
+      <a href="" target="_blank" class="link-inventory ${wallet ? '' : 'hidden'}"> 
+        <i class="fa-solid fa-boxes" title="show items from this template in your AtomicHub inventory"></i>
+      </a>
+  </td>
+  </tr>`;
+
+    exchangeTable.insertAdjacentHTML('beforeend', output);
+  }
+}
+
+function updateMarketListing(m, waxPrice) {
+  const row = document.querySelector(`tr[data-template-id="${m.templateId}"]`);
+  const templateIdLink = row.querySelector(`a.template-id-link`);
+  templateIdLink.href = m.templateLink;
+  templateIdLink.innerHTML = m.templateId;
+
+  const collectionLink = row.querySelector('a.collection-name-link');
+  collectionLink.href = m.collectionLink;
+  collectionLink.innerHTML = m.collectionName;
+
+  const nameLink = row.querySelector('a.asset-name-link');
+  nameLink.href = m.listingsLink;
+  nameLink.innerHTML = m.assetName;
+
+  const floorPrice = row.querySelector('.price-wax-value');
+  floorPrice.innerHTML = `${Math.round(m.floorPrice * 100) / 100}`;
+
+  const usdPrice = row.querySelector('.price-usd-value');
+  usdPrice.innerHTML = util.formatPrice(m.floorPrice * waxPrice);
+}
+
 async function refresh() {
   const now = new Date();
   document.getElementById('timestamp').innerText = now.toLocaleTimeString();
@@ -39,81 +100,47 @@ async function refresh() {
   const lowestListed = [];
 
   for (let i = 0; i < templateIds.length; i++) {
-    const templateID = templateIds[i];
+    const templateId = templateIds[i];
     setRefreshStatus(`retrieving floor prices ${i + 1}/${templateIds.length}`);
+    const row = document.querySelector(`tr[data-template-id="${templateId}"]`);
+    row.classList.add('updating')
 
-    const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales/templates?symbol=WAX&state=1&max_assets=1&template_id=${templateID}&order=asc&sort=price`;
+    const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales/templates?symbol=WAX&state=1&max_assets=1&template_id=${templateId}&order=asc&sort=price`;
     const response = await fetch(url);
     const data = await response.json();
     lowestListed.push(data);
-  }
 
-  // Reset the table
-  exchangeTable.innerHTML = '';
-
-  for (let i = 0; i < templateIds.length; i++) {
-    const templateId = templateIds[i];
+    const lowest = data.data[0];
 
     // Our simple view model
     const m = {
-      assetName: '',
-      collectionLink: '',
-      collectionName: '',
-      floorPrice: 0,
-      historyLink: '',
-      inventoryLink: '',
-      listingsLink: '',
-      schemaName: '',
-      templateLink: '',
+        templateId: 0,
+        assetName: '',
+        collectionLink: '',
+        collectionName: '',
+        floorPrice: 0,
+        historyLink: '',
+        inventoryLink: '',
+        listingsLink: '',
+        schemaName: '',
+        templateLink: '',
     };
 
-    if (lowestListed[i].data.length > 0) {
-      const lowest = lowestListed[i].data[0];
-      m.floorPrice = util.parseTokenValue(lowest.price.token_precision, lowest.price.amount);
-      m.collectionName = lowest.collection_name;
-      m.schemaName = lowest.assets[0].schema.schema_name;
-      m.assetName = lowest.assets[0].name;
+    m.templateId = templateId;
+    m.floorPrice = util.parseTokenValue(lowest.price.token_precision, lowest.price.amount);
+    m.collectionName = lowest.collection_name;
+    m.schemaName = lowest.assets[0].schema.schema_name;
+    m.assetName = lowest.assets[0].name;
 
-      m.historyLink = `https://wax.atomichub.io/market/history?collection_name=${m.collectionName}&data:text.name=${m.assetName}&order=desc&schema_name=${m.schemaName}&sort=updated&symbol=WAX`;
-      m.listingsLink = `https://wax.atomichub.io/market?collection_name=${m.collectionName}&data:text.name=${m.assetName}&order=asc&schema_name=${m.schemaName}&sort=price&symbol=WAX`;
-      m.collectionLink = `https://wax.atomichub.io/explorer/collection/${m.collectionName}`;
-      m.templateLink = `https://wax.atomichub.io/explorer/template/${m.collectionName}/${templateId}`;
-      m.inventoryLink = `https://wax.atomichub.io/profile/${wallet}?collection_name=${m.collectionName}&match=${m.assetName}&order=desc&sort=transferred`;
-    }
+    m.historyLink = `https://wax.atomichub.io/market/history?collection_name=${m.collectionName}&data:text.name=${m.assetName}&order=desc&schema_name=${m.schemaName}&sort=updated&symbol=WAX`;
+    m.listingsLink = `https://wax.atomichub.io/market?collection_name=${m.collectionName}&data:text.name=${m.assetName}&order=asc&schema_name=${m.schemaName}&sort=price&symbol=WAX`;
+    m.collectionLink = `https://wax.atomichub.io/explorer/collection/${m.collectionName}`;
+    m.templateLink = `https://wax.atomichub.io/explorer/template/${m.collectionName}/${templateId}`;
+    m.inventoryLink = `https://wax.atomichub.io/profile/${wallet}?collection_name=${m.collectionName}&match=${m.assetName}&order=desc&sort=transferred`;
 
-    const output = `
-  <tr data-template-id="${templateId}">
-  <td class="template-id">
-    <a href="${m.templateLink}" class="template-id-link" target="_blank">${templateId}</a>
-  </td>
-  <td class="collection-name">
-    <a href="${m.collectionLink}" class="collection-name-link" target="_blank">${m.collectionName}</a>
-  </td>
-  <td class="asset-name">
-    <a href="${m.listingsLink}" target="_blank">${m.assetName}</a>
-    <i class="fa-solid fa-arrow-trend-up up" title="[trending] last sale under ${FRESH_HOURS} hours and floor price is higher than last sales price"></i>
-    <i class="fa-solid fa-fire-flame-curved hot" title="[hot] last sale under ${HOT_HOURS} hours and floor price is higher than last sales price"></i>
-    <i class="fa-solid fa-skull-crossbones dead" title="[stale] last sale over ${DEAD_HOURS / 24} days ago"></i>
-    <i class="fa-solid fa-arrow-trend-down down" title="[down] last sale under ${FRESH_HOURS} hours and floor price is lower than last sales price"></i>
-  </td>
-  <td class="price-wax" style="text-align:right">
-      <span class="price-wax-value">${util.formatPrice(m.floorPrice)}</span> WAX
-  </td>
-  <td class="price-diff" style="text-align:right"></td>
-  <td class="lag">
-    <span class="lag-value"></span> <a href="${m.historyLink}" target="_blank" class="float-right"><i class="fa-solid fa-timeline" title="show past sales"></i></a> 
-  </td>
-  <td class="price-usd" style="text-align:right">
-      $<span class="price-usd-value">${util.formatPrice(m.floorPrice * waxPrice)}</span>
-  </td>
-  <td class="links">
-      <a href="${m.inventoryLink}" target="_blank" class="${wallet ? '' : 'hidden'}"> 
-        <i class="fa-solid fa-boxes" title="show items from this template in your AtomicHub inventory"></i>
-      </a>
-  </td>
-  </tr>`;
+    updateMarketListing(m, waxPrice);
 
-    exchangeTable.insertAdjacentHTML('beforeend', output);
+    row.classList.remove('updating')
   }
 
   setRefreshStatus('');
@@ -127,6 +154,7 @@ async function updateStats(lowestListed) {
     const templateId = templateIds[i];
     const rowSelector = `tr[data-template-id="${templateId}"]`;
     const rowElem = document.querySelector(rowSelector);
+    rowElem.classList.add('updating')
 
     const statusMessage = `retrieving latest sales data ${i + 1}/${templateIds.length}`;
     setRefreshStatus(statusMessage);
@@ -156,16 +184,19 @@ async function updateStats(lowestListed) {
         lagTarget.innerHTML = util.formatTimespan(Date.now() - lastSoldDate);
 
         const lagHours = (Date.now() - lastSoldDate) / 1000 / 60 / 60;
+        rowElem.classList.remove('dead', 'hot', 'down', 'up');
         rowElem.classList.add(priceAction(lagHours, priceDiff));
 
         const mintNumber = last.assets[0].template_mint;
 
-        const target = rowElem.querySelector('td.price-diff');
+        const target = rowElem.querySelector('td.price-gap .price-gap-value');
         target.innerText = util.formatPercent(priceDiff);
         target.title = `mint #${mintNumber} last sold for ${lastPrice} WAX`;
         target.classList.add(priceDiff < 0 ? 'lower' : 'higher');
       }
     }
+
+    rowElem.classList.remove('updating')
   }
 
   setRefreshStatus('');
@@ -195,12 +226,13 @@ function setRefreshStatus(msg) {
   document.getElementById('refreshStatus').innerText = msg;
 }
 
-function setWallet() {
+async function setWallet() {
   // eslint-disable-next-line no-alert
   wallet = prompt('Enter your wallet address', wallet);
   if (wallet) {
     settings.setWallet(wallet);
-    refresh();
+    await drawTable();
+    await refresh();
   }
 }
 
@@ -208,12 +240,13 @@ function setWalletButtonText() {
   setWalletButton.innerText = wallet || 'No wallet set';
 }
 
-function setTemplateIDs() {
+async function setTemplateIDs() {
   // eslint-disable-next-line no-alert
   const newTemplateIds = prompt('Enter your templateIDs delimited by commas', templateIds.join(','));
   if (newTemplateIds.length > 0) {
     templateIds = settings.setTemplateIds(newTemplateIds);
-    refresh();
+    await drawTable();
+    await refresh();
   }
 }
 
@@ -240,6 +273,13 @@ function bindUI() {
 (async () => {
   wallet = settings.getWallet();
   templateIds = settings.getTemplateIds();
+
+  // FIXME: Need to figure out why templateIDs initialize to [0] when local storage is not initialized yet
+  if (templateIds.length === 1 && templateIds[0] === 0) {
+    templateIds = [];
+  }
+
   bindUI();
+  await drawTable();
   await refresh();
 })();
