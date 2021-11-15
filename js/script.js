@@ -117,7 +117,6 @@ async function refresh() {
       response = await fetch(url);
     }
 
-
     const data = await response.json();
     lowestListed.push(data);
 
@@ -160,11 +159,16 @@ async function refresh() {
   setTimeout(refresh, REFRESH_INTERVAL);
 }
 
+function getTemplateRow(templateId) {
+  const rowSelector = `tr[data-template-id="${templateId}"]`;
+  const rowElem = document.querySelector(rowSelector);
+  return rowElem;
+}
+
 async function updateStats(lowestListed) {
   for (let i = 0; i < templateIds.length; i++) {
     const templateId = templateIds[i];
-    const rowSelector = `tr[data-template-id="${templateId}"]`;
-    const rowElem = document.querySelector(rowSelector);
+    const rowElem = getTemplateRow(templateId);
     rowElem.classList.add('updating')
 
     const statusMessage = `retrieving latest sales data ${i + 1}/${templateIds.length}`;
@@ -203,6 +207,7 @@ async function updateStats(lowestListed) {
         const target = rowElem.querySelector('td.price-gap .price-gap-value');
         target.innerText = util.formatPercent(priceDiff);
         target.title = `mint #${mintNumber} last sold for ${lastPrice} WAX`;
+        target.classList.remove('lower', 'higher');
         target.classList.add(priceDiff < 0 ? 'lower' : 'higher');
       }
     }
