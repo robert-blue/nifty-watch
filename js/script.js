@@ -104,7 +104,7 @@ async function refresh() {
     const statusMessage = `retrieving floor prices ${i + 1}/${templateIds.length}`;
     setRefreshStatus(statusMessage);
 
-    const row = document.querySelector(`tr[data-template-id="${templateId}"]`);
+    const row = getTemplateRow(templateId);
     row.classList.add('updating')
 
     const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales/templates?symbol=WAX&state=1&max_assets=1&template_id=${templateId}&order=asc&sort=price`;
@@ -199,8 +199,8 @@ async function updateStats(lowestListed) {
         lagTarget.innerHTML = util.formatTimespan(Date.now() - lastSoldDate);
 
         const lagHours = (Date.now() - lastSoldDate) / 1000 / 60 / 60;
-        rowElem.classList.remove('dead', 'hot', 'down', 'up');
-        rowElem.classList.add(priceAction(lagHours, priceDiff));
+        rowElem.classList.remove('dead', 'hot', 'down', 'up', 'fresh');
+        rowElem.classList.add(...priceAction(lagHours, priceDiff));
 
         const mintNumber = last.assets[0].template_mint;
 
@@ -220,22 +220,24 @@ async function updateStats(lowestListed) {
 
 function priceAction(lagHours, priceDiff) {
   if (lagHours > DEAD_HOURS) {
-    return 'dead';
+    return ['dead'];
   }
 
   if (lagHours <= HOT_HOURS && priceDiff >= 0) {
-    return 'hot';
+    return ['fresh', 'hot'];
   }
 
-  if (lagHours <= FRESH_HOURS && priceDiff < 0) {
-    return 'down';
+  if (lagHours <= FRESH_HOURS) {
+    if (priceDiff < 0) {
+      return ['fresh', 'down'];
+    }
+
+    if (priceDiff > 0) {
+      return ['fresh', 'up'];
+    }
   }
 
-  if (lagHours <= FRESH_HOURS && priceDiff > 0) {
-    return 'up';
-  }
-
-  return undefined;
+  return [];
 }
 
 function setRefreshStatus(msg) {
