@@ -78,6 +78,12 @@ function updateMarketListing(m, waxPrice) {
 
   const usdPrice = row.querySelector('.price-usd-value');
   usdPrice.innerHTML = util.formatPrice(m.floorPrice * waxPrice);
+
+  const historyLink = row.querySelector('a.history-link');
+  historyLink.href = m.historyLink;
+
+  const inventoryLink = row.querySelector('a.link-inventory');
+  inventoryLink.href = m.inventoryLink;
 }
 
 async function refresh() {
