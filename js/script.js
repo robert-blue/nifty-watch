@@ -101,12 +101,23 @@ async function refresh() {
 
   for (let i = 0; i < templateIds.length; i++) {
     const templateId = templateIds[i];
-    setRefreshStatus(`retrieving floor prices ${i + 1}/${templateIds.length}`);
+    const statusMessage = `retrieving floor prices ${i + 1}/${templateIds.length}`;
+    setRefreshStatus(statusMessage);
+
     const row = document.querySelector(`tr[data-template-id="${templateId}"]`);
     row.classList.add('updating')
 
     const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales/templates?symbol=WAX&state=1&max_assets=1&template_id=${templateId}&order=asc&sort=price`;
-    const response = await fetch(url);
+    let response = await fetch(url);
+
+    while (response.status === 429) {
+      setRefreshStatus('AtomicHub rate limit reached. Pausing updates.');
+      await util.sleep(5 * 1000);
+      setRefreshStatus(statusMessage);
+      response = await fetch(url);
+    }
+
+
     const data = await response.json();
     lowestListed.push(data);
 
