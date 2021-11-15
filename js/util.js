@@ -9,8 +9,9 @@ export function formatPrice(price) {
 }
 
 export function formatPercent(value) {
-  const prefix = value < 0 ? '' : '+';
-  return `${prefix}${value.toFixed(2)}%`;
+  const prefix = value <= 0 ? '' : '+';
+  const percentage = Math.floor(value * 100) / 100;
+  return `${prefix}${percentage}%`;
 }
 
 export function formatTimespan(milliseconds) {

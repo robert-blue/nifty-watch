@@ -96,6 +96,15 @@ tr td.asset-name i.up {
     color: green;
 }
 
+tr.dead td, tr.dead td span {
+    opacity: 50%;
+}
+
+tr.dead td.lag span {
+    opacity: 100%;
+}
+
+
 tr td.asset-name i.dead {
     color: gray;
 }

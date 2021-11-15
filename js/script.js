@@ -36,8 +36,6 @@ async function refresh() {
     return;
   }
 
-  // This is a very neive implementation. Needs some refactoring love to parse the results into a more resiliant data structure
-
   const lowestListed = [];
 
   for (let i = 0; i < templateIds.length; i++) {
@@ -71,7 +69,6 @@ async function refresh() {
 
     if (lowestListed[i].data.length > 0) {
       const lowest = lowestListed[i].data[0];
-
       m.floorPrice = util.parseTokenValue(lowest.price.token_precision, lowest.price.amount);
       m.collectionName = lowest.collection_name;
       m.schemaName = lowest.assets[0].schema.schema_name;
@@ -179,7 +176,7 @@ function priceAction(lagHours, priceDiff) {
     return 'dead';
   }
 
-  if (lagHours <= HOT_HOURS && priceDiff > 0) {
+  if (lagHours <= HOT_HOURS && priceDiff >= 0) {
     return 'hot';
   }
 
