@@ -8,10 +8,17 @@ td, th {
 }
 
 .row.header H1 {
-    color: white;
+    color: #cbcccb;
     margin-top: 1rem;
     margin-bottom: auto;
 }
+
+img.logo {
+    height: 3rem;
+    position: relative;
+    bottom: -2rem;
+}
+
 
 #refreshStatus {
     color: hotpink;

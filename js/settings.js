@@ -2,6 +2,12 @@ import { KEY_TEMPLATE_IDS, KEY_WALLET } from './config.js';
 import { get, set } from './storage.js';
 
 export function getTemplateIds() {
+  // QueryString, if present, has precedence over local storage
+  const templateIds = new URLSearchParams(document.location.search).get('template_ids');
+  if (templateIds) {
+    return deserializeTemplateIds(templateIds);
+  }
+
   return deserializeTemplateIds(get(KEY_TEMPLATE_IDS));
 }
 

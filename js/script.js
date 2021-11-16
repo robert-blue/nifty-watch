@@ -3,6 +3,7 @@ import {
 } from './config.js';
 import * as settings from './settings.js';
 import * as util from './util.js';
+import {getTemplateIds} from "./settings.js";
 
 let wallet = '';
 let templateIds = [];
@@ -11,6 +12,7 @@ let exchangeTable;
 let refreshTableButton;
 let setWalletButton;
 let setTemplateIDsButton;
+let shareButton;
 
 async function getWAXPrice() {
   const url = 'https://api.coingecko.com/api/v3/simple/price?ids=WAX&vs_currencies=USD';
@@ -274,6 +276,13 @@ async function setTemplateIDs() {
   }
 }
 
+async function shareTemplateIds() {
+  const templateIds = getTemplateIds();
+  const link = `https://nftgaze.com/?template_ids=${templateIds.join(',')}`;
+  // eslint-disable-next-line no-alert
+  prompt('Here is your sharable link to the current list of template ids', link);
+}
+
 function setTemplateIDsButtonText() {
   setTemplateIDsButton.innerText = templateIds.length === 0
     ? 'No template IDs'
@@ -289,9 +298,12 @@ function bindUI() {
   refreshTableButton = document.querySelector('#refreshTableButton');
   setWalletButton = document.querySelector('#setWalletButton');
   setTemplateIDsButton = document.querySelector('#setTemplateIDsButton');
+  shareButton = document.querySelector('#shareButton')
+
   refreshTableButton.addEventListener('click', refresh);
   setWalletButton.addEventListener('click', setWallet);
   setTemplateIDsButton.addEventListener('click', setTemplateIDs);
+  shareButton.addEventListener('click', shareTemplateIds);
 }
 
 (async () => {
