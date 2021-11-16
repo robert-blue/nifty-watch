@@ -35,6 +35,10 @@ export function formatTimespan(milliseconds) {
     output += `<span class="minute">${mm}m</span>`;
   }
 
+  if (!dd && !hh && !mm) {
+      output = '<span class="minute">0m</span>';
+  }
+
   return output;
 }
 

@@ -1,6 +1,5 @@
 import {DEAD_HOURS, FRESH_HOURS, HOT_HOURS, REFRESH_INTERVAL,} from './config.js';
 import * as settings from './settings.js';
-import {getTemplateIds} from './settings.js';
 import * as util from './util.js';
 import * as data from './data.js';
 import {drawTable, setRefreshStatus} from "./display.js";
@@ -145,7 +144,7 @@ async function setTemplateIDs() {
 }
 
 async function shareTemplateIds() {
-  const templateIds = getTemplateIds();
+  const templateIds = settings.getTemplateIds();
   const link = `https://nftgaze.com/?template_ids=${templateIds.join(',')}`;
   // eslint-disable-next-line no-alert
   prompt('Here is your sharable link to the current list of template ids', link);
