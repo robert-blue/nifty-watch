@@ -43,3 +43,8 @@ export function sleep(ms) {
     setTimeout(resolve, ms);
   });
 }
+
+export function getTemplateRow(templateId) {
+  const rowSelector = `tr[data-template-id="${templateId}"]`;
+  return document.querySelector(rowSelector);
+}
