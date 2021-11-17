@@ -1,4 +1,4 @@
-import {DEAD_HOURS, FRESH_HOURS, HOT_HOURS, REFRESH_INTERVAL,} from './config.js';
+import {DEAD_HOURS, FRESH_HOURS, HOT_HOURS,} from './config.js';
 import * as settings from './settings.js';
 import * as util from './util.js';
 import * as data from './data.js';
@@ -59,7 +59,7 @@ async function refresh() {
   const now = new Date();
   document.getElementById('timestamp').innerText = now.toLocaleTimeString();
 
-  setTimeout(refresh, REFRESH_INTERVAL);
+  setTimeout(refresh, settings.getRefreshInterval());
 }
 
 function updateFloor(m, waxPrice) {
@@ -180,6 +180,9 @@ function bindUI() {
   setWalletButton.addEventListener('click', setWallet);
   setTemplateIDsButton.addEventListener('click', setTemplateIDs);
   shareButton.addEventListener('click', shareTemplateIds);
+
+  const refreshIntervalSpan = document.getElementById('refresh-interval');
+  refreshIntervalSpan.innerText = Number(settings.getRefreshInterval() / 1000 / 60).toString();
 }
 
 (async () => {

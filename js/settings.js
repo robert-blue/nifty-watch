@@ -1,5 +1,5 @@
-import { KEY_TEMPLATE_IDS, KEY_WALLET } from './config.js';
-import { get, set } from './storage.js';
+import {KEY_TEMPLATE_IDS, KEY_WALLET, REFRESH_INTERVAL} from './config.js';
+import {get, set} from './storage.js';
 
 export function getTemplateIds() {
   // QueryString, if present, has precedence over local storage
@@ -32,4 +32,13 @@ function serializeTemplateIds(array) {
 
 function deserializeTemplateIds(str) {
   return (str || '').split(',').map((x) => Number(x)).sort();
+}
+
+export function getRefreshInterval() {
+  const interval = new URLSearchParams(document.location.search).get('refresh_interval');
+  if (interval) {
+    return interval * 1000;
+  }
+
+  return REFRESH_INTERVAL;
 }
