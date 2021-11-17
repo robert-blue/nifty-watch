@@ -75,6 +75,7 @@ export async function getFloorListing(templateId, lastSold) {
         schemaName: lastSold.schemaName,
         lastPrice: lastSold.lastPrice,
         priceGapPercent: 0,
+        lagHours: lastSold.lagHours,
     };
 
     m.floorPrice = util.parseTokenValue(floor.price.token_precision, floor.price.amount);

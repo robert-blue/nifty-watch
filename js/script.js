@@ -76,6 +76,9 @@ function updateFloor(m, waxPrice) {
   target.title = `mint #${m.mintNumber} last sold for ${m.lastPrice} WAX`;
   target.classList.remove('lower', 'higher');
   target.classList.add(m.priceGapPercent < 0 ? 'lower' : 'higher');
+
+  row.classList.remove('dead', 'hot', 'down', 'up', 'fresh');
+  row.classList.add(...priceAction(m.lagHours, m.priceGapPercent));
 }
 
 function updateLastSold(m) {
@@ -101,9 +104,6 @@ function updateLastSold(m) {
 
   const lagTarget = row.querySelector('td.lag .lag-value');
   lagTarget.innerHTML = util.formatTimespan(Date.now() - m.lastSoldDate);
-
-  row.classList.remove('dead', 'hot', 'down', 'up', 'fresh');
-  row.classList.add(...priceAction(m.lagHours, m.priceGapPercent));
 }
 
 function priceAction(lagHours, priceDiff) {
