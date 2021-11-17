@@ -23,19 +23,19 @@ export async function getLastSold(templateId, wallet) {
 
     // Our simple view model
     let m = {
-        collectionName: '',
         assetName: '',
-        schemaName: '',
-        templateId: templateId,
-        floorPrice: 0,
-        lastPrice: 0,
-        lastSoldDate: null,
-        lagHours: 0,
-        mintNumber: null,
         collectionLink: '',
+        collectionName: '',
+        floorPrice: 0,
         historyLink: '',
         inventoryLink: '',
+        lagHours: 0,
+        lastPrice: 0,
+        lastSoldDate: null,
         listingsLink: '',
+        mintNumber: null,
+        schemaName: '',
+        templateId: templateId,
         templateLink: '',
 
     }
@@ -70,12 +70,12 @@ export async function getFloorListing(templateId, lastSold) {
 
     // Our simple view model
     const m = {
-        templateId: templateId,
         floorPrice: 0,
-        schemaName: lastSold.schemaName,
+        lagHours: lastSold.lagHours,
         lastPrice: lastSold.lastPrice,
         priceGapPercent: 0,
-        lagHours: lastSold.lagHours,
+        schemaName: lastSold.schemaName,
+        templateId: templateId,
     };
 
     m.floorPrice = util.parseTokenValue(floor.price.token_precision, floor.price.amount);

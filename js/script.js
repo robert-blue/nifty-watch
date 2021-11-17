@@ -1,4 +1,4 @@
-import {DEAD_HOURS, FRESH_HOURS, HOT_HOURS,} from './config.js';
+import {DEAD_HOURS, FRESH_HOURS, HOT_HOURS} from './config.js';
 import * as settings from './settings.js';
 import * as util from './util.js';
 import * as data from './data.js';
@@ -9,8 +9,8 @@ let templateIds = [];
 
 let exchangeTable;
 let refreshTableButton;
-let setWalletButton;
 let setTemplateIDsButton;
+let setWalletButton;
 let shareButton;
 
 async function refresh() {
@@ -172,13 +172,13 @@ function display(selector, show) {
 function bindUI() {
   exchangeTable = document.querySelector('#exchangeTable');
   refreshTableButton = document.querySelector('#refreshTableButton');
-  setWalletButton = document.querySelector('#setWalletButton');
   setTemplateIDsButton = document.querySelector('#setTemplateIDsButton');
+  setWalletButton = document.querySelector('#setWalletButton');
   shareButton = document.querySelector('#shareButton')
 
   refreshTableButton.addEventListener('click', refresh);
-  setWalletButton.addEventListener('click', setWallet);
   setTemplateIDsButton.addEventListener('click', setTemplateIDs);
+  setWalletButton.addEventListener('click', setWallet);
   shareButton.addEventListener('click', shareTemplateIds);
 
   const refreshIntervalSpan = document.getElementById('refresh-interval');
