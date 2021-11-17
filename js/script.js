@@ -32,16 +32,24 @@ async function refresh() {
     const row = util.getTemplateRow(templateId);
     row.classList.add('updating')
 
-    let statusMessage = `retrieving template data ${i + 1}/${templateIds.length}: floor listing`;
+    let statusMessage = `retrieving template data ${i + 1}/${templateIds.length}: last sold`;
     setRefreshStatus(statusMessage);
-    const floor = await data.getFloorListing(templateId, wallet);
+    const lastSold = await data.getLastSold(templateId, wallet);
 
-    statusMessage = `retrieving template data ${i + 1}/${templateIds.length}: last sold`;
+    if (!lastSold) {
+      row.classList.add('hidden');
+      continue;
+    }
+
+    statusMessage = `retrieving template data ${i + 1}/${templateIds.length}: floor listing`;
     setRefreshStatus(statusMessage);
-    const lastSold = await data.getLastSold(templateId, floor);
+    const floor = await data.getFloorListing(templateId, lastSold);
 
-    updateFloor(floor, waxPrice);
     updateLastSold(lastSold);
+
+    if (floor) {
+      updateFloor(floor, waxPrice);
+    }
 
     row.classList.remove('updating');
   }
@@ -55,7 +63,24 @@ async function refresh() {
 }
 
 function updateFloor(m, waxPrice) {
-  const row = document.querySelector(`tr[data-template-id="${m.templateId}"]`);
+  const row = util.getTemplateRow(m.templateId);
+
+  const floorPrice = row.querySelector('.price-wax-value');
+  floorPrice.innerHTML = `${Math.round(m.floorPrice * 100) / 100}`;
+
+  const usdPrice = row.querySelector('.price-usd-value');
+  usdPrice.innerHTML = util.formatPrice(m.floorPrice * waxPrice);
+
+  const target = row.querySelector('td.price-gap .price-gap-value');
+  target.innerText = util.formatPercent(m.priceGapPercent);
+  target.title = `mint #${m.mintNumber} last sold for ${m.lastPrice} WAX`;
+  target.classList.remove('lower', 'higher');
+  target.classList.add(m.priceGapPercent < 0 ? 'lower' : 'higher');
+}
+
+function updateLastSold(m) {
+  const row = util.getTemplateRow(m.templateId);
+
   const templateIdLink = row.querySelector(`a.template-id-link`);
   templateIdLink.href = m.templateLink;
   templateIdLink.innerHTML = m.templateId;
@@ -68,33 +93,17 @@ function updateFloor(m, waxPrice) {
   nameLink.href = m.listingsLink;
   nameLink.innerHTML = m.assetName;
 
-  const floorPrice = row.querySelector('.price-wax-value');
-  floorPrice.innerHTML = `${Math.round(m.floorPrice * 100) / 100}`;
-
-  const usdPrice = row.querySelector('.price-usd-value');
-  usdPrice.innerHTML = util.formatPrice(m.floorPrice * waxPrice);
-
   const historyLink = row.querySelector('a.history-link');
   historyLink.href = m.historyLink;
 
   const inventoryLink = row.querySelector('a.link-inventory');
   inventoryLink.href = m.inventoryLink;
-}
 
-function updateLastSold(m) {
-  const rowElem = util.getTemplateRow(m.templateId);
-
-  const lagTarget = rowElem.querySelector('td.lag .lag-value');
+  const lagTarget = row.querySelector('td.lag .lag-value');
   lagTarget.innerHTML = util.formatTimespan(Date.now() - m.lastSoldDate);
 
-  rowElem.classList.remove('dead', 'hot', 'down', 'up', 'fresh');
-  rowElem.classList.add(...priceAction(m.lagHours, m.priceGapPercent));
-
-  const target = rowElem.querySelector('td.price-gap .price-gap-value');
-  target.innerText = util.formatPercent(m.priceGapPercent);
-  target.title = `mint #${m.mintNumber} last sold for ${m.lastPrice} WAX`;
-  target.classList.remove('lower', 'higher');
-  target.classList.add(m.priceGapPercent < 0 ? 'lower' : 'higher');
+  row.classList.remove('dead', 'hot', 'down', 'up', 'fresh');
+  row.classList.add(...priceAction(m.lagHours, m.priceGapPercent));
 }
 
 function priceAction(lagHours, priceDiff) {
