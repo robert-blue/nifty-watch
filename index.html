@@ -5,6 +5,7 @@
     <title>Floor Price Watchlist</title>
     <link rel="stylesheet" href="css/milligram.min.css">
     <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/sortable.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/fontawesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/solid.min.css">
 </head>
@@ -29,17 +30,17 @@
         </div>
         <div id="results" class="row hidden">
             <div class="column">
-                <table>
+                <table class="sortable table-sort" id="main-table">
                     <thead>
                         <tr>
-                            <td title="template Id">ID</td>
-                            <td>Collection</td>
-                            <td>Name</td>
-                            <td style="text-align:right" title="price of lowest priced sales listing">Floor Price</td>
-                            <td style="text-align:right" title="percentage difference between last sold WAX price and floor WAX price">Gap</td>
-                            <td title="elapsed time since last sale">Lag</td>
-                            <td style="text-align:right">USD</td>
-                            <td></td>
+                            <th title="template Id">ID</th>
+                            <th>Collection</th>
+                            <th>Name</th>
+                            <th class="text-right" title="price of lowest priced sales listing">Floor Price</th>
+                            <th class="text-right" title="percentage difference between last sold WAX price and floor WAX price">Gap</th>
+                            <th title="elapsed time since last sale">Lag</th>
+                            <th class=no-sort" class="text-right">USD</th>
+                            <th class="no-sort"></th>
                         </tr>
                     </thead>
                     <tbody id="exchangeTable">
@@ -79,6 +80,7 @@
     <script type="module" src="js/util.js"></script>
     <script type="module" src="js/data.js"></script>
     <script type="module" src="js/display.js"></script>
+    <script type="application/javascript" src="js/sortable.js"></script>
 
 </body>
 

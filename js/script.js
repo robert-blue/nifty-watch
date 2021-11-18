@@ -1,8 +1,8 @@
-import {DEAD_HOURS, FRESH_HOURS, HOT_HOURS} from './config.js';
+import { DEAD_HOURS, FRESH_HOURS, HOT_HOURS } from './config.js';
 import * as settings from './settings.js';
 import * as util from './util.js';
 import * as data from './data.js';
-import {drawTable, setRefreshStatus} from "./display.js";
+import { drawTable, setRefreshStatus } from './display.js';
 
 let wallet = '';
 let templateIds = [];
@@ -30,7 +30,7 @@ async function refresh() {
   for (let i = 0; i < templateIds.length; i++) {
     const templateId = templateIds[i];
     const row = util.getTemplateRow(templateId);
-    row.classList.add('updating')
+    row.classList.add('updating');
 
     let statusMessage = `retrieving template data ${i + 1}/${templateIds.length}: last sold`;
     setRefreshStatus(statusMessage);
@@ -56,6 +56,9 @@ async function refresh() {
 
   setRefreshStatus('');
 
+  const table = document.querySelector('#main-table');
+  table.refreshSort();
+
   const now = new Date();
   document.getElementById('timestamp').innerText = now.toLocaleTimeString();
 
@@ -68,8 +71,14 @@ function updateFloor(m, waxPrice) {
   const floorPrice = row.querySelector('.price-wax-value');
   floorPrice.innerHTML = `${Math.round(m.floorPrice * 100) / 100}`;
 
+  const floorPriceCell = row.querySelector('td.price-wax');
+  floorPriceCell.dataset.sort = m.floorPrice;
+
   const usdPrice = row.querySelector('.price-usd-value');
   usdPrice.innerHTML = util.formatPrice(m.floorPrice * waxPrice);
+
+  const gapCell = row.querySelector('td.price-gap');
+  gapCell.dataset.sort = m.priceGapPercent;
 
   const target = row.querySelector('td.price-gap .price-gap-value');
   target.innerText = util.formatPercent(m.priceGapPercent);
@@ -84,7 +93,10 @@ function updateFloor(m, waxPrice) {
 function updateLastSold(m) {
   const row = util.getTemplateRow(m.templateId);
 
-  const templateIdLink = row.querySelector(`a.template-id-link`);
+  const collectionCell = row.querySelector('td.collection-name');
+  collectionCell.dataset.sort = m.collectionName;
+
+  const templateIdLink = row.querySelector('a.template-id-link');
   templateIdLink.href = m.templateLink;
   templateIdLink.innerHTML = m.templateId;
 
@@ -104,6 +116,9 @@ function updateLastSold(m) {
 
   const lagTarget = row.querySelector('td.lag .lag-value');
   lagTarget.innerHTML = util.formatTimespan(Date.now() - m.lastSoldDate);
+
+  const lagCell = row.querySelector('td.lag');
+  lagCell.dataset.sort = Number(Date.now() - m.lastSoldDate).toString();
 }
 
 function priceAction(lagHours, priceDiff) {
@@ -174,7 +189,7 @@ function bindUI() {
   refreshTableButton = document.querySelector('#refreshTableButton');
   setTemplateIDsButton = document.querySelector('#setTemplateIDsButton');
   setWalletButton = document.querySelector('#setWalletButton');
-  shareButton = document.querySelector('#shareButton')
+  shareButton = document.querySelector('#shareButton');
 
   refreshTableButton.addEventListener('click', refresh);
   setTemplateIDsButton.addEventListener('click', setTemplateIDs);
