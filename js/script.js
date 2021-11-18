@@ -57,7 +57,9 @@ async function refresh() {
   setRefreshStatus('');
 
   const table = document.querySelector('#main-table');
-  table.refreshSort();
+  if (table && table.refreshSort !== undefined) {
+    table.refreshSort();
+  }
 
   const now = new Date();
   document.getElementById('timestamp').innerText = now.toLocaleTimeString();
