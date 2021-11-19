@@ -2,7 +2,7 @@ import { DEAD_HOURS, FRESH_HOURS, HOT_HOURS } from './config.js';
 import * as settings from './settings.js';
 import * as util from './util.js';
 import * as data from './data.js';
-import { drawTable, setRefreshStatus } from './display.js';
+import { drawTable } from './display.js';
 
 let wallet = '';
 let templateIds = [];
@@ -20,6 +20,14 @@ async function refresh() {
   setWalletButtonText();
   setTemplateIDsButtonText();
 
+  const rows = document.querySelectorAll('#main-table tbody tr[data-template-id]');
+  if (rows) {
+    templateIds = [];
+    rows.forEach((row) => {
+      templateIds.push(row.dataset.templateId);
+    });
+  }
+
   display('#noResults', templateIds.length === 0);
   display('#results', templateIds.length > 0);
 
@@ -29,32 +37,26 @@ async function refresh() {
 
   for (let i = 0; i < templateIds.length; i++) {
     const templateId = templateIds[i];
+
     const row = util.getTemplateRow(templateId);
     row.classList.add('updating');
 
-    let statusMessage = `retrieving template data ${i + 1}/${templateIds.length}: last sold`;
-    setRefreshStatus(statusMessage);
     const lastSold = await data.getLastSold(templateId, wallet);
 
-    if (!lastSold) {
-      row.classList.add('hidden');
-      continue;
-    }
+    if (lastSold) {
+      const floor = await data.getFloorListing(templateId, lastSold);
 
-    statusMessage = `retrieving template data ${i + 1}/${templateIds.length}: floor listing`;
-    setRefreshStatus(statusMessage);
-    const floor = await data.getFloorListing(templateId, lastSold);
+      updateLastSold(lastSold);
 
-    updateLastSold(lastSold);
-
-    if (floor) {
-      updateFloor(floor, waxPrice);
+      if (floor) {
+        updateFloor(floor, waxPrice);
+      }
+    } else {
+      display(row, false);
     }
 
     row.classList.remove('updating');
   }
-
-  setRefreshStatus('');
 
   const table = document.querySelector('#main-table');
   if (table && table.refreshSort !== undefined) {
@@ -170,8 +172,8 @@ async function setTemplateIDs() {
 }
 
 async function shareTemplateIds() {
-  const templateIds = settings.getTemplateIds();
-  const link = `https://nftgaze.com/?template_ids=${templateIds.join(',')}`;
+  const ids = settings.getTemplateIds();
+  const link = `https://nftgaze.com/?template_ids=${ids.join(',')}`;
   // eslint-disable-next-line no-alert
   prompt('Here is your sharable link to the current list of template ids', link);
 }

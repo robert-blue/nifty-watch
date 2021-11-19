@@ -23,6 +23,7 @@ export async function drawTable(templateIds, targetElem, wallet) {
     <i class="fa-solid fa-fire-flame-curved hot" title="[hot] last sale under ${HOT_HOURS} hours and floor price is higher than last sales price"></i>
     <i class="fa-solid fa-skull-crossbones dead" title="[stale] last sale over ${DEAD_HOURS / 24} days ago"></i>
     <i class="fa-solid fa-arrow-trend-down down" title="[down] last sale under ${FRESH_HOURS} hours and floor price is lower than last sales price"></i>
+    <i class="fa-solid fa-rotate"></i>
   </td>
   <td class="price-wax" style="text-align:right"><span class="price-wax-value"></span> WAX</td>
   <td class="price-gap" style="text-align:right"><span class="price-gap-value"></span></td>

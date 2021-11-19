@@ -21,7 +21,7 @@ img.logo {
 
 
 #refreshStatus {
-    color: hotpink;
+    color: darkslateblue;
     margin-left: 1rem;
 }
 
@@ -35,14 +35,6 @@ img.logo {
 
 tr.updating td {
     opacity: 100%;
-}
-
-tr td:first-of-type {
-    border-left: 3px solid black;
-}
-
-tr.updating td:first-of-type {
-    border-left: 3px solid #606c76;
 }
 
 .buttons-right > button {
@@ -136,4 +128,35 @@ tr.hot td.asset-name i.hot, tr.dead td.asset-name i.dead, tr.up td.asset-name i.
 
 .text-right {
     text-align: right;
+}
+
+.fade-in {
+  animation: fadeIn ease 1s;
+}
+@keyframes fadeIn {
+  0% {
+    opacity:0;
+  }
+  100% {
+    opacity:1;
+  }
+}
+
+tr .fa-rotate {
+  visibility: hidden;
+}
+
+tr.updating .fa-rotate {
+  visibility: visible;
+  animation: rotate 3s ease infinite;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotateZ(0deg);
+  }
+
+  100% {
+    transform: rotateZ(360deg);
+  }
 }
