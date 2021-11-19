@@ -1,19 +1,19 @@
-import {DEAD_HOURS, FRESH_HOURS, HOT_HOURS} from "./config.js";
+import { DEAD_HOURS, FRESH_HOURS, HOT_HOURS } from './config.js';
 
 export function setRefreshStatus(msg) {
-    document.getElementById('refreshStatus').innerText = msg;
+  document.getElementById('refreshStatus').innerText = msg;
 }
 
 export async function drawTable(templateIds, targetElem, wallet) {
-    if (templateIds.length === 0) {
-        return;
-    }
+  if (templateIds.length === 0) {
+    return;
+  }
 
-    // Reset the table
-    targetElem.innerHTML = '';
+  // Reset the table
+  targetElem.innerHTML = '';
 
-    for (let templateId of templateIds) {
-        const output = `
+  for (const templateId of templateIds) {
+    const output = `
   <tr data-template-id="${templateId}">
   <td class="template-id"><a href="" class="template-id-link" target="_blank">${templateId}</a></td>
   <td class="collection-name"><a href="" class="collection-name-link" target="_blank"></a></td>
@@ -28,18 +28,18 @@ export async function drawTable(templateIds, targetElem, wallet) {
   <td class="price-gap" style="text-align:right"><span class="price-gap-value"></span></td>
   <td class="lag">
     <span class="lag-value"></span>
-    <a href="" target="_blank" class="history-link float-right"><i class="fa-solid fa-timeline" title="show past sales"></i></a> 
+    <a href="" target="_blank" class="history-link float-right"><i class="fa-solid fa-timeline" title="show past sales"></i></a>
   </td>
   <td class="price-usd" style="text-align:right">
       $<span class="price-usd-value"></span>
   </td>
   <td class="links">
-      <a href="" target="_blank" class="link-inventory ${wallet ? '' : 'hidden'}"> 
+      <a href="" target="_blank" class="link-inventory ${wallet ? '' : 'hidden'}">
         <i class="fa-solid fa-boxes" title="show items from this template in your AtomicHub inventory"></i>
       </a>
   </td>
   </tr>`;
 
-        targetElem.insertAdjacentHTML('beforeend', output);
-    }
+    targetElem.insertAdjacentHTML('beforeend', output);
+  }
 }
