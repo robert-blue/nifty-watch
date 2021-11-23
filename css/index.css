@@ -160,3 +160,21 @@ tr.updating .fa-rotate {
     transform: rotateZ(360deg);
   }
 }
+
+td.asset-name i.hot {
+  animation: burn 15s ease-in-out infinite;
+}
+
+@keyframes burn {
+  0% {
+    color: orange;
+  }
+
+  50% {
+    color: red;
+  }
+
+  100% {
+    color: orange;
+  }
+}
