@@ -2,85 +2,85 @@
 <html lang="en">
 
 <head>
-    <title>Floor Price Watchlist</title>
-    <link rel="stylesheet" href="css/milligram.min.css">
-    <link rel="stylesheet" href="css/index.css">
-    <link rel="stylesheet" href="css/sortable.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/fontawesome.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/solid.min.css">
+  <title>Floor Price Watchlist</title>
+  <link rel="stylesheet" href="css/milligram.min.css">
+  <link rel="stylesheet" href="css/index.css">
+  <link rel="stylesheet" href="css/sortable.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/fontawesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/solid.min.css">
 </head>
 
 <body class="fade-in">
-    <div class="container">
-        <div class="row header">
-            <div class="column">
-                <h1 class="float-left">Fl</h1>
-                <img class="float-left logo" src="/img/NicePng_googly-eyes-png_24220.png"/>
-                <h1 class="float-left">r Price Watchlist</h1>
+<div class="container">
+  <div class="row header">
+    <div class="column">
+      <h1 class="float-left">Fl</h1>
+      <img class="float-left logo" src="/img/NicePng_googly-eyes-png_24220.png"/>
+      <h1 class="float-left">r Price Watchlist</h1>
 
-            </div>
-            <div class="column">
-                <a href="https://atomikings.com" target="_blank" class="logoLink float-right">
-                    <img style="height: 5em;" src="img/AKlogobanner.png" />
-                </a>
-            </div>
-        </div>
-        <div id="noResults" class="row hidden">
-          <p>You have entered no template IDs.  Click the button below to set some up.</p>
-        </div>
-        <div id="results" class="row hidden">
-            <div class="column">
-                <table class="sortable table-sort" id="main-table">
-                    <thead>
-                        <tr>
-                            <th title="template Id">ID</th>
-                            <th>Collection</th>
-                            <th>Name</th>
-                            <th class="text-right" title="price of lowest priced sales listing">Floor Price</th>
-                            <th class="text-right" title="percentage difference between last sold WAX price and floor WAX price">Gap</th>
-                            <th title="elapsed time since last sale">Lag</th>
-                            <th class=no-sort" class="text-right">USD</th>
-                            <th class="no-sort"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="exchangeTable">
-                        <tr>
-                            <td colspan=8>Loading....</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="row">
-            <div class="column">
-                <button id="refreshTableButton">Refresh</button>
-                <span id="refreshStatus"></span>
-            </div>
-            <div class="column buttons-right">
-              <button id="shareButton" title="Generate sharable link of this current view">Share</button>
-              <button id="setWalletButton">...</button>
-              <button id="setTemplateIDsButton">...</button>
-            </div>
-      </div>
-        <div class="row">
-            <div class="column">
-                WAX = $<span id="waxPrice"></span>
-                &nbsp;&nbsp;|&nbsp;&nbsp;
-                Updated <span id="timestamp"></span>
-                &nbsp;&nbsp;|&nbsp;&nbsp;
-                Updates every <span id="refresh-interval"></span> minutes
-            </div>
-        </div>
     </div>
+    <div class="column">
+      <a href="https://atomikings.com" target="_blank" class="logoLink float-right">
+        <img style="height: 5em;" src="img/AKlogobanner.png"/>
+      </a>
+    </div>
+  </div>
+  <div id="noResults" class="row hidden">
+    <p>You have entered no template IDs. Click the button below to set some up.</p>
+  </div>
+  <div id="results" class="row hidden">
+    <div class="column">
+      <table class="sortable table-sort" id="main-table">
+        <thead>
+        <tr>
+          <th title="template Id">ID</th>
+          <th>Collection</th>
+          <th>Name</th>
+          <th class="text-right" title="price of lowest priced sales listing">Floor Price</th>
+          <th class="text-right" title="percentage difference between last sold WAX price and floor WAX price">Gap</th>
+          <th title="elapsed time since last sale">Lag</th>
+          <th class=no-sort" class="text-right">USD</th>
+          <th class="no-sort"></th>
+        </tr>
+        </thead>
+        <tbody id="exchangeTable">
+        <tr>
+          <td colspan=8>Loading....</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="row">
+    <div class="column">
+      <button id="refreshTableButton">Refresh</button>
+      <span id="refreshStatus"></span>
+    </div>
+    <div class="column buttons-right">
+      <button id="shareButton" title="Generate sharable link of this current view">Share</button>
+      <button id="setWalletButton">...</button>
+      <button id="setTemplateIDsButton">...</button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="column">
+      WAX = $<span id="waxPrice"></span>
+      &nbsp;&nbsp;|&nbsp;&nbsp;
+      Updated <span id="timestamp"></span>
+      &nbsp;&nbsp;|&nbsp;&nbsp;
+      Updates every <span id="refresh-interval"></span> minutes
+    </div>
+  </div>
+</div>
 
-    <script type="module" src="js/config.js"></script>
-    <script type="module" src="js/settings.js"></script>
-    <script type="module" src="js/script.js"></script>
-    <script type="module" src="js/storage.js"></script>
-    <script type="module" src="js/util.js"></script>
-    <script type="module" src="js/data.js"></script>
-    <script type="module" src="js/display.js"></script>
-    <script type="application/javascript" src="js/sortable.js"></script>
+<script type="module" src="js/config.js"></script>
+<script type="module" src="js/settings.js"></script>
+<script type="module" src="js/script.js"></script>
+<script type="module" src="js/storage.js"></script>
+<script type="module" src="js/util.js"></script>
+<script type="module" src="js/data.js"></script>
+<script type="module" src="js/display.js"></script>
+<script type="application/javascript" src="js/sortable.js"></script>
 
 </body>
 
