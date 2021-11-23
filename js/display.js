@@ -12,7 +12,7 @@ export async function drawTable(templateIds, targetElem, wallet) {
   // Reset the table
   targetElem.innerHTML = '';
 
-  for (const templateId of templateIds) {
+  templateIds.forEach((templateId) => {
     const output = `
   <tr data-template-id="${templateId}">
   <td class="template-id"><a href="" class="template-id-link" target="_blank">${templateId}</a></td>
@@ -42,5 +42,5 @@ export async function drawTable(templateIds, targetElem, wallet) {
   </tr>`;
 
     targetElem.insertAdjacentHTML('beforeend', output);
-  }
+  });
 }

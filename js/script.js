@@ -14,6 +14,8 @@ let setWalletButton;
 let shareButton;
 
 async function refresh() {
+  exchangeTable.classList.add('updating');
+
   const waxPrice = await data.getWAXPrice();
   document.getElementById('waxPrice').innerText = waxPrice;
 
@@ -65,6 +67,8 @@ async function refresh() {
 
   const now = new Date();
   document.getElementById('timestamp').innerText = now.toLocaleTimeString();
+
+  exchangeTable.classList.remove('updating');
 
   setTimeout(refresh, settings.getRefreshInterval());
 }

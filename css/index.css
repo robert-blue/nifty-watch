@@ -19,7 +19,6 @@ img.logo {
     bottom: -2rem;
 }
 
-
 #refreshStatus {
     color: darkslateblue;
     margin-left: 1rem;
@@ -94,10 +93,6 @@ tr td.asset-name i.hot, tr td.asset-name i.dead, tr td.asset-name i.down, tr td.
     display: none;
 }
 
-tr td.asset-name i.hot {
-    color: orange;
-}
-
 tr td.asset-name i.down {
     color: red;
 }
@@ -161,20 +156,24 @@ tr.updating .fa-rotate {
   }
 }
 
-td.asset-name i.hot {
-  animation: burn 15s ease-in-out infinite;
+tr td.asset-name i.hot {
+  color: #ffa500;
+}
+
+#exchangeTable:not(.updating) tr.hot td.asset-name i.hot {
+  animation: burn 5s ease-in-out infinite;
 }
 
 @keyframes burn {
   0% {
-    color: orange;
+    color: #ffa500;
   }
 
   50% {
-    color: red;
+    color: #ff4d00;
   }
 
   100% {
-    color: orange;
+    color: #ffa500;
   }
 }
