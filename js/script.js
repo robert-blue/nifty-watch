@@ -13,6 +13,13 @@ let setTemplateIDsButton;
 let setWalletButton;
 let shareButton;
 
+function refreshTableSort() {
+  const table = document.querySelector('#main-table');
+  if (table && table.refreshSort !== undefined) {
+    table.refreshSort();
+  }
+}
+
 async function refresh() {
   exchangeTable.classList.add('updating');
 
@@ -60,10 +67,7 @@ async function refresh() {
     row.classList.remove('updating');
   }
 
-  const table = document.querySelector('#main-table');
-  if (table && table.refreshSort !== undefined) {
-    table.refreshSort();
-  }
+  refreshTableSort();
 
   const now = new Date();
   document.getElementById('timestamp').innerText = now.toLocaleTimeString();
