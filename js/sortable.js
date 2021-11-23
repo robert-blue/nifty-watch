@@ -38,10 +38,8 @@
 // Not solved with documentFragment, same issue... :(
 // My guess is that it is simply too much to hold in memory, since
 // it freezes even before sortable is called if the table is too big in index.html
-const down_class = ' dir-d ';
-const up_class = ' dir-u ';
-const regex_dir = / dir-(u|d) /;
-const regex_table = /\bsortable\b/;
+const downClass = 'dir-d';
+const upClass = 'dir-u';
 
 function getValue(element) {
   // If you aren't using data-sort and want to make it just the tiniest bit smaller/faster
@@ -51,7 +49,10 @@ function getValue(element) {
 }
 
 function reClassify(element, dir) {
-  element.className = element.className.replace(regex_dir, '') + dir;
+  element.classList.remove('dir-u', 'dir-d');
+  if (dir) {
+    element.classList.add(dir);
+  }
 }
 
 document.addEventListener('click', (e) => {
@@ -64,33 +65,28 @@ document.addEventListener('click', (e) => {
       // this is the only way to make really, really sure. A few more bytes though... 😡
       const table = tr.parentNode.parentNode;
 
-      if (regex_table.test(table.className)) {
-        let column_index;
+      if (table.classList.contains('sortable')) {
+        let columnIndex;
         const nodes = tr.cells;
 
         // reset thead cells and get column index
         for (let i = 0; i < nodes.length; i++) {
           if (nodes[i] === element) {
-            column_index = i;
+            columnIndex = i;
           } else {
             reClassify(nodes[i], '');
           }
         }
 
-        let dir = down_class;
-
         // check if we're sorting up or down, and update the css accordingly
-        if (element.className.indexOf(down_class) !== -1) {
-          dir = up_class;
-        }
+        const dir = (element.classList.contains(downClass)) ? upClass : downClass;
 
         reClassify(element, dir);
 
-        sortTable(table, column_index, dir);
+        sortTable(table, columnIndex, dir);
 
-        table.refreshSort = function () {
-          sortTable(table, column_index, dir);
-        };
+        // Attach the refresh function to the table so other code can trigger it
+        table.refreshSort = () => sortTable(table, columnIndex, dir);
       }
     } catch (error) {
       // console.log(error)
@@ -98,32 +94,32 @@ document.addEventListener('click', (e) => {
   }
 });
 
-function sortTable(table, column_index, dir) {
+function sortTable(table, columnIndex, dir) {
   // extract all table rows, so the sorting can start.
-  const org_tbody = table.tBodies[0];
+  const tbodyOriginal = table.tBodies[0];
 
   // get the array rows in an array, so we can sort them...
-  const rows = [].slice.call(org_tbody.rows, 0);
+  const rows = [].slice.call(tbodyOriginal.rows, 0);
 
-  const reverse = dir === up_class;
+  const reverse = dir === upClass;
 
   // sort them using custom built in array sort.
   rows.sort((a, b) => {
-    const x = getValue((reverse ? a : b).cells[column_index]);
-    const y = getValue((reverse ? b : a).cells[column_index]);
-    // var y = (reverse ? b : a).cells[column_index].innerText
-    // var x = (reverse ? a : b).cells[column_index].innerText
-    return isNaN(x - y) ? x.localeCompare(y) : x - y;
+    const x = getValue((reverse ? a : b).cells[columnIndex]);
+    const y = getValue((reverse ? b : a).cells[columnIndex]);
+    // var y = (reverse ? b : a).cells[columnIndex].innerText
+    // var x = (reverse ? a : b).cells[columnIndex].innerText
+    return Number.isNaN(x - y) ? x.localeCompare(y) : x - y;
   });
 
   // Make a clone without content
-  const clone_tbody = org_tbody.cloneNode();
+  const tbodyClone = tbodyOriginal.cloneNode();
 
   // Build a sorted table body and replace the old one.
   while (rows.length) {
-    clone_tbody.appendChild(rows.splice(0, 1)[0]);
+    tbodyClone.appendChild(rows.splice(0, 1)[0]);
   }
 
   // And finally insert the end result
-  table.replaceChild(clone_tbody, org_tbody);
+  table.replaceChild(tbodyClone, tbodyOriginal);
 }
