@@ -78,7 +78,7 @@ export async function getFloorListing(templateId, lastSold) {
   };
 
   m.floorPrice = util.parseTokenValue(floor.price.token_precision, floor.price.amount);
-  m.priceGapPercent = Math.round(((m.floorPrice - lastSold.lastPrice) / m.floorPrice * 100) * 10) / 10;
+  m.priceGapPercent = ((m.floorPrice - lastSold.lastPrice) / lastSold.lastPrice) * 100;
   m.mintNumber = floor.assets[0].template_mint;
 
   return m;
