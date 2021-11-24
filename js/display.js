@@ -1,7 +1,7 @@
 import { DEAD_HOURS, FRESH_HOURS, HOT_HOURS } from './config.js';
 
 export function setRefreshStatus(msg) {
-  document.getElementById('refreshStatus').innerText = msg;
+  document.getElementById('refreshStatus').innerText =  msg ?? '';
 }
 
 export async function drawTable(templateIds, targetElem, wallet) {

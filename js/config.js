@@ -8,3 +8,6 @@ export const DEAD_HOURS = 5 * 24;
 // Local storage keys
 export const KEY_TEMPLATE_IDS = 'templateIDs';
 export const KEY_WALLET = 'wallet';
+
+// How many rows to update simultaneously
+export const BATCH_SIZE = 5;

@@ -24,7 +24,6 @@ export function formatTimespan(milliseconds) {
   msec -= mm * 1000 * 60;
   const ss = Math.floor(msec / 1000);
 
-
   let output = '';
   if (dd) {
     output = `<span class="day">${dd}d</span>`;
@@ -39,7 +38,7 @@ export function formatTimespan(milliseconds) {
   }
 
   if (!dd && !hh && !mm && ss) {
-      output = `<span class="second">${ss}s</span>`;
+    output = `<span class="second">${ss}s</span>`;
   }
 
   return output;
@@ -52,6 +51,6 @@ export function sleep(ms) {
 }
 
 export function getTemplateRow(templateId) {
-  const rowSelector = `tr[data-template-id="${templateId}"]`;
+  const rowSelector = `#exchangeTable tr[data-template-id="${templateId}"]`;
   return document.querySelector(rowSelector);
 }
