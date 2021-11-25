@@ -1,3 +1,8 @@
+/*
+Source: https://github.com/robertgeb/semaphore
+Modified to work as vanilla javascript module
+ */
+
 const __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
   function adopt(value) { return value instanceof P ? value : new P((resolve) => { resolve(value); }); }
   return new (P || (P = Promise))((resolve, reject) => {
@@ -9,9 +14,10 @@ const __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, 
 };
 
 export default class Semaphore {
-  constructor(max_concurrency_limit = 1, max_throughput_per_second = 1) {
+  constructor(max_concurrency_limit = 1, max_throughput_per_timespan = 1, timespan_seconds = 1) {
     this.max_concurrency_limit = max_concurrency_limit;
-    this.max_throughput_per_second = max_throughput_per_second;
+    this.max_throughput_per_timespan = max_throughput_per_timespan;
+    this.timespan_seconds = timespan_seconds;
     this.running = 0;
     this.runned = 0;
     this.waiting = 0;
@@ -24,12 +30,12 @@ export default class Semaphore {
 
   wait() {
     return __awaiter(this, void 0, void 0, function* () {
-      if (!this.start_time || (this.waiting + this.running == 0 && this.getActualThroughput() < this.max_throughput_per_second)) {
+      if (!this.start_time || (this.waiting + this.running == 0 && this.getActualThroughput() < this.max_throughput_per_timespan)) {
         this.start_time = Date.now();
         this.runned = 0;
       }
       this.waiting++;
-      while (this.running >= this.max_concurrency_limit || this.getActualThroughput() >= this.max_throughput_per_second) {
+      while (this.running >= this.max_concurrency_limit || this.getActualThroughput() >= this.max_throughput_per_timespan) {
         yield this.delay(50);
       }
       this.waiting--;
@@ -42,9 +48,9 @@ export default class Semaphore {
   }
 
   getActualThroughput() {
-    if (!this.start_time) return this.max_throughput_per_second;
+    if (!this.start_time) return this.max_throughput_per_timespan;
     const actual_time = Date.now();
-    const elapsed_seconds = Number(actual_time - this.start_time) / 1000;
-    return (this.runned + this.running) / elapsed_seconds;
+    const elapsed_time = Number(actual_time - this.start_time) / 1000 / this.timespan_seconds;
+    return (this.runned + this.running) / elapsed_time;
   }
 }

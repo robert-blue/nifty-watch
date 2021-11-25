@@ -2,21 +2,20 @@ import * as util from './util.js';
 import { setRefreshStatus } from './display.js';
 import Semaphore from './semaphore.js';
 
-const sem = new Semaphore(5, 2);
+const sem = new Semaphore(30, 30, 15);
 
 async function atomicFetch(url, status) {
-  // await sem.wait();
+  await sem.wait();
   let response = await fetch(url);
-  // await sem.release();
 
   while (response.status === 429) {
     status('AtomicHub rate limit reached. Pausing updates.');
     await util.sleep(5 * 1000);
     response = await fetch(url);
+    status();
   }
 
-  status();
-
+  await sem.release();
   return response;
 }
 

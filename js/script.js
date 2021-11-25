@@ -1,15 +1,11 @@
 import {
-  BATCH_SIZE, DEAD_HOURS, FRESH_HOURS, HOT_HOURS,
+  DEAD_HOURS, FRESH_HOURS, FRESH_HOURS_REFRESH_INTERVAL, HOT_HOURS, HOT_HOURS_REFRESH_INTERVAL,
 } from './config.js';
 import * as settings from './settings.js';
 import * as util from './util.js';
 import * as data from './data.js';
 import { drawTable, setRefreshStatus } from './display.js';
-import Semaphore from './semaphore.js';
-import { getTemplateRow } from "./util.js";
-
-const sem = new Semaphore(5, 1);
-
+import { getTemplateRow } from './util.js';
 
 let wallet = '';
 let templateIds = [];
@@ -28,7 +24,6 @@ function refreshTableSort() {
 }
 
 async function updateRow(templateId, waxPrice) {
-  await sem.wait();
   const row = util.getTemplateRow(templateId);
   row.classList.add('updating');
 
@@ -41,41 +36,38 @@ async function updateRow(templateId, waxPrice) {
   updateRowData(transformed, waxPrice);
 
   row.classList.remove('updating');
-  await sem.release();
 
   return transformed;
 }
 
-function refreshTimestamp() {
+function setTimestamp() {
   const now = new Date();
   document.getElementById('timestamp').innerText = now.toLocaleTimeString();
 }
 
-function processResult(result) {
-  const {templateId} = result;
+function additionalRefresh(result) {
+  const { templateId } = result;
   const row = getTemplateRow(templateId);
 
   let refreshInterval = 0;
 
-  if (result.lagHours <= 1) {
-    refreshInterval = 30 * 1000;
-  } else if (result.lagHours <= 6) {
-    refreshInterval = 60 * 1000;
+  if (result.lagHours <= HOT_HOURS) {
+    refreshInterval = HOT_HOURS_REFRESH_INTERVAL;
+  } else if (result.lagHours <= FRESH_HOURS) {
+    refreshInterval = FRESH_HOURS_REFRESH_INTERVAL;
   } else {
     return;
   }
 
-  console.log('refresh', refreshInterval);
-  if (refreshInterval < 30) {
-    return;
-  }
-
-  clearTimeout(row.refreshTimeout);
-  row.refreshTimeout = setTimeout(async () => {
+  clearTimeout(row.refreshTimeoutId);
+  row.refreshTimeoutId = setTimeout(async () => {
     const price = await data.getWAXPrice();
-    processResult(await updateRow(templateId, price));
+    additionalRefresh(await updateRow(templateId, price));
   }, refreshInterval);
+}
 
+function getAssetRows() {
+  return document.querySelectorAll('#main-table tbody tr[data-template-id]');
 }
 
 async function refresh() {
@@ -86,50 +78,38 @@ async function refresh() {
 
   setWalletButtonText();
   setTemplateIDsButtonText();
-
-  const rows = document.querySelectorAll('#main-table tbody tr[data-template-id]');
-  if (rows) {
-    templateIds = [];
-    rows.forEach((row) => templateIds.push(row.dataset.templateId));
-  }
-
-  // Clear all timeouts so we don't double up
-  rows.forEach((row) => clearTimeout(row.refreshTimeout));
-
   display('#noResults', templateIds.length === 0);
   display('#results', templateIds.length > 0);
+
+  const rows = getAssetRows();
+  templateIds = [...rows].map((row) => row.dataset.templateId);
 
   if (templateIds.length === 0) {
     return;
   }
 
-  const batches = [];
+  clearTimeouts(rows);
 
-  for (let i = 0; i < templateIds.length; i += BATCH_SIZE) {
-    const slice = templateIds.slice(i, i + BATCH_SIZE);
-    batches.push(slice);
-  }
+  const results = await Promise.all(templateIds.map((templateId) => updateRow(templateId, waxPrice)));
+  results.forEach((result) => additionalRefresh(result));
 
-  let results;
-  for (let i = 0; i < batches.length; i++) {
-    const batch = batches[i];
-    results = await Promise.all(batch.map((templateId) => updateRow(templateId, waxPrice)));
-
-    for (const result of results) {
-      processResult(result);
-    }
-
-    setRefreshStatus();
-  }
-
-  console.log(results);
+  // Clean up any lagging status message
+  setRefreshStatus();
 
   refreshTableSort();
-  refreshTimestamp();
+  setTimestamp();
 
   exchangeTable.classList.remove('updating');
 
   setTimeout(refresh, settings.getRefreshInterval());
+}
+
+function clearTimeouts(rows) {
+  rows.forEach((row) => {
+    clearTimeout(row.refreshTimeoutId);
+    // eslint-disable-next-line no-param-reassign
+    delete row.refreshTimeoutId;
+  });
 }
 
 function updateRowData(m, waxPrice) {
@@ -212,7 +192,7 @@ async function setWallet() {
   if (wallet) {
     settings.setWallet(wallet);
     await drawTable(templateIds, exchangeTable, wallet);
-    await refresh(templateIds);
+    await refresh();
   }
 }
 
@@ -226,7 +206,7 @@ async function setTemplateIDs() {
   if (newTemplateIds.length > 0) {
     templateIds = settings.setTemplateIds(newTemplateIds);
     await drawTable(templateIds, exchangeTable, wallet);
-    await refresh(templateIds);
+    await refresh();
   }
 }
 
