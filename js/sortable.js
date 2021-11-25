@@ -86,7 +86,7 @@ document.addEventListener('click', (e) => {
         sortTable(table, columnIndex, dir);
 
         // Attach the refresh function to the table so other code can trigger it
-        table.refreshSort = () => sortTable(table, columnIndex, dir);
+        table.sort = () => sortTable(table, columnIndex, dir);
       }
     } catch (error) {
       // console.log(error)

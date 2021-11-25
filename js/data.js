@@ -1,9 +1,13 @@
 import * as util from './util.js';
-import { setRefreshStatus } from './display.js';
 import Semaphore from './semaphore.js';
 
 const sem = new Semaphore(30, 30, 15);
 
+/**
+ * @param {string} url
+ * @param {Function} status
+ * @returns {Promise<Response>}
+ */
 async function atomicFetch(url, status) {
   await sem.wait();
   let response = await fetch(url);
@@ -19,62 +23,85 @@ async function atomicFetch(url, status) {
   return response;
 }
 
-export async function getLastSold(templateId) {
+/**
+ * Get latest USD value of WAXP
+ * @returns {Promise<number>}
+ */
+export async function getWAXPrice() {
+  const url = 'https://api.coingecko.com/api/v3/simple/price?ids=WAX&vs_currencies=USD';
+  const response = await fetch(url);
+  const data = await response.json();
+  return Number(data.wax.usd);
+}
+
+/**
+ * @param {string} templateId
+ * @param {Function} status
+ * @returns {Promise<AtomicSale>}
+ */
+export async function getLastSold(templateId, status) {
   const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?symbol=WAX&state=3&max_assets=1&template_id=${templateId}&page=1&limit=1&order=desc&sort=updated`;
-  const response = await atomicFetch(url, setRefreshStatus);
+  const response = await atomicFetch(url, status);
   const data = await response.json();
   const last = data.data[0];
 
-  // Our simple view model
-  const m = {
-    assetName: '',
-    collectionName: '',
-    floorPrice: 0,
-    lagHours: 0,
-    lastPrice: 0,
-    schemaName: '',
-    templateId,
+  return {
+    assetName: last.assets[0].name,
+    collectionName: last.collection_name,
+    lastPrice: util.parseTokenValue(last.price.token_precision, last.price.amount),
+    lastSoldDate: new Date(Number(last.updated_at_time)),
+    schemaName: last.assets[0].schema.schema_name,
   };
-
-  m.collectionName = last.collection_name;
-  m.schemaName = last.assets[0].schema.schema_name;
-  m.assetName = last.assets[0].name;
-  m.lastPrice = util.parseTokenValue(last.price.token_precision, last.price.amount);
-  m.lastSoldDate = new Date(Number(last.updated_at_time));
-
-  return m;
 }
 
-export async function getFloorListing(templateId) {
+/**
+ * @param {string} templateId
+ * @param {Function} status
+ * @returns {Promise<AtomicListing>}
+ */
+export async function getFloorListing(templateId, status) {
   const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales/templates?symbol=WAX&state=1&max_assets=1&template_id=${templateId}&order=asc&sort=price`;
-  const response = await atomicFetch(url, setRefreshStatus);
+  const response = await atomicFetch(url, status);
 
   const data = await response.json();
   const floor = data.data[0];
 
+  /** @type {AtomicListing} */
+  const m = {
+    floorPrice: 0,
+    mintNumber: 0,
+  };
+
   if (!floor) {
-    return {};
+    return m;
   }
 
   return {
     floorPrice: util.parseTokenValue(floor.price.token_precision, floor.price.amount),
     mintNumber: floor.assets[0].template_mint,
-    templateId,
   };
 }
 
-export function transform(data, templateId, wallet) {
-  // Our simple view model
+/**
+ * @param {AtomicSale} lastSold
+ * @param {AtomicListing} floor
+ * @param {string} templateId
+ * @param {string} wallet
+ * @returns {AtomicModel}
+ */
+export function transform(lastSold, floor, templateId, wallet) {
+  /** @type {AtomicModel} */
   const m = {
-    lagHours: 0,
+    lagHours: new Date(),
     priceGapPercent: 0,
     historyLink: '',
     listingsLink: '',
     collectionLink: '',
     templateLink: '',
     inventoryLink: '',
-    ...data[0],
-    ...data[1],
+    templateId,
+    ...lastSold,
+    ...floor,
   };
 
   m.lagHours = (Date.now() - m.lastSoldDate) / 1000 / 60 / 60;
@@ -89,9 +116,31 @@ export function transform(data, templateId, wallet) {
   return m;
 }
 
-export async function getWAXPrice() {
-  const url = 'https://api.coingecko.com/api/v3/simple/price?ids=WAX&vs_currencies=USD';
-  const response = await fetch(url);
-  const data = await response.json();
-  return data.wax.usd;
-}
+/**
+ * Recent sale data from AtomicHub
+ * @typedef {Object} AtomicSale
+ * @property {string} assetName
+ * @property {string} collectionName
+ * @property {number} lastPrice
+ * @property {Date} lastSoldDate
+ * @property {string} schemaName
+ */
+
+/** Asset listed for sale on AtomicHub
+ * @typedef {Object} AtomicListing
+ * @property {number} floorPrice
+ * @property {number} mintNumber
+ */
+
+/**
+ * Composite model of asset data retrieved from AtomicHub.io
+ * @typedef {AtomicListing|AtomicSale} AtomicModel
+ * @property {number} lagHours
+ * @property {string} templateLink
+ * @property {number} priceGapPercent
+ * @property {string} inventoryLink
+ * @property {string} historyLink
+ * @property {string} listingsLink
+ * @property {string} collectionLink
+ * @property {string} templateId
+ */

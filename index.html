@@ -5,8 +5,7 @@
   <title>Floor Price Watchlist</title>
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="/img/apple-touch-icon.png"/>
-  <link rel="manifest" href="/site.webmanifest" />
-
+  <link rel="manifest" href="/site.webmanifest"/>
   <link rel="stylesheet" href="css/milligram.min.css">
   <link rel="stylesheet" href="css/index.css">
   <link rel="stylesheet" href="css/sortable.css">
@@ -18,10 +17,9 @@
 <div class="container">
   <div class="row header">
     <div class="column">
-      <h1 class="float-left">Fl</h1>
+      <h1 class="float-left">&#129488; Fl</h1>
       <img class="float-left logo" src="/img/NicePng_googly-eyes-png_24220.png"/>
       <h1 class="float-left">r Price Watchlist</h1>
-
     </div>
     <div class="column">
       <a href="https://atomikings.com" target="_blank" class="logoLink float-right">
@@ -30,7 +28,9 @@
     </div>
   </div>
   <div id="noResults" class="row hidden">
-    <p>You have entered no template IDs. Click the button below to set some up.</p>
+    <div class="column">
+      <p>You have entered no template IDs. Click the button below to set some up.</p>
+    </div>
   </div>
   <div id="results" class="row hidden">
     <div class="column">
@@ -43,15 +43,11 @@
           <th class="text-right" title="price of lowest priced sales listing">Floor Price</th>
           <th class="text-right" title="percentage difference between last sold WAX price and floor WAX price">Gap</th>
           <th title="elapsed time since last sale">Lag</th>
-          <th class=no-sort" class="text-right">USD</th>
+          <th class="no-sort text-right">USD</th>
           <th class="no-sort"></th>
         </tr>
         </thead>
-        <tbody id="exchangeTable">
-        <tr>
-          <td colspan=8>Loading....</td>
-        </tr>
-        </tbody>
+        <tbody id="exchangeTable"></tbody>
       </table>
     </div>
   </div>
@@ -83,10 +79,9 @@
 <script type="module" src="js/storage.js"></script>
 <script type="module" src="js/util.js"></script>
 <script type="module" src="js/data.js"></script>
-<script type="module" src="js/display.js"></script>
+<script type="module" src="js/view.js"></script>
 <script type="module" src="js/semaphore.js"></script>
 <script type="application/javascript" src="js/sortable.js"></script>
 
 </body>
-
 </html>
