@@ -1,25 +1,17 @@
-# EditorConfig is awesome: http://EditorConfig.org
-
-# top-most EditorConfig file
-root = true
-
-# Unix-style newlines with a newline ending every file
 [*]
-end_of_line = lf
-insert_final_newline = true
-
-# Matches multiple files with brace expansion notation
-# Set default charset and 2 space indentation
-[*.{js, jsx, html, sass, scss, css, yaml, yml}]
 charset = utf-8
+end_of_line = lf
+indent_size = 4
 indent_style = space
-indent_size = 2
+insert_final_newline = true
+max_line_length = 120
+tab_width = 4
 trim_trailing_whitespace = true
+ij_visual_guides = 80,100
 
-[{Makefile, go.mod, go.sum, *.go}]
-indent_style = tab
-indent_size = 4
-
-[*.py]
-indent_style = space
-indent_size = 4
+[{*.cjs,*.js}]
+indent_size = 2
+ij_javascript_keep_blank_lines_in_code = 1
+ij_javascript_spaces_within_object_literal_braces = true
+ij_javascript_spaces_within_imports = true
+ij_javascript_use_double_quotes = false
