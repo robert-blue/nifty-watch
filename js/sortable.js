@@ -55,9 +55,7 @@ function reClassify(element, dir) {
   }
 }
 
-document.addEventListener('click', (e) => {
-  const element = e.target;
-
+export default function apply(element) {
   if (element.nodeName === 'TH') {
     try {
       const tr = element.parentNode;
@@ -86,12 +84,17 @@ document.addEventListener('click', (e) => {
         sortTable(table, columnIndex, dir);
 
         // Attach the refresh function to the table so other code can trigger it
-        table.sort = () => sortTable(table, columnIndex, dir);
+        table.sort = (colIndex = columnIndex, sortDir = dir) => sortTable(table, colIndex, sortDir);
       }
     } catch (error) {
       // console.log(error)
     }
   }
+}
+
+document.addEventListener('click', (e) => {
+  const element = e.target;
+  apply(element);
 });
 
 function sortTable(table, columnIndex, dir) {

@@ -6,6 +6,7 @@ import { getTemplateRow } from './util.js';
 import * as data from './data.js';
 import * as view from './view.js';
 import { display } from './view.js';
+import sortable from './sortable.js';
 
 let wallet = '';
 let templateIds = [];
@@ -31,6 +32,8 @@ async function refreshRow(row, waxPrice) {
   view.bindRow(row, model, waxPrice);
 
   row.classList.remove('updating');
+
+  view.sortTable();
 
   return model;
 }
@@ -125,6 +128,9 @@ function setTemplateIDsButtonText() {
 }
 
 function bindUI() {
+  const sortColumn = document.querySelector('#main-table th.dir-u, #main-table th.dir-d');
+  sortable(sortColumn);
+
   exchangeTable = document.querySelector('#exchangeTable');
   refreshTableButton = document.querySelector('#refreshTableButton');
   setTemplateIDsButton = document.querySelector('#setTemplateIDsButton');
