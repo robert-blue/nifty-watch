@@ -37,15 +37,28 @@ export function getWAXPrice() {
 }
 export function getLastSold(templateId, status) {
     return __awaiter(this, void 0, void 0, function* () {
-        const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?symbol=WAX&state=3&max_assets=1&template_id=${templateId}&page=1&limit=1&order=desc&sort=updated`;
+        const assetCount = 5;
+        const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?symbol=WAX&state=3&max_assets=1&template_id=${templateId}&page=1&limit=${assetCount}&order=desc&sort=updated`;
         const response = yield atomicFetch(url, status);
         const data = yield response.json();
         const last = data.data[0];
+        const priceHistory = data.data.map((d) => ({
+            date: new Date(Number(d.updated_at_time)),
+            price: util.parseTokenValue(d.price.token_precision, d.price.amount),
+        })).reverse();
+        const prices = priceHistory.map((p) => p.price);
+        let increases = 0;
+        for (let i = 1; i < prices.length; i++) {
+            if (prices[i] >= prices[i - 1]) {
+                increases += 1;
+            }
+        }
         return {
             assetName: last.assets[0].name,
             collectionName: last.collection_name,
             lastPrice: util.parseTokenValue(last.price.token_precision, last.price.amount),
             lastSoldDate: new Date(Number(last.updated_at_time)),
+            increasing: increases / (prices.length - 1),
             schemaName: last.assets[0].schema.schema_name,
         };
     });

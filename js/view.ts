@@ -1,5 +1,6 @@
 import { DEAD_HOURS, FRESH_HOURS, HOT_HOURS } from './config.js';
 import * as util from './util.js';
+// eslint-disable-next-line import/named
 import { AtomicModel, Sortable } from './types.js';
 
 export function setStatus(msg?: string) {
@@ -38,10 +39,10 @@ export async function drawTableRows(templateIds: string[], targetElem: HTMLTable
   <td class="collection-name"><a href="" class="collection-name-link" target="_blank"></a></td>
   <td class="asset-name">
     <a href="" target="_blank" class="asset-name-link"></a>
-    <i class="fa-solid fa-arrow-trend-up up" title="[trending] last sale under ${FRESH_HOURS} hours and floor price is higher than last sales price"></i>
-    <i class="fa-solid fa-fire-flame-curved hot" title="[hot] last sale under ${HOT_HOURS} hours and floor price is higher than last sales price"></i>
     <i class="fa-solid fa-skull-crossbones dead" title="[stale] last sale over ${DEAD_HOURS / 24} days ago"></i>
-    <i class="fa-solid fa-arrow-trend-down down" title="[down] last sale under ${FRESH_HOURS} hours and floor price is lower than last sales price"></i>
+    <i class="fa-solid fa-fire-flame-curved hot" title="[hot] last sale under ${HOT_HOURS} hours and floor price is higher than last sales price"></i>
+    <i class="fa-solid fa-arrow-trend-up up" title="[trending] 3 of the last 4 sales had same or increasing prices"></i>
+    <i class="fa-solid fa-arrow-trend-down down" title="[down] 3 of the last 4 sales had decreasing prices"></i>
     <i class="fa-solid fa-rotate"></i>
   </td>
   <td class="price-wax" style="text-align:right"><span class="price-wax-value"></span> WAX</td>
@@ -85,7 +86,6 @@ export function setTimestamp() {
 
 export function sortTable() {
   const table = document.querySelector('#main-table') as Sortable;
-  console.log('sortable', table);
   if (table && table.sort !== undefined) {
     table.sort();
   } else {
@@ -113,7 +113,7 @@ export function bindRow(row: HTMLElement, m: AtomicModel, waxPrice: number) {
   target.classList.add(m.priceGapPercent < 0 ? 'lower' : 'higher');
 
   row.classList.remove('dead', 'hot', 'down', 'up', 'fresh');
-  row.classList.add(...priceAction(m.lagHours, m.priceGapPercent));
+  row.classList.add(...priceAction(m.lagHours, m.increasing));
 
   const collectionCell = row.querySelector('td.collection-name') as HTMLElement;
   collectionCell.dataset.sort = m.collectionName;
@@ -143,26 +143,28 @@ export function bindRow(row: HTMLElement, m: AtomicModel, waxPrice: number) {
   lagCell.dataset.sort = Number(Date.now() - m.lastSoldDate.getTime()).toString();
 }
 
-function priceAction(lagHours: number, priceDiff: number) {
-  if (lagHours > DEAD_HOURS) {
+function priceAction(lagHours: number, increasing: number) {
+  const result: string[] = [];
+
+  if (lagHours >= DEAD_HOURS) {
     return ['dead'];
   }
 
-  if (lagHours <= HOT_HOURS && priceDiff >= 0) {
-    return ['fresh', 'hot'];
-  }
-
   if (lagHours <= FRESH_HOURS) {
-    if (priceDiff < 0) {
-      return ['fresh', 'down'];
-    }
-
-    if (priceDiff > 0) {
-      return ['fresh', 'up'];
-    }
+    result.push('fresh');
   }
 
-  return [];
+  if (increasing >= 3 / 4) {
+    if (lagHours <= HOT_HOURS) {
+      result.push('hot');
+    } else {
+      result.push('up');
+    }
+  } else if (increasing <= 1 / 4) {
+    result.push('down');
+  }
+
+  return result;
 }
 
 export function display(selector: string, show: boolean) {

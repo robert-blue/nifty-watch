@@ -16,6 +16,7 @@ import { display } from './view.js';
 import sortable from './vendor/sortable.js';
 let wallet = '';
 let templateIds = [];
+let globalTimeout;
 let exchangeTable;
 let refreshTableButton;
 let setTemplateIDsButton;
@@ -78,7 +79,8 @@ function refresh() {
         view.setTimestamp();
         view.clearStatus();
         exchangeTable.classList.remove('updating');
-        setTimeout(refresh, settings.getRefreshInterval());
+        clearTimeout(globalTimeout);
+        globalTimeout = setTimeout(refresh, settings.getRefreshInterval());
     });
 }
 function clearTimeouts(rows) {
