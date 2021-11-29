@@ -41,30 +41,38 @@
 const downClass = 'dir-d';
 const upClass = 'dir-u';
 
-function getValue(element) {
+interface SortableTable extends HTMLTableElement {
+  sort(): void;
+}
+
+function getValue(element: HTMLElement) {
   // If you aren't using data-sort and want to make it just the tiniest bit smaller/faster
   // comment this line and uncomment the next one
   return element.getAttribute('data-sort') || element.innerText;
   // return element.innerText
 }
 
-function reClassify(element, dir) {
+function reClassify(element: HTMLTableCellElement, dir: string) {
   element.classList.remove('dir-u', 'dir-d');
   if (dir) {
     element.classList.add(dir);
   }
 }
 
-export default function apply(element) {
+export default function apply(element: HTMLTableCellElement): HTMLTableElement|undefined {
   if (element.nodeName === 'TH') {
     try {
-      const tr = element.parentNode;
+      const tr = element.parentNode as HTMLTableRowElement;
       // var table = element.offsetParent; // Fails with positioned table elements
       // this is the only way to make really, really sure. A few more bytes though... 😡
-      const table = tr.parentNode.parentNode;
+      if (tr.parentNode === null) {
+        throw new Error('TABLE not found');
+      }
+
+      const table = tr.parentNode.parentNode as SortableTable;
 
       if (table.classList.contains('sortable')) {
-        let columnIndex;
+        let columnIndex = 0;
         const nodes = tr.cells;
 
         // reset thead cells and get column index
@@ -85,19 +93,23 @@ export default function apply(element) {
 
         // Attach the refresh function to the table so other code can trigger it
         table.sort = (colIndex = columnIndex, sortDir = dir) => sortTable(table, colIndex, sortDir);
+        return table;
       }
     } catch (error) {
       // console.log(error)
     }
   }
+  return undefined;
 }
 
 document.addEventListener('click', (e) => {
-  const element = e.target;
-  apply(element);
+  const element = e.target as HTMLElement;
+    if (element.nodeName === 'TH') {
+      apply(element as HTMLTableCellElement);
+    }
 });
 
-function sortTable(table, columnIndex, dir) {
+function sortTable(table: HTMLTableElement, columnIndex: number, dir: string) {
   // extract all table rows, so the sorting can start.
   const tbodyOriginal = table.tBodies[0];
 
@@ -107,12 +119,14 @@ function sortTable(table, columnIndex, dir) {
   const reverse = dir === upClass;
 
   // sort them using custom built in array sort.
-  rows.sort((a, b) => {
+  rows.sort((a: HTMLTableRowElement, b: HTMLTableRowElement) => {
     const x = getValue((reverse ? a : b).cells[columnIndex]);
     const y = getValue((reverse ? b : a).cells[columnIndex]);
     // var y = (reverse ? b : a).cells[columnIndex].innerText
     // var x = (reverse ? a : b).cells[columnIndex].innerText
-    return Number.isNaN(x - y) ? x.localeCompare(y) : x - y;
+    const notNumber = Number.isNaN(x) || Number.isNaN(y);
+
+    return notNumber ? x.localeCompare(y) : Number(x) - Number(y);
   });
 
   // Make a clone without content
