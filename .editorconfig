@@ -9,8 +9,9 @@ tab_width = 4
 trim_trailing_whitespace = true
 ij_visual_guides = 80,100
 
-[{*.cjs,*.js}]
+[{*.cjs,*.js,*.ts,*.tsx}]
 indent_size = 2
+max_line_length = 100
 ij_javascript_keep_blank_lines_in_code = 1
 ij_javascript_spaces_within_object_literal_braces = true
 ij_javascript_spaces_within_imports = true

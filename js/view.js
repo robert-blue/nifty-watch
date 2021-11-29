@@ -1,32 +1,37 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { DEAD_HOURS, FRESH_HOURS, HOT_HOURS } from './config.js';
 import * as util from './util.js';
-
 export function setStatus(msg) {
-  document.getElementById('refreshStatus').innerText = msg ?? '';
+    const statusElem = document.getElementById('refreshStatus');
+    statusElem.innerText = msg !== null && msg !== void 0 ? msg : '';
 }
-
 export function clearStatus() {
-  document.getElementById('refreshStatus').innerText = '';
+    const statusElem = document.getElementById('refreshStatus');
+    statusElem.innerText = '';
 }
-
-/**
- * @param {Number[]} templateIds
- * @param {HTMLElement} targetElem
- * @param {string} wallet
- */
-export async function drawTableRows(templateIds, targetElem, wallet) {
-  if (templateIds.length === 0) {
-    return;
-  }
-
-  // Reset table
-  targetElem.querySelectorAll('tr').forEach((row) => {
-    clearTimeout(row.refreshTimeoutId);
-    row.parentNode.removeChild(row);
-  });
-
-  templateIds.forEach((templateId) => {
-    const output = `
+export function drawTableRows(templateIds, targetElem, wallet) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (templateIds.length === 0) {
+            return;
+        }
+        // Reset table
+        targetElem.querySelectorAll('tr').forEach((row) => {
+            clearTimeout(row.refreshTimeoutId);
+            if (row.parentNode === null) {
+                throw new Error('Parent node for row not found');
+            }
+            row.parentNode.removeChild(row);
+        });
+        templateIds.forEach((templateId) => {
+            const output = `
   <tr data-template-id="${templateId}">
   <td class="template-id"><a href="" class="template-id-link" target="_blank">${templateId}</a></td>
   <td class="collection-name"><a href="" class="collection-name-link" target="_blank"></a></td>
@@ -53,111 +58,91 @@ export async function drawTableRows(templateIds, targetElem, wallet) {
       </a>
   </td>
   </tr>`;
-
-    targetElem.insertAdjacentHTML('beforeend', output);
-  });
+            targetElem.insertAdjacentHTML('beforeend', output);
+        });
+    });
 }
-
 /**
  * Returns table rows
- * @returns {HTMLTableRowElement[]}
  */
 export function getAssetRows() {
-  const rows = document.querySelectorAll('#main-table tbody tr[data-template-id]');
-  return [...rows];
+    const selector = '#main-table tbody tr[data-template-id]';
+    const rows = document.querySelectorAll(selector);
+    return Array.from(rows);
 }
-
 export function setTimestamp() {
-  const now = new Date();
-  document.getElementById('timestamp').innerText = now.toLocaleTimeString();
+    const now = new Date();
+    const timestampElem = document.getElementById('timestamp');
+    if (timestampElem === null) {
+        throw new Error('Could not find timestamp SPAN');
+    }
+    timestampElem.innerText = now.toLocaleTimeString();
 }
-
 export function sortTable() {
-  const table = document.querySelector('#main-table');
-  if (table && table.sort !== undefined) {
-    table.sort();
-  }
+    const table = document.querySelector('#main-table');
+    console.log('sortable', table);
+    if (table && table.sort !== undefined) {
+        table.sort();
+    }
+    else {
+        console.warn('#main-table not sortable');
+    }
 }
-
-/**
- * Bind the model to the table row
- * @param {Element} row
- * @param {AtomicModel} m
- * @param {number} waxPrice
- */
 export function bindRow(row, m, waxPrice) {
-  const floorPrice = row.querySelector('.price-wax-value');
-  floorPrice.innerHTML = `${Math.round(m.floorPrice * 100) / 100}`;
-
-  const floorPriceCell = row.querySelector('td.price-wax');
-  floorPriceCell.dataset.sort = m.floorPrice.toString();
-
-  const usdPrice = row.querySelector('.price-usd-value');
-  usdPrice.innerHTML = util.formatPrice(m.floorPrice * waxPrice);
-
-  const gapCell = row.querySelector('td.price-gap');
-  gapCell.dataset.sort = m.priceGapPercent.toString();
-
-  const target = row.querySelector('td.price-gap .price-gap-value');
-  target.innerText = util.formatPercent(m.priceGapPercent);
-  target.title = `mint #${m.mintNumber} last sold for ${m.lastPrice} WAX`;
-  target.classList.remove('lower', 'higher');
-  target.classList.add(m.priceGapPercent < 0 ? 'lower' : 'higher');
-
-  row.classList.remove('dead', 'hot', 'down', 'up', 'fresh');
-  row.classList.add(...priceAction(m.lagHours, m.priceGapPercent));
-
-  const collectionCell = row.querySelector('td.collection-name');
-  collectionCell.dataset.sort = m.collectionName;
-
-  const templateIdLink = row.querySelector('a.template-id-link');
-  templateIdLink.href = m.templateLink;
-  templateIdLink.innerHTML = m.templateId;
-
-  const collectionLink = row.querySelector('a.collection-name-link');
-  collectionLink.href = m.collectionLink;
-  collectionLink.innerHTML = m.collectionName;
-
-  const nameLink = row.querySelector('a.asset-name-link');
-  nameLink.href = m.listingsLink;
-  nameLink.innerHTML = m.assetName;
-
-  const historyLink = row.querySelector('a.history-link');
-  historyLink.href = m.historyLink;
-
-  const inventoryLink = row.querySelector('a.link-inventory');
-  inventoryLink.href = m.inventoryLink;
-
-  const lagTarget = row.querySelector('td.lag .lag-value');
-  lagTarget.innerHTML = util.formatTimespan(Date.now() - m.lastSoldDate);
-
-  const lagCell = row.querySelector('td.lag');
-  lagCell.dataset.sort = Number(Date.now() - m.lastSoldDate).toString();
+    const floorPrice = row.querySelector('.price-wax-value');
+    floorPrice.innerHTML = `${Math.round(m.floorPrice * 100) / 100}`;
+    const floorPriceCell = row.querySelector('td.price-wax');
+    floorPriceCell.dataset.sort = m.floorPrice.toString();
+    const usdPrice = row.querySelector('.price-usd-value');
+    usdPrice.innerHTML = util.formatPrice(m.floorPrice * waxPrice);
+    const gapCell = row.querySelector('td.price-gap');
+    gapCell.dataset.sort = m.priceGapPercent.toString();
+    const target = row.querySelector('td.price-gap .price-gap-value');
+    target.innerText = util.formatPercent(m.priceGapPercent);
+    target.title = `mint #${m.mintNumber} last sold for ${m.lastPrice} WAX`;
+    target.classList.remove('lower', 'higher');
+    target.classList.add(m.priceGapPercent < 0 ? 'lower' : 'higher');
+    row.classList.remove('dead', 'hot', 'down', 'up', 'fresh');
+    row.classList.add(...priceAction(m.lagHours, m.priceGapPercent));
+    const collectionCell = row.querySelector('td.collection-name');
+    collectionCell.dataset.sort = m.collectionName;
+    const templateIdLink = row.querySelector('a.template-id-link');
+    templateIdLink.href = m.templateLink;
+    templateIdLink.innerHTML = m.templateId;
+    const collectionLink = row.querySelector('a.collection-name-link');
+    collectionLink.href = m.collectionLink;
+    collectionLink.innerHTML = m.collectionName;
+    const nameLink = row.querySelector('a.asset-name-link');
+    nameLink.href = m.listingsLink;
+    nameLink.innerHTML = m.assetName;
+    const historyLink = row.querySelector('a.history-link');
+    historyLink.href = m.historyLink;
+    const inventoryLink = row.querySelector('a.link-inventory');
+    inventoryLink.href = m.inventoryLink;
+    const lagTarget = row.querySelector('td.lag .lag-value');
+    lagTarget.innerHTML = util.formatTimespan(Date.now() - m.lastSoldDate.getTime());
+    const lagCell = row.querySelector('td.lag');
+    lagCell.dataset.sort = Number(Date.now() - m.lastSoldDate.getTime()).toString();
 }
-
 function priceAction(lagHours, priceDiff) {
-  if (lagHours > DEAD_HOURS) {
-    return ['dead'];
-  }
-
-  if (lagHours <= HOT_HOURS && priceDiff >= 0) {
-    return ['fresh', 'hot'];
-  }
-
-  if (lagHours <= FRESH_HOURS) {
-    if (priceDiff < 0) {
-      return ['fresh', 'down'];
+    if (lagHours > DEAD_HOURS) {
+        return ['dead'];
     }
-
-    if (priceDiff > 0) {
-      return ['fresh', 'up'];
+    if (lagHours <= HOT_HOURS && priceDiff >= 0) {
+        return ['fresh', 'hot'];
     }
-  }
-
-  return [];
+    if (lagHours <= FRESH_HOURS) {
+        if (priceDiff < 0) {
+            return ['fresh', 'down'];
+        }
+        if (priceDiff > 0) {
+            return ['fresh', 'up'];
+        }
+    }
+    return [];
 }
-
 export function display(selector, show) {
-  document.querySelector(selector).classList[show ? 'remove' : 'add']('hidden');
+    const elem = document.querySelector(selector);
+    elem.classList[show ? 'remove' : 'add']('hidden');
 }
-
+//# sourceMappingURL=view.js.map

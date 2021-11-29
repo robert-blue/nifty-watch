@@ -1,42 +1,49 @@
 {
-  "env": {
-    "browser": true,
-    "es2021": true
-  },
-  "extends": [
-    "airbnb-base"
-  ],
-  "parserOptions": {
-    "ecmaVersion": 12,
-    "sourceType": "module"
-  },
-  "rules": {
-    "import/extensions": [
-      "error",
-      "always"
+    "env": {
+        "browser": true,
+        "es2021": true
+    },
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+        "@typescript-eslint"
     ],
-    "no-use-before-define": [
-      "error",
-      "nofunc"
+    "extends": [
+        "airbnb-base",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended"
     ],
-    "max-len": [
-      "error",
-      {
-        "code": 200,
-        "tabWidth": 2
-      }
-    ],
-    "no-await-in-loop": [
-      "off"
-    ],
-    "no-mixed-operators": [
-      "off"
-    ],
-    "no-plusplus": [
-      "error",
-      {
-        "allowForLoopAfterthoughts": true
-      }
-    ]
-  }
+    "parserOptions": {
+        "ecmaVersion": 12,
+        "project": "./tsconfig.json",
+        "sourceType": "module"
+    },
+    "rules": {
+        "import/extensions": [
+            "error",
+            "always"
+        ],
+        "no-use-before-define": [
+            "error",
+            "nofunc"
+        ],
+        "max-len": [
+            "error",
+            {
+                "code": 200,
+                "tabWidth": 2
+            }
+        ],
+        "no-await-in-loop": [
+            "off"
+        ],
+        "no-mixed-operators": [
+            "off"
+        ],
+        "no-plusplus": [
+            "error",
+            {
+                "allowForLoopAfterthoughts": true
+            }
+        ]
+    }
 }
