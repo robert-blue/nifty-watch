@@ -38,9 +38,9 @@ export function drawTableRows(templateIds, targetElem, wallet) {
   <td class="asset-name">
     <a href="" target="_blank" class="asset-name-link"></a>
     <i class="fa-solid fa-skull-crossbones dead" title="[stale] last sale over ${DEAD_HOURS / 24} days ago"></i>
-    <i class="fa-solid fa-fire-flame-curved hot" title="[hot] last sale under ${HOT_HOURS} hours and floor price is higher than last sales price"></i>
-    <i class="fa-solid fa-arrow-trend-up up" title="[trending] 3 of the last 4 sales had same or increasing prices"></i>
-    <i class="fa-solid fa-arrow-trend-down down" title="[down] 3 of the last 4 sales had decreasing prices"></i>
+    <i class="fa-solid fa-fire-flame-curved hot" title="[hot] last sale under ${HOT_HOURS} hours and 3 of the last 4 sales had same or increasing price"></i>
+    <i class="fa-solid fa-arrow-trend-up up" title="[trending] 3 of the last 4 sales had same or increasing price"></i>
+    <i class="fa-solid fa-arrow-trend-down down" title="[down] 3 of the last 4 sales had decreasing price"></i>
     <i class="fa-solid fa-rotate"></i>
   </td>
   <td class="price-wax" style="text-align:right"><span class="price-wax-value"></span> WAX</td>
