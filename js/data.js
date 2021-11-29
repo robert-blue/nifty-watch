@@ -59,6 +59,7 @@ export function getLastSold(templateId, status) {
             lastPrice: util.parseTokenValue(last.price.token_precision, last.price.amount),
             lastSoldDate: new Date(Number(last.updated_at_time)),
             increasing: increases / (prices.length - 1),
+            priceHistory,
             schemaName: last.assets[0].schema.schema_name,
         };
     });

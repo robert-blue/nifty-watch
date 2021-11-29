@@ -40,7 +40,7 @@ export async function getLastSold(
   const data = await response.json();
   const last = data.data[0];
 
-  const priceHistory: [{ date: string, price: number }] = data.data.map((d: any) => ({
+  const priceHistory: [{ date: Date, price: number }] = data.data.map((d: any) => ({
     date: new Date(Number(d.updated_at_time)),
     price: util.parseTokenValue(d.price.token_precision, d.price.amount),
   })).reverse();
@@ -59,6 +59,7 @@ export async function getLastSold(
     lastPrice: util.parseTokenValue(last.price.token_precision, last.price.amount),
     lastSoldDate: new Date(Number(last.updated_at_time)),
     increasing: increases / (prices.length - 1),
+    priceHistory,
     schemaName: last.assets[0].schema.schema_name,
   };
 }

@@ -38,7 +38,7 @@ export function drawTableRows(templateIds, targetElem, wallet) {
   <td class="asset-name">
     <a href="" target="_blank" class="asset-name-link"></a>
     <i class="fa-solid fa-skull-crossbones dead" title="[stale] last sale over ${DEAD_HOURS / 24} days ago"></i>
-    <i class="fa-solid fa-fire-flame-curved hot" title="[hot] last sale under ${HOT_HOURS} hours and 3 of the last 4 sales had same or increasing price"></i>
+    <i class="fa-solid fa-fire-flame-curved hot" title="[hot] last 5 sales occurred within the last ${HOT_HOURS} hours"></i>
     <i class="fa-solid fa-arrow-trend-up up" title="[trending] 3 of the last 4 sales had same or increasing price"></i>
     <i class="fa-solid fa-arrow-trend-down down" title="[down] 3 of the last 4 sales had decreasing price"></i>
     <i class="fa-solid fa-rotate"></i>
@@ -101,8 +101,8 @@ export function bindRow(row, m, waxPrice) {
     target.title = `mint #${m.mintNumber} last sold for ${m.lastPrice} WAX`;
     target.classList.remove('lower', 'higher');
     target.classList.add(m.priceGapPercent < 0 ? 'lower' : 'higher');
-    row.classList.remove('dead', 'hot', 'down', 'up', 'fresh');
-    row.classList.add(...priceAction(m.lagHours, m.increasing));
+    row.classList.remove('dead', 'hot', 'down', 'up', 'fresh', 'fire');
+    row.classList.add(...priceAction(m.lagHours, m.increasing, m.priceHistory));
     const collectionCell = row.querySelector('td.collection-name');
     collectionCell.dataset.sort = m.collectionName;
     const templateIdLink = row.querySelector('a.template-id-link');
@@ -123,24 +123,27 @@ export function bindRow(row, m, waxPrice) {
     const lagCell = row.querySelector('td.lag');
     lagCell.dataset.sort = Number(Date.now() - m.lastSoldDate.getTime()).toString();
 }
-function priceAction(lagHours, increasing) {
+function priceAction(lagHours, increasing, priceHistory) {
     const result = [];
     if (lagHours >= DEAD_HOURS) {
         return ['dead'];
     }
-    if (lagHours <= FRESH_HOURS) {
+    if (lagHours <= HOT_HOURS) {
+        result.push('hot');
+    }
+    else if (lagHours <= FRESH_HOURS) {
         result.push('fresh');
     }
     if (increasing >= 3 / 4) {
-        if (lagHours <= HOT_HOURS) {
-            result.push('hot');
-        }
-        else {
-            result.push('up');
-        }
+        result.push('up');
     }
     else if (increasing <= 1 / 4) {
         result.push('down');
+    }
+    const hotBoundary = new Date(Date.now() - (HOT_HOURS * 60 * 60 * 1000));
+    const fire = priceHistory.every((history) => history.date > hotBoundary);
+    if (fire) {
+        result.push('fire');
     }
     return result;
 }

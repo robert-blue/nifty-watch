@@ -117,7 +117,7 @@ tr td.asset-name i.dead {
     color: gray;
 }
 
-tr.hot td.asset-name i.hot, tr.dead td.asset-name i.dead, tr.up td.asset-name i.up, tr.down td.asset-name i.down {
+tr.fire td.asset-name i.hot, tr.dead td.asset-name i.dead, tr.up td.asset-name i.up, tr.down td.asset-name i.down {
     display: inline-block;
 }
 
@@ -160,7 +160,7 @@ tr td.asset-name i.hot {
   color: #ffa500;
 }
 
-#exchangeTable:not(.updating) tr.hot td.asset-name i.hot {
+#exchangeTable:not(.updating) tr.fire td.asset-name i.hot {
   animation: burn 5s ease-in-out infinite;
 }
 
