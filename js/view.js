@@ -37,10 +37,10 @@ export function drawTableRows(templateIds, targetElem, wallet) {
   <td class="collection-name"><a href="" class="collection-name-link" target="_blank"></a></td>
   <td class="asset-name">
     <a href="" target="_blank" class="asset-name-link"></a>
-    <i class="fa-solid fa-arrow-trend-up up" title="[trending] last sale under ${FRESH_HOURS} hours and floor price is higher than last sales price"></i>
-    <i class="fa-solid fa-fire-flame-curved hot" title="[hot] last sale under ${HOT_HOURS} hours and floor price is higher than last sales price"></i>
     <i class="fa-solid fa-skull-crossbones dead" title="[stale] last sale over ${DEAD_HOURS / 24} days ago"></i>
-    <i class="fa-solid fa-arrow-trend-down down" title="[down] last sale under ${FRESH_HOURS} hours and floor price is lower than last sales price"></i>
+    <i class="fa-solid fa-fire-flame-curved hot" title="[hot] last sale under ${HOT_HOURS} hours and floor price is higher than last sales price"></i>
+    <i class="fa-solid fa-arrow-trend-up up" title="[trending] 3 of the last 4 sales had same or increasing prices"></i>
+    <i class="fa-solid fa-arrow-trend-down down" title="[down] 3 of the last 4 sales had decreasing prices"></i>
     <i class="fa-solid fa-rotate"></i>
   </td>
   <td class="price-wax" style="text-align:right"><span class="price-wax-value"></span> WAX</td>
@@ -80,7 +80,6 @@ export function setTimestamp() {
 }
 export function sortTable() {
     const table = document.querySelector('#main-table');
-    console.log('sortable', table);
     if (table && table.sort !== undefined) {
         table.sort();
     }
@@ -103,7 +102,7 @@ export function bindRow(row, m, waxPrice) {
     target.classList.remove('lower', 'higher');
     target.classList.add(m.priceGapPercent < 0 ? 'lower' : 'higher');
     row.classList.remove('dead', 'hot', 'down', 'up', 'fresh');
-    row.classList.add(...priceAction(m.lagHours, m.priceGapPercent));
+    row.classList.add(...priceAction(m.lagHours, m.increasing));
     const collectionCell = row.querySelector('td.collection-name');
     collectionCell.dataset.sort = m.collectionName;
     const templateIdLink = row.querySelector('a.template-id-link');
@@ -124,22 +123,26 @@ export function bindRow(row, m, waxPrice) {
     const lagCell = row.querySelector('td.lag');
     lagCell.dataset.sort = Number(Date.now() - m.lastSoldDate.getTime()).toString();
 }
-function priceAction(lagHours, priceDiff) {
-    if (lagHours > DEAD_HOURS) {
+function priceAction(lagHours, increasing) {
+    const result = [];
+    if (lagHours >= DEAD_HOURS) {
         return ['dead'];
     }
-    if (lagHours <= HOT_HOURS && priceDiff >= 0) {
-        return ['fresh', 'hot'];
-    }
     if (lagHours <= FRESH_HOURS) {
-        if (priceDiff < 0) {
-            return ['fresh', 'down'];
+        result.push('fresh');
+    }
+    if (increasing >= 3 / 4) {
+        if (lagHours <= HOT_HOURS) {
+            result.push('hot');
         }
-        if (priceDiff > 0) {
-            return ['fresh', 'up'];
+        else {
+            result.push('up');
         }
     }
-    return [];
+    else if (increasing <= 1 / 4) {
+        result.push('down');
+    }
+    return result;
 }
 export function display(selector, show) {
     const elem = document.querySelector(selector);

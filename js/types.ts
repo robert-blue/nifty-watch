@@ -10,6 +10,7 @@ export interface Sortable extends HTMLTableElement {
 export interface AtomicSale {
   assetName: string
   collectionName: string
+  increasing: number
   lastPrice: number
   lastSoldDate: Date
   schemaName: string

@@ -1,5 +1,6 @@
 import Semaphore from './vendor/semaphore.js';
 import * as util from './util.js';
+// eslint-disable-next-line import/named
 import { AtomicListing, AtomicModel, AtomicSale } from './types.js';
 
 const sem = new Semaphore(30, 30, 15);
@@ -33,16 +34,31 @@ export async function getLastSold(
   templateId: string,
   status: (msg?: string | undefined) => void,
 ): Promise<AtomicSale> {
-  const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?symbol=WAX&state=3&max_assets=1&template_id=${templateId}&page=1&limit=1&order=desc&sort=updated`;
+  const assetCount = 5;
+  const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?symbol=WAX&state=3&max_assets=1&template_id=${templateId}&page=1&limit=${assetCount}&order=desc&sort=updated`;
   const response = await atomicFetch(url, status);
   const data = await response.json();
   const last = data.data[0];
+
+  const priceHistory: [{ date: string, price: number }] = data.data.map((d: any) => ({
+    date: new Date(Number(d.updated_at_time)),
+    price: util.parseTokenValue(d.price.token_precision, d.price.amount),
+  })).reverse();
+
+  const prices: number[] = priceHistory.map((p) => p.price);
+  let increases = 0;
+  for (let i = 1; i < prices.length; i++) {
+    if (prices[i] >= prices[i - 1]) {
+      increases += 1;
+    }
+  }
 
   return {
     assetName: last.assets[0].name,
     collectionName: last.collection_name,
     lastPrice: util.parseTokenValue(last.price.token_precision, last.price.amount),
     lastSoldDate: new Date(Number(last.updated_at_time)),
+    increasing: increases / (prices.length - 1),
     schemaName: last.assets[0].schema.schema_name,
   };
 }

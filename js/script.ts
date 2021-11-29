@@ -7,12 +7,14 @@ import * as data from './data.js';
 import * as view from './view.js';
 import { display } from './view.js';
 import {
+  // eslint-disable-next-line import/named
   AtomicListing, AtomicModel, AtomicSale, HasRefreshTimeout,
 } from './types.js';
 import sortable from './vendor/sortable.js';
 
 let wallet = '';
 let templateIds: string[] = [];
+let globalTimeout: number|undefined;
 
 let exchangeTable: HTMLTableSectionElement;
 let refreshTableButton: HTMLButtonElement;
@@ -90,7 +92,8 @@ async function refresh() {
 
   exchangeTable.classList.remove('updating');
 
-  setTimeout(refresh, settings.getRefreshInterval());
+  clearTimeout(globalTimeout);
+  globalTimeout = setTimeout(refresh, settings.getRefreshInterval());
 }
 
 function clearTimeouts(rows: Array<HasRefreshTimeout>) {
