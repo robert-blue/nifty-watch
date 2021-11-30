@@ -44,4 +44,11 @@ export function getTemplateRow(templateId) {
     const rowSelector = `#exchangeTable tr[data-template-id="${templateId}"]`;
     return document.querySelector(rowSelector);
 }
+export function findParentNode(element, nodeName) {
+    let parent = element.parentNode;
+    while (parent && parent.nodeName !== nodeName) {
+        parent = parent.parentNode;
+    }
+    return parent;
+}
 //# sourceMappingURL=util.js.map

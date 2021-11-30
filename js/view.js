@@ -17,23 +17,24 @@ export function clearStatus() {
     const statusElem = document.getElementById('refreshStatus');
     statusElem.innerText = '';
 }
-export function drawTableRows(templateIds, targetElem, wallet) {
+export function drawTableRows(templateIds, wallet) {
     return __awaiter(this, void 0, void 0, function* () {
         if (templateIds.length === 0) {
             return;
         }
+        const targetElem = document.querySelector('tbody#exchangeTable');
         // Reset table
         targetElem.querySelectorAll('tr').forEach((row) => {
             clearTimeout(row.refreshTimeoutId);
-            if (row.parentNode === null) {
-                throw new Error('Parent node for row not found');
-            }
-            row.parentNode.removeChild(row);
+            row.remove();
         });
         templateIds.forEach((templateId) => {
             const output = `
   <tr data-template-id="${templateId}">
-  <td class="template-id"><a href="" class="template-id-link" target="_blank">${templateId}</a></td>
+  <td class="template-id">
+    <a href="" class="template-id-link" target="_blank">${templateId}</a>
+    <i class="fa-solid fa-trash-can delete-row" title="delete"></i>
+  </td>
   <td class="collection-name"><a href="" class="collection-name-link" target="_blank"></a></td>
   <td class="asset-name">
     <a href="" target="_blank" class="asset-name-link"></a>
@@ -140,10 +141,12 @@ function priceAction(lagHours, increasing, priceHistory) {
     else if (increasing <= 1 / 4) {
         result.push('down');
     }
-    const hotBoundary = new Date(Date.now() - (HOT_HOURS * 60 * 60 * 1000));
-    const fire = priceHistory.every((history) => history.date > hotBoundary);
-    if (fire) {
-        result.push('fire');
+    if (priceHistory) {
+        const hotBoundary = new Date(Date.now() - (HOT_HOURS * 60 * 60 * 1000));
+        const fire = priceHistory.every((history) => history.date > hotBoundary);
+        if (fire) {
+            result.push('fire');
+        }
     }
     return result;
 }

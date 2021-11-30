@@ -24,7 +24,7 @@ function serializeTemplateIds(array) {
     return array.join(',');
 }
 function deserializeTemplateIds(str) {
-    return (str || '').split(',').map((x) => Number(x)).sort();
+    return (str || '').split(',').map((x) => x).filter((x) => x !== '').sort();
 }
 export function getRefreshInterval() {
     const urlParams = new URLSearchParams(document.location.search);

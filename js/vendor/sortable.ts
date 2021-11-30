@@ -111,10 +111,10 @@ document.addEventListener('click', (e) => {
 
 function sortTable(table: HTMLTableElement, columnIndex: number, dir: string) {
   // extract all table rows, so the sorting can start.
-  const tbodyOriginal = table.tBodies[0];
+  const tbody = table.tBodies[0];
 
   // get the array rows in an array, so we can sort them...
-  const rows = [].slice.call(tbodyOriginal.rows, 0);
+  const rows = [].slice.call(tbody.rows, 0);
 
   const reverse = dir === upClass;
 
@@ -122,21 +122,16 @@ function sortTable(table: HTMLTableElement, columnIndex: number, dir: string) {
   rows.sort((a: HTMLTableRowElement, b: HTMLTableRowElement) => {
     const x = getValue((reverse ? a : b).cells[columnIndex]);
     const y = getValue((reverse ? b : a).cells[columnIndex]);
-    // var y = (reverse ? b : a).cells[columnIndex].innerText
-    // var x = (reverse ? a : b).cells[columnIndex].innerText
-    const notNumber = Number.isNaN(x) || Number.isNaN(y);
+    const notNumber = Number.isNaN(Number(x)) || Number.isNaN(Number(y));
 
     return notNumber ? x.localeCompare(y) : Number(x) - Number(y);
   });
 
-  // Make a clone without content
-  const tbodyClone = tbodyOriginal.cloneNode();
-
-  // Build a sorted table body and replace the old one.
-  while (rows.length) {
-    tbodyClone.appendChild(rows.splice(0, 1)[0]);
+  while (tbody.hasChildNodes() && tbody.firstChild !== null) {
+      tbody.removeChild(tbody.firstChild);
   }
 
-  // And finally insert the end result
-  table.replaceChild(tbodyClone, tbodyOriginal);
+  for (let i = 0; i < rows.length; i += 1) {
+      tbody.appendChild(rows[i]);
+  }
 }

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { FRESH_HOURS, FRESH_HOURS_REFRESH_INTERVAL, HOT_HOURS, HOT_HOURS_REFRESH_INTERVAL, } from './config.js';
 import * as settings from './settings.js';
-import { getTemplateRow } from './util.js';
+import * as util from './util.js';
 import * as data from './data.js';
 import * as view from './view.js';
 import { display } from './view.js';
@@ -17,7 +17,6 @@ import sortable from './vendor/sortable.js';
 let wallet = '';
 let templateIds = [];
 let globalTimeout;
-let exchangeTable;
 let refreshTableButton;
 let setTemplateIDsButton;
 let setWalletButton;
@@ -40,7 +39,7 @@ function refreshRow(row, waxPrice) {
 }
 function supplementalRefresh(result) {
     const { templateId } = result;
-    const row = getTemplateRow(templateId);
+    const row = util.getTemplateRow(templateId);
     let refreshInterval = 0;
     if (result.lagHours <= HOT_HOURS) {
         refreshInterval = HOT_HOURS_REFRESH_INTERVAL;
@@ -60,6 +59,7 @@ function supplementalRefresh(result) {
 }
 function refresh() {
     return __awaiter(this, void 0, void 0, function* () {
+        const exchangeTable = document.querySelector('tbody#exchangeTable');
         exchangeTable.classList.add('updating');
         const waxPrice = yield data.getWAXPrice();
         const waxPriceElem = document.getElementById('waxPrice');
@@ -99,7 +99,7 @@ function setWallet() {
         }
         wallet = input;
         settings.setWallet(wallet);
-        yield view.drawTableRows(templateIds, exchangeTable, wallet);
+        yield view.drawTableRows(templateIds, wallet);
         yield refresh();
     });
 }
@@ -108,11 +108,12 @@ function setTemplateIDs() {
         // eslint-disable-next-line no-alert
         const newTemplateIds = prompt('Enter your templateIDs delimited by commas', templateIds.join(','));
         if (newTemplateIds === null) {
-            throw new Error('No template IDs provided');
+            return;
         }
         if (newTemplateIds.length > 0) {
             templateIds = settings.setTemplateIds(newTemplateIds);
-            yield view.drawTableRows(templateIds, exchangeTable, wallet);
+            setTemplateIDsButtonText();
+            yield view.drawTableRows(templateIds, wallet);
             yield refresh();
         }
     });
@@ -143,6 +144,32 @@ function bindUI() {
     shareButton.addEventListener('click', shareTemplateIds);
     const refreshIntervalSpan = document.getElementById('refresh-interval');
     refreshIntervalSpan.innerText = Number(settings.getRefreshInterval() / 1000 / 60).toString();
+    document.addEventListener('click', deleteRowHandler);
+}
+function deleteRowHandler(e) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (e.target === null) {
+            return;
+        }
+        const element = e.target;
+        if (!element.classList.contains('delete-row')) {
+            return;
+        }
+        const row = util.findParentNode(element, 'TR');
+        const attr = row.getAttribute('data-template-id');
+        if (attr !== null) {
+            const templateId = attr.toString();
+            const doDelete = window.confirm(`Are you sure you want to remove this template (#${templateId})? `);
+            if (!doDelete) {
+                return;
+            }
+            const index = templateIds.indexOf(templateId);
+            delete templateIds[index];
+            templateIds = settings.setTemplateIds(templateIds);
+            setTemplateIDsButtonText();
+            row.remove();
+        }
+    });
 }
 function setWalletButtonText() {
     setWalletButton.innerText = wallet || 'No wallet set';
@@ -157,8 +184,7 @@ function setWalletButtonText() {
         templateIds = [];
     }
     bindUI();
-    exchangeTable = document.querySelector('tbody#exchangeTable');
-    yield view.drawTableRows(templateIds, exchangeTable, wallet);
+    yield view.drawTableRows(templateIds, wallet);
     yield refresh();
 }))();
 //# sourceMappingURL=script.js.map

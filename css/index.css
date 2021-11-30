@@ -3,7 +3,7 @@ body {
 }
 
 td, th {
-    border-bottom-color: #222;
+    border-bottom-color: #121212;
     padding: .5rem 1.5rem;
 }
 
@@ -101,9 +101,9 @@ tr td.asset-name i.up {
     color: green;
 }
 
-tr.hot {
-    background-color: #05160ca6;
-}
+/*tr.hot {*/
+/*    background-color: #05160ca6;*/
+/*}*/
 
 tr.dead td a, tr.dead td span {
     opacity: 50%;
@@ -176,4 +176,25 @@ tr td.asset-name i.hot {
   100% {
     color: #ffa500;
   }
+}
+
+#exchangeTable tr:hover, #exchangeTable tr:hover:nth-of-type(odd)  {
+    background-color: #121212;
+}
+
+#exchangeTable tr i.delete-row {
+    visibility: hidden;
+}
+
+#exchangeTable tr:hover i.delete-row {
+    visibility: visible;
+}
+
+#exchangeTable tr i.delete-row:hover {
+    cursor: pointer;
+    color: white;
+}
+
+#exchangeTable td:first-child {
+  padding-right: 0;
 }

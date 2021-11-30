@@ -1,14 +1,17 @@
 import {
-  FRESH_HOURS, FRESH_HOURS_REFRESH_INTERVAL, HOT_HOURS, HOT_HOURS_REFRESH_INTERVAL,
+  FRESH_HOURS,
+  FRESH_HOURS_REFRESH_INTERVAL,
+  HOT_HOURS,
+  HOT_HOURS_REFRESH_INTERVAL,
 } from './config.js';
 import * as settings from './settings.js';
-import { getTemplateRow } from './util.js';
+import * as util from './util.js';
 import * as data from './data.js';
 import * as view from './view.js';
 import { display } from './view.js';
 import {
   // eslint-disable-next-line import/named
-  AtomicListing, AtomicModel, AtomicSale, HasRefreshTimeout,
+  AtomicListing, AtomicModel, AtomicSale, TemplateRow,
 } from './types.js';
 import sortable from './vendor/sortable.js';
 
@@ -16,7 +19,6 @@ let wallet = '';
 let templateIds: string[] = [];
 let globalTimeout: number|undefined;
 
-let exchangeTable: HTMLTableSectionElement;
 let refreshTableButton: HTMLButtonElement;
 let setTemplateIDsButton: HTMLButtonElement;
 let setWalletButton: HTMLButtonElement;
@@ -44,7 +46,7 @@ async function refreshRow(row: HTMLTableRowElement, waxPrice: number) {
 
 function supplementalRefresh(result: AtomicModel) {
   const { templateId } = result;
-  const row = getTemplateRow(templateId);
+  const row = util.getTemplateRow(templateId);
 
   let refreshInterval = 0;
 
@@ -65,6 +67,7 @@ function supplementalRefresh(result: AtomicModel) {
 }
 
 async function refresh() {
+  const exchangeTable = document.querySelector('tbody#exchangeTable') as HTMLTableSectionElement;
   exchangeTable.classList.add('updating');
 
   const waxPrice = await data.getWAXPrice();
@@ -96,7 +99,7 @@ async function refresh() {
   globalTimeout = setTimeout(refresh, settings.getRefreshInterval());
 }
 
-function clearTimeouts(rows: Array<HasRefreshTimeout>) {
+function clearTimeouts(rows: Array<TemplateRow>) {
   rows.forEach((row) => {
     clearTimeout(row.refreshTimeoutId);
     // eslint-disable-next-line no-param-reassign
@@ -114,7 +117,7 @@ async function setWallet() {
   wallet = input;
 
   settings.setWallet(wallet);
-  await view.drawTableRows(templateIds, exchangeTable, wallet);
+  await view.drawTableRows(templateIds, wallet);
   await refresh();
 }
 
@@ -122,12 +125,13 @@ async function setTemplateIDs() {
   // eslint-disable-next-line no-alert
   const newTemplateIds = prompt('Enter your templateIDs delimited by commas', templateIds.join(','));
   if (newTemplateIds === null) {
-    throw new Error('No template IDs provided');
+    return;
   }
 
   if (newTemplateIds.length > 0) {
     templateIds = settings.setTemplateIds(newTemplateIds);
-    await view.drawTableRows(templateIds, exchangeTable, wallet);
+    setTemplateIDsButtonText();
+    await view.drawTableRows(templateIds, wallet);
     await refresh();
   }
 }
@@ -161,6 +165,36 @@ function bindUI() {
 
   const refreshIntervalSpan = document.getElementById('refresh-interval') as HTMLSpanElement;
   refreshIntervalSpan.innerText = Number(settings.getRefreshInterval() / 1000 / 60).toString();
+
+  document.addEventListener('click', deleteRowHandler);
+}
+
+async function deleteRowHandler(e: MouseEvent) {
+  if (e.target === null) {
+    return;
+  }
+
+  const element = e.target as HTMLElement;
+  if (!element.classList.contains('delete-row')) {
+    return;
+  }
+
+  const row = util.findParentNode(element, 'TR');
+  const attr = row.getAttribute('data-template-id');
+  if (attr !== null) {
+    const templateId = attr.toString();
+
+    const doDelete = window.confirm(`Are you sure you want to remove this template (#${templateId})? `);
+    if (!doDelete) {
+      return;
+    }
+
+    const index = templateIds.indexOf(templateId);
+    delete templateIds[index];
+    templateIds = settings.setTemplateIds(templateIds);
+    setTemplateIDsButtonText();
+    row.remove();
+  }
 }
 
 function setWalletButtonText() {
@@ -181,8 +215,6 @@ function setWalletButtonText() {
 
   bindUI();
 
-  exchangeTable = document.querySelector('tbody#exchangeTable') as HTMLTableSectionElement;
-
-  await view.drawTableRows(templateIds, exchangeTable, wallet);
+  await view.drawTableRows(templateIds, wallet);
   await refresh();
 })();

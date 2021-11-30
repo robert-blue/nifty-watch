@@ -38,6 +38,18 @@ export async function getLastSold(
   const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?symbol=WAX&state=3&max_assets=1&template_id=${templateId}&page=1&limit=${assetCount}&order=desc&sort=updated`;
   const response = await atomicFetch(url, status);
   const data = await response.json();
+
+  if (!data || !data.data || data.data.length === 0) {
+    return {
+      assetName: 'no sales',
+      collectionName: 'unknown',
+      increasing: 0,
+      lastPrice: 0,
+      lastSoldDate: new Date(0),
+      schemaName: '',
+    };
+  }
+
   const last = data.data[0];
 
   const priceHistory: [{ date: Date, price: number }] = data.data.map((d: any) => ({

@@ -1,4 +1,4 @@
-import { HasRefreshTimeout } from './types.js';
+import { TemplateRow } from './types.js';
 
 export function parseTokenValue(precision: number, amount: string) {
   const left = amount.substring(0, amount.length - precision);
@@ -52,7 +52,16 @@ export function sleep(ms: number) {
   });
 }
 
-export function getTemplateRow(templateId: string): HasRefreshTimeout {
+export function getTemplateRow(templateId: string): TemplateRow {
   const rowSelector = `#exchangeTable tr[data-template-id="${templateId}"]`;
   return document.querySelector(rowSelector) as HTMLTableRowElement;
+}
+
+export function findParentNode(element: HTMLElement, nodeName: string): HTMLElement {
+  let parent = element.parentNode as HTMLElement;
+  while (parent && parent.nodeName !== nodeName) {
+    parent = parent.parentNode as HTMLElement;
+  }
+
+  return parent;
 }

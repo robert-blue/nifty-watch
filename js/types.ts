@@ -1,4 +1,4 @@
-export interface HasRefreshTimeout extends HTMLTableRowElement {
+export interface TemplateRow extends HTMLTableRowElement {
   refreshTimeoutId?: number
 }
 
@@ -13,7 +13,7 @@ export interface AtomicSale {
   increasing: number
   lastPrice: number
   lastSoldDate: Date
-  priceHistory: [{date: Date, price: number}]
+  priceHistory?: [{date: Date, price: number}]
   schemaName: string
 }
 

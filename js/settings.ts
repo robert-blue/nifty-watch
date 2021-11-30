@@ -12,26 +12,26 @@ export function getTemplateIds() {
 }
 
 // Stores template IDs. Accepts an array or comma-delimited string.
-export function setTemplateIds(val) {
+export function setTemplateIds(val: string[]|string) {
   const idString = typeof val === 'string' ? val : serializeTemplateIds(val);
   set(KEY_TEMPLATE_IDS, idString);
   return deserializeTemplateIds(idString);
 }
 
-export function getWallet() {
+export function getWallet(): string {
   return get(KEY_WALLET) || '';
 }
 
-export function setWallet(address) {
+export function setWallet(address: string): void {
   return set(KEY_WALLET, address);
 }
 
-function serializeTemplateIds(array) {
+function serializeTemplateIds(array: string[]) {
   return array.join(',');
 }
 
-function deserializeTemplateIds(str) {
-  return (str || '').split(',').map((x) => Number(x)).sort();
+function deserializeTemplateIds(str?: string) {
+  return (str || '').split(',').map((x: string) => x).filter((x: string) => x !== '').sort();
 }
 
 export function getRefreshInterval() {
