@@ -36,6 +36,7 @@ export function drawTableRows(templateIds, wallet) {
     <i class="fa-solid fa-trash-can delete-row" title="delete"></i>
   </td>
   <td class="collection-name"><a href="" class="collection-name-link" target="_blank"></a></td>
+  <td class="rarity"><a href="" class="rarity-link" target="_blank"></a></td>
   <td class="asset-name">
     <a href="" target="_blank" class="asset-name-link"></a>
     <i class="fa-solid fa-skull-crossbones dead" title="[stale] last sale over ${DEAD_HOURS / 24} days ago"></i>
@@ -47,8 +48,7 @@ export function drawTableRows(templateIds, wallet) {
   <td class="price-wax" style="text-align:right"><span class="price-wax-value"></span> WAX</td>
   <td class="price-gap" style="text-align:right"><span class="price-gap-value"></span></td>
   <td class="lag">
-    <span class="lag-value"></span>
-    <a href="" target="_blank" class="history-link float-right"><i class="fa-solid fa-timeline" title="show past sales"></i></a>
+    <a href="" target="_blank" title="show past sales" class="history-link float-right"></a>
   </td>
   <td class="price-usd" style="text-align:right">
       $<span class="price-usd-value"></span>
@@ -111,16 +111,20 @@ export function bindRow(row, m, waxPrice) {
     templateIdLink.innerHTML = m.templateId;
     const collectionLink = row.querySelector('a.collection-name-link');
     collectionLink.href = m.collectionLink;
-    collectionLink.innerHTML = m.collectionName;
+    collectionLink.innerHTML = m.collectionName || 'unknown';
+    if (m.rarity) {
+        const rarityLink = row.querySelector('a.rarity-link');
+        rarityLink.href = m.rarityLink || '';
+        rarityLink.innerHTML = m.rarity || '';
+    }
     const nameLink = row.querySelector('a.asset-name-link');
     nameLink.href = m.listingsLink;
-    nameLink.innerHTML = m.assetName;
+    nameLink.innerHTML = m.assetName || 'unknown';
     const historyLink = row.querySelector('a.history-link');
+    historyLink.innerHTML = util.formatTimespan(Date.now() - m.lastSoldDate.getTime());
     historyLink.href = m.historyLink;
     const inventoryLink = row.querySelector('a.link-inventory');
     inventoryLink.href = m.inventoryLink;
-    const lagTarget = row.querySelector('td.lag .lag-value');
-    lagTarget.innerHTML = util.formatTimespan(Date.now() - m.lastSoldDate.getTime());
     const lagCell = row.querySelector('td.lag');
     lagCell.dataset.sort = Number(Date.now() - m.lastSoldDate.getTime()).toString();
 }

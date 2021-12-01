@@ -34,8 +34,30 @@ img.emoji-logo {
     color: darkcyan;
 }
 
-.template-id-link, .collection-name-link {
+td, th, td.template-id, td.lag, td.price-wax {
+  white-space: nowrap;
+}
+
+.history-link:hover .day, .history-link:hover .hour, .history-link:hover .second, .history-link:hover .minute {
+  /*color: #9b4dca;*/
+  /*color: #606c76;*/
+  color: #eeeeee;
+}
+
+.template-id-link, .collection-name-link, .rarity-link {
     color: #606c76;
+}
+
+.template-id-link:hover, .collection-name-link:hover, .rarity-link:hover {
+    color: #eeeeee;
+}
+
+.rarity-link {
+    display: inline-block;
+    text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+    max-width: 10rem;
 }
 
 tr.updating td {

@@ -37,5 +37,6 @@ export interface AtomicModel extends AtomicListing, AtomicSale {
   historyLink: string
   listingsLink: string
   collectionLink: string
+  rarityLink?: string
   templateId: string
 }
