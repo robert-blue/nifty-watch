@@ -52,13 +52,13 @@ td, th, td.template-id, td.lag, td.price-wax {
     color: #eeeeee;
 }
 
-.rarity-link {
-    display: inline-block;
-    text-overflow: ellipsis;
-	white-space: nowrap;
-	overflow: hidden;
-    max-width: 10rem;
-}
+/*.rarity-link {*/
+/*    display: inline-block;*/
+/*    text-overflow: ellipsis;*/
+/*	white-space: nowrap;*/
+/*	overflow: hidden;*/
+/*    max-width: 10rem;*/
+/*}*/
 
 tr.updating td {
     opacity: 100%;
