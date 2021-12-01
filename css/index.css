@@ -19,6 +19,12 @@ img.logo {
     bottom: -2rem;
 }
 
+img.emoji-logo {
+  height: 3.5rem;
+  position: relative;
+  margin-right: 1rem;
+}
+
 #refreshStatus {
     color: darkslateblue;
     margin-left: 1rem;
