@@ -43,12 +43,11 @@ export function getLastSold(templateId, status) {
         const data = yield response.json();
         if (!data || !data.data || data.data.length === 0) {
             return {
-                assetName: 'no sales',
-                collectionName: 'unknown',
                 increasing: 0,
                 lastPrice: 0,
                 lastSoldDate: new Date(0),
                 schemaName: '',
+                templateId,
             };
         }
         const last = data.data[0];
@@ -63,14 +62,17 @@ export function getLastSold(templateId, status) {
                 increases += 1;
             }
         }
+        const asset = last.assets[0];
         return {
-            assetName: last.assets[0].name,
+            assetName: asset.name,
             collectionName: last.collection_name,
             lastPrice: util.parseTokenValue(last.price.token_precision, last.price.amount),
             lastSoldDate: new Date(Number(last.updated_at_time)),
             increasing: increases / (prices.length - 1),
             priceHistory,
-            schemaName: last.assets[0].schema.schema_name,
+            rarity: asset.template.immutable_data.rarity,
+            schemaName: asset.schema.schema_name,
+            templateId,
         };
     });
 }
@@ -83,25 +85,30 @@ export function getFloorListing(templateId, status) {
         const m = {
             floorPrice: 0,
             mintNumber: 0,
+            templateId,
         };
         if (!floor) {
             return m;
         }
         return {
+            assetName: floor.assets[0].name,
             floorPrice: util.parseTokenValue(floor.price.token_precision, floor.price.amount),
             mintNumber: floor.assets[0].template_mint,
+            schemaName: floor.assets[0].schema.schema_name,
+            templateId,
         };
     });
 }
 export function transform(lastSold, floor, templateId, wallet) {
-    const m = Object.assign(Object.assign({ lagHours: 0, priceGapPercent: 0, historyLink: '', listingsLink: '', collectionLink: '', templateLink: '', inventoryLink: '', templateId }, lastSold), floor);
+    const m = Object.assign(Object.assign({ lagHours: 0, priceGapPercent: 0, historyLink: '', listingsLink: '', collectionLink: '', templateLink: '', inventoryLink: '' }, lastSold), floor);
     m.lagHours = (Date.now() - m.lastSoldDate.getTime()) / 1000 / 60 / 60;
     m.priceGapPercent = ((m.floorPrice - m.lastPrice) / m.lastPrice) * 100;
-    m.historyLink = `https://wax.atomichub.io/market/history?collection_name=${m.collectionName}&data:text.name=${m.assetName}&order=desc&schema_name=${m.schemaName}&sort=updated&symbol=WAX`;
-    m.listingsLink = `https://wax.atomichub.io/market?collection_name=${m.collectionName}&data:text.name=${m.assetName}&order=asc&schema_name=${m.schemaName}&sort=price&symbol=WAX`;
     m.collectionLink = `https://wax.atomichub.io/explorer/collection/${m.collectionName}`;
     m.templateLink = `https://wax.atomichub.io/explorer/template/${m.collectionName}/${templateId}`;
-    m.inventoryLink = `https://wax.atomichub.io/profile/${wallet}?collection_name=${m.collectionName}&match=${m.assetName}&order=desc&sort=transferred`;
+    const rarity = (m.rarity) ? `&data:text.rarity=${m.rarity}` : '';
+    m.inventoryLink = `https://wax.atomichub.io/profile/${wallet}?collection_name=${m.collectionName}${rarity}&match=${m.assetName}&order=desc&sort=transferred`;
+    m.historyLink = `https://wax.atomichub.io/market/history?collection_name=${m.collectionName}${rarity}&match=${m.assetName}&order=desc&schema_name=${m.schemaName}&sort=updated&symbol=WAX`;
+    m.listingsLink = `https://wax.atomichub.io/market?collection_name=${m.collectionName}${rarity}&match=${m.assetName}&order=asc&schema_name=${m.schemaName}&sort=price&symbol=WAX`;
     return m;
 }
 //# sourceMappingURL=data.js.map

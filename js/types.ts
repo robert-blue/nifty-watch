@@ -6,19 +6,24 @@ export interface Sortable extends HTMLTableElement {
   sort?: () => void
 }
 
+export interface AtomicAsset {
+  templateId: string
+  assetName?: string
+  collectionName?: string
+  schemaName?: string
+  rarity?: string
+}
+
 /** Recent sale data from AtomicHub */
-export interface AtomicSale {
-  assetName: string
-  collectionName: string
+export interface AtomicSale extends AtomicAsset {
   increasing: number
   lastPrice: number
   lastSoldDate: Date
   priceHistory?: [{date: Date, price: number}]
-  schemaName: string
 }
 
 /** Asset listed for sale on AtomicHub */
-export interface AtomicListing {
+export interface AtomicListing extends AtomicAsset {
   floorPrice: number
   mintNumber: number
 }
