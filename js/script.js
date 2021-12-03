@@ -106,6 +106,15 @@ function setWallet() {
         yield refresh();
     });
 }
+function cleanParams() {
+    const urlParams = new URLSearchParams(document.location.search);
+    urlParams.delete('template_ids');
+    const url = document.location;
+    const newUrl = `${url.origin}${url.pathname}${urlParams.toString()}`;
+    if (window.history.pushState) {
+        window.history.pushState({}, '', newUrl);
+    }
+}
 function setTemplateIDs() {
     return __awaiter(this, void 0, void 0, function* () {
         // eslint-disable-next-line no-alert
@@ -116,6 +125,7 @@ function setTemplateIDs() {
         if (newTemplateIds.length > 0) {
             templateIds = settings.setTemplateIds(newTemplateIds);
             setTemplateIDsButtonText();
+            cleanParams();
             yield view.drawTableRows(templateIds, wallet);
             yield refresh();
         }
@@ -154,6 +164,7 @@ function deleteRowHandler(e) {
             const index = templateIds.indexOf(templateId);
             delete templateIds[index];
             templateIds = settings.setTemplateIds(templateIds);
+            cleanParams();
             setTemplateIDsButtonText();
             row.remove();
         }

@@ -125,6 +125,16 @@ async function setWallet() {
   await refresh();
 }
 
+function cleanParams() {
+  const urlParams = new URLSearchParams(document.location.search);
+  urlParams.delete('template_ids');
+  const url = document.location;
+  const newUrl = `${url.origin}${url.pathname}${urlParams.toString()}`;
+  if (window.history.pushState) {
+    window.history.pushState({}, '', newUrl);
+  }
+}
+
 async function setTemplateIDs() {
   // eslint-disable-next-line no-alert
   const newTemplateIds = prompt('Enter your templateIDs delimited by commas', templateIds.join(','));
@@ -135,6 +145,8 @@ async function setTemplateIDs() {
   if (newTemplateIds.length > 0) {
     templateIds = settings.setTemplateIds(newTemplateIds);
     setTemplateIDsButtonText();
+    cleanParams();
+
     await view.drawTableRows(templateIds, wallet);
     await refresh();
   }
@@ -176,6 +188,7 @@ async function deleteRowHandler(e: MouseEvent) {
     const index = templateIds.indexOf(templateId);
     delete templateIds[index];
     templateIds = settings.setTemplateIds(templateIds);
+    cleanParams();
     setTemplateIDsButtonText();
     row.remove();
   }
