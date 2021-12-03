@@ -7,16 +7,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { FRESH_HOURS, FRESH_HOURS_REFRESH_INTERVAL, HOT_HOURS, HOT_HOURS_REFRESH_INTERVAL, } from './config.js';
+import { DEAD_HOURS_REFRESH_INTERVAL, FIRE_HOURS, FIRE_HOURS_REFRESH_INTERVAL, FRESH_HOURS, FRESH_HOURS_REFRESH_INTERVAL, HOT_HOURS, HOT_HOURS_REFRESH_INTERVAL, } from './config.js';
 import * as settings from './settings.js';
 import * as util from './util.js';
 import * as data from './data.js';
 import * as view from './view.js';
-import { display } from './view.js';
 import sortable from './vendor/sortable.js';
 let wallet = '';
 let templateIds = [];
-let globalTimeout;
 let refreshTableButton;
 let setTemplateIDsButton;
 let setWalletButton;
@@ -33,6 +31,8 @@ function refreshRow(row, waxPrice) {
         const model = data.transform(results[0], results[1], templateId, wallet);
         view.bindRow(row, model, waxPrice);
         row.classList.remove('updating');
+        row.setAttribute('title', `last updated ${(new Date()).toLocaleTimeString()}`);
+        view.setTimestamp();
         view.sortTable();
         return model;
     });
@@ -41,14 +41,17 @@ function supplementalRefresh(result) {
     const { templateId } = result;
     const row = util.getTemplateRow(templateId);
     let refreshInterval = 0;
-    if (result.lagHours <= HOT_HOURS) {
+    if (result.lagHours <= FIRE_HOURS) {
+        refreshInterval = FIRE_HOURS_REFRESH_INTERVAL;
+    }
+    else if (result.lagHours <= HOT_HOURS) {
         refreshInterval = HOT_HOURS_REFRESH_INTERVAL;
     }
     else if (result.lagHours <= FRESH_HOURS) {
         refreshInterval = FRESH_HOURS_REFRESH_INTERVAL;
     }
     else {
-        return;
+        refreshInterval = DEAD_HOURS_REFRESH_INTERVAL;
     }
     clearTimeout(row.refreshTimeoutId);
     row.refreshTimeoutId = setTimeout(() => __awaiter(this, void 0, void 0, function* () {
@@ -72,18 +75,15 @@ function refresh() {
         waxPriceElem.innerText = waxPrice.toString();
         setWalletButtonText();
         setTemplateIDsButtonText();
-        display('#noResults', templateIds.length === 0);
-        display('#results', templateIds.length > 0);
+        view.display('#noResults', templateIds.length === 0);
+        view.display('#results', templateIds.length > 0);
         const rows = view.getAssetRows();
         clearTimeouts(rows);
         const results = yield Promise.all(rows.map((row) => refreshRow(row, waxPrice)));
         results.forEach((result) => supplementalRefresh(result));
         view.sortTable();
-        view.setTimestamp();
         view.clearStatus();
         tBody.classList.remove('updating');
-        clearTimeout(globalTimeout);
-        globalTimeout = setTimeout(refresh, settings.getRefreshInterval());
     });
 }
 function clearTimeouts(rows) {
@@ -184,8 +184,6 @@ function bindUI() {
     setTemplateIDsButton.addEventListener('click', setTemplateIDs);
     setWalletButton.addEventListener('click', setWallet);
     shareButton.addEventListener('click', shareTemplateIds);
-    const refreshIntervalSpan = document.getElementById('refresh-interval');
-    refreshIntervalSpan.innerText = Number(settings.getRefreshInterval() / 1000 / 60).toString();
     document.addEventListener('click', deleteRowHandler);
     loadColumnOptions();
     const checkboxes = document.querySelectorAll('input[data-show-column]');
@@ -230,8 +228,8 @@ function applyColumnVisibility() {
 (() => __awaiter(void 0, void 0, void 0, function* () {
     wallet = settings.getWallet();
     templateIds = settings.getTemplateIds();
-    display('#noResults', templateIds.length === 0);
-    display('#results', templateIds.length > 0);
+    view.display('#noResults', templateIds.length === 0);
+    view.display('#results', templateIds.length > 0);
     // FIXME: Need to figure out why templateIDs initialize to [0] when local storage is not initialized yet
     if (templateIds.length === 1 && Number(templateIds[0]) === 0) {
         templateIds = [];

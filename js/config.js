@@ -1,7 +1,10 @@
 // Frequency in milliseconds to update the data
 export const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
-export const HOT_HOURS_REFRESH_INTERVAL = 30 * 1000; // 30 seconds
-export const FRESH_HOURS_REFRESH_INTERVAL = 60 * 1000; // 1 minute
+export const FIRE_HOURS_REFRESH_INTERVAL = 30 * 1000; // 30 seconds
+export const HOT_HOURS_REFRESH_INTERVAL = 60 * 1000; // 1 minute
+export const FRESH_HOURS_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+export const DEAD_HOURS_REFRESH_INTERVAL = 15 * 60 * 1000; // 15 minute
+export const FIRE_HOURS = 0.5;
 export const HOT_HOURS = 2;
 export const FRESH_HOURS = 16;
 export const DEAD_HOURS = 5 * 24;

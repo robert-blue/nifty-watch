@@ -72,6 +72,14 @@ export function getAssetRows() {
     const rows = document.querySelectorAll(selector);
     return Array.from(rows);
 }
+export function getAssetRow(templateId) {
+    const selector = `#main-table tbody tr[data-template-id=${templateId}]`;
+    const rows = document.querySelectorAll(selector);
+    if (rows.length > 1) {
+        throw new Error(`More than one row found for template id ${templateId}`);
+    }
+    return rows[0];
+}
 export function setTimestamp() {
     const now = new Date();
     const timestampElem = document.getElementById('timestamp');

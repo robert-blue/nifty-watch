@@ -1,4 +1,5 @@
 import {
+  DEAD_HOURS_REFRESH_INTERVAL, FIRE_HOURS, FIRE_HOURS_REFRESH_INTERVAL,
   FRESH_HOURS,
   FRESH_HOURS_REFRESH_INTERVAL,
   HOT_HOURS,
@@ -8,7 +9,6 @@ import * as settings from './settings.js';
 import * as util from './util.js';
 import * as data from './data.js';
 import * as view from './view.js';
-import { display } from './view.js';
 import {
   // eslint-disable-next-line import/named
   AtomicListing, RowView, AtomicSale, TemplateRow,
@@ -17,7 +17,6 @@ import sortable from './vendor/sortable.js';
 
 let wallet = '';
 let templateIds: string[] = [];
-let globalTimeout: number|undefined;
 
 let refreshTableButton: HTMLButtonElement;
 let setTemplateIDsButton: HTMLButtonElement;
@@ -39,6 +38,9 @@ async function refreshRow(row: HTMLTableRowElement, waxPrice: number) {
 
   row.classList.remove('updating');
 
+  row.setAttribute('title', `last updated ${(new Date()).toLocaleTimeString()}`);
+  view.setTimestamp();
+
   view.sortTable();
 
   return model;
@@ -50,12 +52,14 @@ function supplementalRefresh(result: RowView) {
 
   let refreshInterval = 0;
 
-  if (result.lagHours <= HOT_HOURS) {
+  if (result.lagHours <= FIRE_HOURS) {
+    refreshInterval = FIRE_HOURS_REFRESH_INTERVAL;
+  } else if (result.lagHours <= HOT_HOURS) {
     refreshInterval = HOT_HOURS_REFRESH_INTERVAL;
   } else if (result.lagHours <= FRESH_HOURS) {
     refreshInterval = FRESH_HOURS_REFRESH_INTERVAL;
   } else {
-    return;
+    refreshInterval = DEAD_HOURS_REFRESH_INTERVAL;
   }
 
   clearTimeout(row.refreshTimeoutId);
@@ -84,8 +88,8 @@ async function refresh() {
 
   setWalletButtonText();
   setTemplateIDsButtonText();
-  display('#noResults', templateIds.length === 0);
-  display('#results', templateIds.length > 0);
+  view.display('#noResults', templateIds.length === 0);
+  view.display('#results', templateIds.length > 0);
 
   const rows = view.getAssetRows();
   clearTimeouts(rows);
@@ -94,13 +98,9 @@ async function refresh() {
   results.forEach((result) => supplementalRefresh(result));
 
   view.sortTable();
-  view.setTimestamp();
   view.clearStatus();
 
   tBody.classList.remove('updating');
-
-  clearTimeout(globalTimeout);
-  globalTimeout = setTimeout(refresh, settings.getRefreshInterval());
 }
 
 function clearTimeouts(rows: Array<TemplateRow>) {
@@ -212,9 +212,6 @@ function bindUI() {
   setWalletButton.addEventListener('click', setWallet);
   shareButton.addEventListener('click', shareTemplateIds);
 
-  const refreshIntervalSpan = document.getElementById('refresh-interval') as HTMLSpanElement;
-  refreshIntervalSpan.innerText = Number(settings.getRefreshInterval() / 1000 / 60).toString();
-
   document.addEventListener('click', deleteRowHandler);
 
   loadColumnOptions();
@@ -271,8 +268,8 @@ function applyColumnVisibility() {
   wallet = settings.getWallet();
   templateIds = settings.getTemplateIds();
 
-  display('#noResults', templateIds.length === 0);
-  display('#results', templateIds.length > 0);
+  view.display('#noResults', templateIds.length === 0);
+  view.display('#results', templateIds.length > 0);
 
   // FIXME: Need to figure out why templateIDs initialize to [0] when local storage is not initialized yet
   if (templateIds.length === 1 && Number(templateIds[0]) === 0) {

@@ -76,6 +76,16 @@ export function getAssetRows(): Array<HTMLTableRowElement> {
   return Array.from<HTMLTableRowElement>(rows);
 }
 
+export function getAssetRow(templateId: string): HTMLTableRowElement {
+  const selector = `#main-table tbody tr[data-template-id=${templateId}]`;
+  const rows = document.querySelectorAll<HTMLTableRowElement>(selector);
+  if (rows.length > 1) {
+    throw new Error(`More than one row found for template id ${templateId}`);
+  }
+
+  return rows[0] as HTMLTableRowElement;
+}
+
 export function setTimestamp() {
   const now = new Date();
   const timestampElem = document.getElementById('timestamp');
