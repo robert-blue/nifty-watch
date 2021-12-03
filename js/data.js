@@ -102,7 +102,7 @@ export function getFloorListing(templateId, status) {
     });
 }
 export function transform(lastSold, floor, templateId, wallet) {
-    const m = Object.assign(Object.assign({ lagHours: 0, priceGapPercent: 0, historyLink: '', listingsLink: '', collectionLink: '', templateLink: '', inventoryLink: '' }, lastSold), floor);
+    const m = Object.assign(Object.assign({ lagHours: 0, priceGapPercent: 0, historyLink: '', listingsLink: '', collectionLink: '', templateLink: '', inventoryLink: '', schemaLink: '' }, lastSold), floor);
     m.lagHours = (Date.now() - m.lastSoldDate.getTime()) / 1000 / 60 / 60;
     m.priceGapPercent = ((m.floorPrice - m.lastPrice) / m.lastPrice) * 100;
     m.collectionLink = `https://wax.atomichub.io/explorer/collection/${m.collectionName}`;
@@ -112,6 +112,7 @@ export function transform(lastSold, floor, templateId, wallet) {
     m.historyLink = `https://wax.atomichub.io/market/history?collection_name=${m.collectionName}${rarity}&match=${m.assetName}&order=desc&schema_name=${m.schemaName}&sort=updated&symbol=WAX`;
     m.listingsLink = `https://wax.atomichub.io/market?collection_name=${m.collectionName}${rarity}&match=${m.assetName}&order=asc&schema_name=${m.schemaName}&sort=price&symbol=WAX`;
     m.rarityLink = `https://wax.atomichub.io/market?collection_name=${m.collectionName}${rarity}&order=asc&schema_name=${m.schemaName}&sort=price&symbol=WAX`;
+    m.schemaLink = `https://wax.atomichub.io/market?collection_name=${m.collectionName}&order=asc&schema_name=${m.schemaName}&sort=price&symbol=WAX`;
     return m;
 }
 //# sourceMappingURL=data.js.map

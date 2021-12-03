@@ -9,8 +9,8 @@
   <link rel="stylesheet" href="css/milligram.min.css">
   <link rel="stylesheet" href="css/index.css">
   <link rel="stylesheet" href="css/sortable.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/fontawesome.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/solid.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/fontawesome.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/solid.min.css">
 </head>
 
 <body class="fade-in">
@@ -39,11 +39,12 @@
         <tr>
           <th title="template Id">ID</th>
           <th>Collection</th>
-          <th>Rarity</th>
+          <th class="schema-name">Schema</th>
+          <th class="rarity">Rarity</th>
           <th>Name</th>
           <th class="text-right" title="price of lowest priced sales listing">Floor</th>
           <th class="text-right" title="percentage difference between last sold WAX price and floor WAX price">Gap</th>
-          <th class="dir-u" title="elapsed time since last sale" >Lag</th>
+          <th class="dir-u" title="elapsed time since last sale">Lag</th>
           <th class="no-sort text-right">USD</th>
           <th class="no-sort"></th>
         </tr>
@@ -61,6 +62,10 @@
       <button id="shareButton" title="Generate sharable link of this current view">Share</button>
       <button id="setWalletButton">...</button>
       <button id="setTemplateIDsButton">...</button>
+      <div>
+        <label class="float-left"><input type="checkbox" data-show-column="schema-name"/> Schema</label>
+        <label class="float-left"><input type="checkbox" data-show-column="rarity"/> Rarity</label>
+      </div>
     </div>
   </div>
   <div class="row">
@@ -87,6 +92,6 @@
 <script type="module" src="js/script.js"></script>
 
 <script async src="//static.getclicky.com/101344235.js"></script>
-<noscript><p><img alt="Clicky" width="1" height="1" src="//in.getclicky.com/101344235ns.gif" /></p></noscript>
+<noscript><p><img alt="Clicky" width="1" height="1" src="//in.getclicky.com/101344235ns.gif"/></p></noscript>
 </body>
 </html>

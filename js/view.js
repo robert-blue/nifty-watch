@@ -36,6 +36,7 @@ export function drawTableRows(templateIds, wallet) {
     <i class="fa-solid fa-trash-can delete-row" title="delete"></i>
   </td>
   <td class="collection-name"><a href="" class="collection-name-link" target="_blank"></a></td>
+  <td class="schema-name"><a href="" class="schema-name-link" target="_blank"></a></td>
   <td class="rarity"><a href="" class="rarity-link" target="_blank"></a></td>
   <td class="asset-name">
     <a href="" target="_blank" class="asset-name-link"></a>
@@ -89,6 +90,7 @@ export function sortTable() {
     }
 }
 export function bindRow(row, m, waxPrice) {
+    var _a, _b;
     const floorPrice = row.querySelector('.price-wax-value');
     floorPrice.innerHTML = `${Math.round(m.floorPrice * 100) / 100}`;
     const floorPriceCell = row.querySelector('td.price-wax');
@@ -106,27 +108,23 @@ export function bindRow(row, m, waxPrice) {
     row.classList.add(...priceAction(m.lagHours, m.increasing, m.priceHistory));
     const collectionCell = row.querySelector('td.collection-name');
     collectionCell.dataset.sort = m.collectionName;
-    const templateIdLink = row.querySelector('a.template-id-link');
-    templateIdLink.href = m.templateLink;
-    templateIdLink.innerHTML = m.templateId;
-    const collectionLink = row.querySelector('a.collection-name-link');
-    collectionLink.href = m.collectionLink;
-    collectionLink.innerHTML = m.collectionName || 'unknown';
-    if (m.rarity) {
-        const rarityLink = row.querySelector('a.rarity-link');
-        rarityLink.href = m.rarityLink || '';
-        rarityLink.innerHTML = m.rarity || '';
-    }
-    const nameLink = row.querySelector('a.asset-name-link');
-    nameLink.href = m.listingsLink;
-    nameLink.innerHTML = m.assetName || 'unknown';
-    const historyLink = row.querySelector('a.history-link');
-    historyLink.innerHTML = util.formatTimespan(Date.now() - m.lastSoldDate.getTime());
-    historyLink.href = m.historyLink;
-    const inventoryLink = row.querySelector('a.link-inventory');
-    inventoryLink.href = m.inventoryLink;
     const lagCell = row.querySelector('td.lag');
     lagCell.dataset.sort = Number(Date.now() - m.lastSoldDate.getTime()).toString();
+    bindLink(row, 'a.template-id-link', m.templateLink, m.templateId);
+    bindLink(row, 'a.collection-name-link', m.collectionLink, m.collectionName);
+    bindLink(row, 'a.schema-name-link', m.schemaLink, (_a = m.schemaName) === null || _a === void 0 ? void 0 : _a.toLowerCase());
+    bindLink(row, 'a.asset-name-link', m.listingsLink, m.assetName);
+    bindLink(row, 'a.history-link', m.historyLink, util.formatTimespan(Date.now() - m.lastSoldDate.getTime()));
+    if (m.rarity) {
+        bindLink(row, 'a.rarity-link', m.rarityLink, (_b = m.rarity) === null || _b === void 0 ? void 0 : _b.toLowerCase());
+    }
+    const inventoryLink = row.querySelector('a.link-inventory');
+    inventoryLink.href = m.inventoryLink;
+}
+function bindLink(row, selector, href, text) {
+    const link = row.querySelector(selector);
+    link.href = href || '';
+    link.innerHTML = text || '';
 }
 function priceAction(lagHours, increasing, priceHistory) {
     const result = [];

@@ -125,6 +125,7 @@ export function transform(
     collectionLink: '',
     templateLink: '',
     inventoryLink: '',
+    schemaLink: '',
     ...lastSold,
     ...floor,
   };
@@ -139,6 +140,7 @@ export function transform(
   m.historyLink = `https://wax.atomichub.io/market/history?collection_name=${m.collectionName}${rarity}&match=${m.assetName}&order=desc&schema_name=${m.schemaName}&sort=updated&symbol=WAX`;
   m.listingsLink = `https://wax.atomichub.io/market?collection_name=${m.collectionName}${rarity}&match=${m.assetName}&order=asc&schema_name=${m.schemaName}&sort=price&symbol=WAX`;
   m.rarityLink = `https://wax.atomichub.io/market?collection_name=${m.collectionName}${rarity}&order=asc&schema_name=${m.schemaName}&sort=price&symbol=WAX`;
+  m.schemaLink = `https://wax.atomichub.io/market?collection_name=${m.collectionName}&order=asc&schema_name=${m.schemaName}&sort=price&symbol=WAX`;
 
   return m;
 }

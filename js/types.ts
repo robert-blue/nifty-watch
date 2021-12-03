@@ -38,5 +38,6 @@ export interface RowView extends AtomicListing, AtomicSale {
   listingsLink: string
   collectionLink: string
   rarityLink?: string
+  schemaLink: string;
   templateId: string
 }

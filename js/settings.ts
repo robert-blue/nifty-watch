@@ -1,4 +1,6 @@
-import { KEY_TEMPLATE_IDS, KEY_WALLET, REFRESH_INTERVAL } from './config.js';
+import {
+  KEY_COLUMN_OPTIONS, KEY_TEMPLATE_IDS, KEY_WALLET, REFRESH_INTERVAL,
+} from './config.js';
 import { get, set } from './storage.js';
 
 export function getTemplateIds() {
@@ -42,4 +44,21 @@ export function getRefreshInterval() {
   }
 
   return REFRESH_INTERVAL;
+}
+
+interface ColumnOptions {
+  enabled: string[]
+}
+
+export function setColumnOptions(options: ColumnOptions): void {
+  return set(KEY_COLUMN_OPTIONS, JSON.stringify(options));
+}
+
+export function getColumnOptions(): ColumnOptions {
+  const options = get(KEY_COLUMN_OPTIONS);
+  if (options === undefined) {
+    return { enabled: [] };
+  }
+
+  return JSON.parse(options) as ColumnOptions;
 }

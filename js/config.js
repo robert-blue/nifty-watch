@@ -8,4 +8,5 @@ export const DEAD_HOURS = 5 * 24;
 // Local storage keys
 export const KEY_TEMPLATE_IDS = 'templateIDs';
 export const KEY_WALLET = 'wallet';
+export const KEY_COLUMN_OPTIONS = '0.columnOptions';
 //# sourceMappingURL=config.js.map

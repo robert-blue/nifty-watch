@@ -1,4 +1,4 @@
-import { KEY_TEMPLATE_IDS, KEY_WALLET, REFRESH_INTERVAL } from './config.js';
+import { KEY_COLUMN_OPTIONS, KEY_TEMPLATE_IDS, KEY_WALLET, REFRESH_INTERVAL, } from './config.js';
 import { get, set } from './storage.js';
 export function getTemplateIds() {
     // QueryString, if present, has precedence over local storage
@@ -33,5 +33,15 @@ export function getRefreshInterval() {
         return interval * 1000;
     }
     return REFRESH_INTERVAL;
+}
+export function setColumnOptions(options) {
+    return set(KEY_COLUMN_OPTIONS, JSON.stringify(options));
+}
+export function getColumnOptions() {
+    const options = get(KEY_COLUMN_OPTIONS);
+    if (options === undefined) {
+        return { enabled: [] };
+    }
+    return JSON.parse(options);
 }
 //# sourceMappingURL=settings.js.map

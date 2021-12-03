@@ -57,10 +57,13 @@ function supplementalRefresh(result) {
         view.sortTable();
     }), refreshInterval);
 }
+function getTableBody() {
+    return document.querySelector('tbody#exchangeTable');
+}
 function refresh() {
     return __awaiter(this, void 0, void 0, function* () {
-        const exchangeTable = document.querySelector('tbody#exchangeTable');
-        exchangeTable.classList.add('updating');
+        const tBody = getTableBody();
+        tBody.classList.add('updating');
         const waxPrice = yield data.getWAXPrice();
         const waxPriceElem = document.getElementById('waxPrice');
         if (waxPriceElem === null) {
@@ -78,7 +81,7 @@ function refresh() {
         view.sortTable();
         view.setTimestamp();
         view.clearStatus();
-        exchangeTable.classList.remove('updating');
+        tBody.classList.remove('updating');
         clearTimeout(globalTimeout);
         globalTimeout = setTimeout(refresh, settings.getRefreshInterval());
     });
@@ -131,21 +134,6 @@ function setTemplateIDsButtonText() {
         ? 'No template IDs'
         : `${templateIds.length} template IDs`;
 }
-function bindUI() {
-    const headerCell = document.querySelector('#main-table th.dir-u, #main-table th.dir-d');
-    sortable(headerCell);
-    refreshTableButton = document.querySelector('#refreshTableButton');
-    setTemplateIDsButton = document.querySelector('#setTemplateIDsButton');
-    setWalletButton = document.querySelector('#setWalletButton');
-    shareButton = document.querySelector('#shareButton');
-    refreshTableButton.addEventListener('click', refresh);
-    setTemplateIDsButton.addEventListener('click', setTemplateIDs);
-    setWalletButton.addEventListener('click', setWallet);
-    shareButton.addEventListener('click', shareTemplateIds);
-    const refreshIntervalSpan = document.getElementById('refresh-interval');
-    refreshIntervalSpan.innerText = Number(settings.getRefreshInterval() / 1000 / 60).toString();
-    document.addEventListener('click', deleteRowHandler);
-}
 function deleteRowHandler(e) {
     return __awaiter(this, void 0, void 0, function* () {
         if (e.target === null) {
@@ -173,6 +161,60 @@ function deleteRowHandler(e) {
 }
 function setWalletButtonText() {
     setWalletButton.innerText = wallet || 'No wallet set';
+}
+function bindUI() {
+    const headerCell = document.querySelector('#main-table th.dir-u, #main-table th.dir-d');
+    sortable(headerCell);
+    refreshTableButton = document.querySelector('#refreshTableButton');
+    setTemplateIDsButton = document.querySelector('#setTemplateIDsButton');
+    setWalletButton = document.querySelector('#setWalletButton');
+    shareButton = document.querySelector('#shareButton');
+    refreshTableButton.addEventListener('click', refresh);
+    setTemplateIDsButton.addEventListener('click', setTemplateIDs);
+    setWalletButton.addEventListener('click', setWallet);
+    shareButton.addEventListener('click', shareTemplateIds);
+    const refreshIntervalSpan = document.getElementById('refresh-interval');
+    refreshIntervalSpan.innerText = Number(settings.getRefreshInterval() / 1000 / 60).toString();
+    document.addEventListener('click', deleteRowHandler);
+    loadColumnOptions();
+    const checkboxes = document.querySelectorAll('input[data-show-column]');
+    checkboxes.forEach((checkbox) => {
+        checkbox.addEventListener('change', applyColumnVisibility);
+    });
+    applyColumnVisibility();
+}
+function saveColumnOptions() {
+    const checkboxes = document.querySelectorAll('input[data-show-column]');
+    const enabled = [];
+    checkboxes.forEach((checkbox) => {
+        const columnName = checkbox.dataset.showColumn;
+        if (checkbox.checked && columnName !== undefined) {
+            enabled.push(columnName);
+        }
+    });
+    settings.setColumnOptions({ enabled });
+}
+function loadColumnOptions() {
+    const options = settings.getColumnOptions();
+    options.enabled.forEach((columnName) => {
+        const checkbox = document.querySelector(`input[data-show-column=${columnName}]`);
+        checkbox.checked = true;
+    });
+}
+function applyColumnVisibility() {
+    const table = document.getElementById('main-table');
+    const checkboxes = document.querySelectorAll('input[data-show-column]');
+    checkboxes.forEach((checkbox) => {
+        const columnName = checkbox.dataset.showColumn;
+        const className = `show-${columnName}`;
+        if (checkbox.checked) {
+            table.classList.add(className);
+        }
+        else {
+            table.classList.remove(className);
+        }
+    });
+    saveColumnOptions();
 }
 (() => __awaiter(void 0, void 0, void 0, function* () {
     wallet = settings.getWallet();

@@ -38,6 +38,7 @@ export async function drawTableRows(templateIds: string[], wallet: string) {
     <i class="fa-solid fa-trash-can delete-row" title="delete"></i>
   </td>
   <td class="collection-name"><a href="" class="collection-name-link" target="_blank"></a></td>
+  <td class="schema-name"><a href="" class="schema-name-link" target="_blank"></a></td>
   <td class="rarity"><a href="" class="rarity-link" target="_blank"></a></td>
   <td class="asset-name">
     <a href="" target="_blank" class="asset-name-link"></a>
@@ -94,7 +95,7 @@ export function sortTable() {
   }
 }
 
-export function bindRow(row: HTMLElement, m: RowView, waxPrice: number) {
+export function bindRow(row: HTMLTableRowElement, m: RowView, waxPrice: number) {
   const floorPrice = row.querySelector('.price-wax-value') as HTMLElement;
   floorPrice.innerHTML = `${Math.round(m.floorPrice * 100) / 100}`;
 
@@ -119,33 +120,29 @@ export function bindRow(row: HTMLElement, m: RowView, waxPrice: number) {
   const collectionCell = row.querySelector('td.collection-name') as HTMLElement;
   collectionCell.dataset.sort = m.collectionName;
 
-  const templateIdLink = row.querySelector('a.template-id-link') as HTMLLinkElement;
-  templateIdLink.href = m.templateLink;
-  templateIdLink.innerHTML = m.templateId;
+  const lagCell = row.querySelector('td.lag') as HTMLElement;
+  lagCell.dataset.sort = Number(Date.now() - m.lastSoldDate.getTime()).toString();
 
-  const collectionLink = row.querySelector('a.collection-name-link') as HTMLLinkElement;
-  collectionLink.href = m.collectionLink;
-  collectionLink.innerHTML = m.collectionName || 'unknown';
+  bindLink(row, 'a.template-id-link', m.templateLink, m.templateId);
+  bindLink(row, 'a.collection-name-link', m.collectionLink, m.collectionName);
+  bindLink(row, 'a.schema-name-link', m.schemaLink, m.schemaName?.toLowerCase());
+  bindLink(row, 'a.asset-name-link', m.listingsLink, m.assetName);
+  bindLink(row, 'a.history-link', m.historyLink, util.formatTimespan(
+    Date.now() - m.lastSoldDate.getTime(),
+  ));
 
   if (m.rarity) {
-    const rarityLink = row.querySelector('a.rarity-link') as HTMLLinkElement;
-    rarityLink.href = m.rarityLink || '';
-    rarityLink.innerHTML = m.rarity || '';
+    bindLink(row, 'a.rarity-link', m.rarityLink, m.rarity?.toLowerCase());
   }
-
-  const nameLink = row.querySelector('a.asset-name-link') as HTMLLinkElement;
-  nameLink.href = m.listingsLink;
-  nameLink.innerHTML = m.assetName || 'unknown';
-
-  const historyLink = row.querySelector('a.history-link') as HTMLLinkElement;
-  historyLink.innerHTML = util.formatTimespan(Date.now() - m.lastSoldDate.getTime());
-  historyLink.href = m.historyLink;
 
   const inventoryLink = row.querySelector('a.link-inventory') as HTMLLinkElement;
   inventoryLink.href = m.inventoryLink;
+}
 
-  const lagCell = row.querySelector('td.lag') as HTMLElement;
-  lagCell.dataset.sort = Number(Date.now() - m.lastSoldDate.getTime()).toString();
+function bindLink(row: HTMLTableRowElement, selector: string, href?: string, text?: string) {
+  const link = row.querySelector(selector) as HTMLLinkElement;
+  link.href = href || '';
+  link.innerHTML = text || '';
 }
 
 function priceAction(lagHours: number, increasing: number, priceHistory?: [{date: Date, price: number}]) {

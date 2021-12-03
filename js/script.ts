@@ -66,9 +66,13 @@ function supplementalRefresh(result: RowView) {
   }, refreshInterval);
 }
 
+function getTableBody(): HTMLTableSectionElement {
+  return document.querySelector('tbody#exchangeTable') as HTMLTableSectionElement;
+}
+
 async function refresh() {
-  const exchangeTable = document.querySelector('tbody#exchangeTable') as HTMLTableSectionElement;
-  exchangeTable.classList.add('updating');
+  const tBody = getTableBody();
+  tBody.classList.add('updating');
 
   const waxPrice = await data.getWAXPrice();
   const waxPriceElem = document.getElementById('waxPrice');
@@ -93,7 +97,7 @@ async function refresh() {
   view.setTimestamp();
   view.clearStatus();
 
-  exchangeTable.classList.remove('updating');
+  tBody.classList.remove('updating');
 
   clearTimeout(globalTimeout);
   globalTimeout = setTimeout(refresh, settings.getRefreshInterval());
@@ -149,26 +153,6 @@ function setTemplateIDsButtonText() {
     : `${templateIds.length} template IDs`;
 }
 
-function bindUI() {
-  const headerCell = document.querySelector('#main-table th.dir-u, #main-table th.dir-d');
-  sortable(headerCell as HTMLTableCellElement);
-
-  refreshTableButton = document.querySelector('#refreshTableButton') as HTMLButtonElement;
-  setTemplateIDsButton = document.querySelector('#setTemplateIDsButton') as HTMLButtonElement;
-  setWalletButton = document.querySelector('#setWalletButton') as HTMLButtonElement;
-  shareButton = document.querySelector('#shareButton') as HTMLButtonElement;
-
-  refreshTableButton.addEventListener('click', refresh);
-  setTemplateIDsButton.addEventListener('click', setTemplateIDs);
-  setWalletButton.addEventListener('click', setWallet);
-  shareButton.addEventListener('click', shareTemplateIds);
-
-  const refreshIntervalSpan = document.getElementById('refresh-interval') as HTMLSpanElement;
-  refreshIntervalSpan.innerText = Number(settings.getRefreshInterval() / 1000 / 60).toString();
-
-  document.addEventListener('click', deleteRowHandler);
-}
-
 async function deleteRowHandler(e: MouseEvent) {
   if (e.target === null) {
     return;
@@ -199,6 +183,75 @@ async function deleteRowHandler(e: MouseEvent) {
 
 function setWalletButtonText() {
   setWalletButton.innerText = wallet || 'No wallet set';
+}
+
+function bindUI() {
+  const headerCell = document.querySelector('#main-table th.dir-u, #main-table th.dir-d');
+  sortable(headerCell as HTMLTableCellElement);
+
+  refreshTableButton = document.querySelector('#refreshTableButton') as HTMLButtonElement;
+  setTemplateIDsButton = document.querySelector('#setTemplateIDsButton') as HTMLButtonElement;
+  setWalletButton = document.querySelector('#setWalletButton') as HTMLButtonElement;
+  shareButton = document.querySelector('#shareButton') as HTMLButtonElement;
+
+  refreshTableButton.addEventListener('click', refresh);
+  setTemplateIDsButton.addEventListener('click', setTemplateIDs);
+  setWalletButton.addEventListener('click', setWallet);
+  shareButton.addEventListener('click', shareTemplateIds);
+
+  const refreshIntervalSpan = document.getElementById('refresh-interval') as HTMLSpanElement;
+  refreshIntervalSpan.innerText = Number(settings.getRefreshInterval() / 1000 / 60).toString();
+
+  document.addEventListener('click', deleteRowHandler);
+
+  loadColumnOptions();
+
+  const checkboxes = document.querySelectorAll('input[data-show-column]') as NodeListOf<HTMLInputElement>;
+  checkboxes.forEach((checkbox) => {
+    checkbox.addEventListener('change', applyColumnVisibility);
+  });
+
+  applyColumnVisibility();
+}
+
+function saveColumnOptions() {
+  const checkboxes = document.querySelectorAll('input[data-show-column]') as NodeListOf<HTMLInputElement>;
+  const enabled: string[] = [];
+
+  checkboxes.forEach((checkbox) => {
+    const columnName = checkbox.dataset.showColumn;
+    if (checkbox.checked && columnName !== undefined) {
+      enabled.push(columnName);
+    }
+  });
+
+  settings.setColumnOptions({ enabled });
+}
+
+function loadColumnOptions() {
+  const options = settings.getColumnOptions();
+  options.enabled.forEach((columnName) => {
+    const checkbox = document.querySelector(`input[data-show-column=${columnName}]`) as HTMLInputElement;
+    checkbox.checked = true;
+  });
+}
+
+function applyColumnVisibility() {
+  const table = document.getElementById('main-table') as HTMLTableElement;
+
+  const checkboxes = document.querySelectorAll('input[data-show-column]') as NodeListOf<HTMLInputElement>;
+
+  checkboxes.forEach((checkbox) => {
+    const columnName = checkbox.dataset.showColumn;
+    const className = `show-${columnName}`;
+    if (checkbox.checked) {
+      table.classList.add(className);
+    } else {
+      table.classList.remove(className);
+    }
+  });
+
+  saveColumnOptions();
 }
 
 (async () => {

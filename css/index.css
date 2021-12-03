@@ -44,12 +44,28 @@ td, th, td.template-id, td.lag, td.price-wax {
   color: #eeeeee;
 }
 
-.template-id-link, .collection-name-link, .rarity-link {
+th:nth-of-type(1), th:nth-of-type(2), th:nth-of-type(3), th:nth-of-type(4){
+  font-size: 80%;
+}
+
+tr td:nth-of-type(1) > a, td:nth-of-type(2) > a, td:nth-of-type(3) > a , td:nth-of-type(4) > a {
     color: #606c76;
+  font-size: 80%;
 }
 
 .template-id-link:hover, .collection-name-link:hover, .rarity-link:hover {
     color: #eeeeee;
+}
+
+table th.rarity, table td.rarity, table th.schema-name, table td.schema-name {
+  display: none;
+}
+
+table.show-rarity th.rarity,
+table.show-rarity td.rarity,
+table.show-schema-name th.schema-name,
+table.show-schema-name td.schema-name {
+  display: table-cell;
 }
 
 /*.rarity-link {*/
@@ -128,10 +144,6 @@ tr td.asset-name i.down {
 tr td.asset-name i.up {
     color: green;
 }
-
-/*tr.hot {*/
-/*    background-color: #05160ca6;*/
-/*}*/
 
 tr.dead td a, tr.dead td span {
     opacity: 50%;
