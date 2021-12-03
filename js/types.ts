@@ -29,7 +29,7 @@ export interface AtomicListing extends AtomicAsset {
 }
 
 /** Composite model of asset data retrieved from AtomicHub.io */
-export interface AtomicModel extends AtomicListing, AtomicSale {
+export interface RowView extends AtomicListing, AtomicSale {
   lagHours: number
   templateLink: string
   priceGapPercent: number

@@ -11,7 +11,7 @@ import * as view from './view.js';
 import { display } from './view.js';
 import {
   // eslint-disable-next-line import/named
-  AtomicListing, AtomicModel, AtomicSale, TemplateRow,
+  AtomicListing, RowView, AtomicSale, TemplateRow,
 } from './types.js';
 import sortable from './vendor/sortable.js';
 
@@ -44,7 +44,7 @@ async function refreshRow(row: HTMLTableRowElement, waxPrice: number) {
   return model;
 }
 
-function supplementalRefresh(result: AtomicModel) {
+function supplementalRefresh(result: RowView) {
   const { templateId } = result;
   const row = util.getTemplateRow(templateId);
 

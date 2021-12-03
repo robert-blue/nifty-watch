@@ -1,7 +1,7 @@
 import { DEAD_HOURS, FRESH_HOURS, HOT_HOURS } from './config.js';
 import * as util from './util.js';
 // eslint-disable-next-line import/named
-import { AtomicModel, Sortable } from './types.js';
+import { RowView, Sortable } from './types.js';
 
 export function setStatus(msg?: string) {
   const statusElem = document.getElementById('refreshStatus') as HTMLElement;
@@ -94,7 +94,7 @@ export function sortTable() {
   }
 }
 
-export function bindRow(row: HTMLElement, m: AtomicModel, waxPrice: number) {
+export function bindRow(row: HTMLElement, m: RowView, waxPrice: number) {
   const floorPrice = row.querySelector('.price-wax-value') as HTMLElement;
   floorPrice.innerHTML = `${Math.round(m.floorPrice * 100) / 100}`;
 

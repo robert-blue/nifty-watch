@@ -1,7 +1,7 @@
 import Semaphore from './vendor/semaphore.js';
 import * as util from './util.js';
 // eslint-disable-next-line import/named
-import { AtomicListing, AtomicModel, AtomicSale } from './types.js';
+import { AtomicListing, RowView, AtomicSale } from './types.js';
 
 const sem = new Semaphore(30, 30, 15);
 
@@ -116,8 +116,8 @@ export function transform(
   floor: AtomicListing,
   templateId: string,
   wallet: string,
-): AtomicModel {
-  const m: AtomicModel = {
+): RowView {
+  const m: RowView = {
     lagHours: 0,
     priceGapPercent: 0,
     historyLink: '',
