@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import Semaphore from './vendor/semaphore.js';
 import * as util from './util.js';
-const sem = new Semaphore(30, 30, 15);
+const sem = new Semaphore(5, 30, 15);
 function atomicFetch(url, status) {
     return __awaiter(this, void 0, void 0, function* () {
         yield sem.wait();

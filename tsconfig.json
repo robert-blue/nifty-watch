@@ -2,7 +2,8 @@
   "compilerOptions": {
     "target": "es6",
     "module": "es6",
-    "moduleResolution": "node",
+    "moduleResolution": "classic",
+    "noEmit": false,
     "declaration": true,
     "strict": true,
     "noImplicitAny": true /* Raise error on expressions and declarations with an implied 'any' type. */,
@@ -18,10 +19,6 @@
     "allowSyntheticDefaultImports": false,
     "experimentalDecorators": true,
     "sourceMap": true,
-    "types": [
-      "node",
-      "jest"
-    ],
     "lib": [
       "ES6",
       "DOM"

@@ -1,7 +1,9 @@
 import {
   KEY_COLUMN_OPTIONS, KEY_TEMPLATE_IDS, KEY_WALLET, REFRESH_INTERVAL,
 } from './config.js';
-import { get, set } from './storage.js';
+import {
+  get, getString, set, setString,
+} from './storage.js';
 
 export function getTemplateIds() {
   // QueryString, if present, has precedence over local storage
@@ -10,22 +12,22 @@ export function getTemplateIds() {
     return deserializeTemplateIds(templateIds);
   }
 
-  return deserializeTemplateIds(get(KEY_TEMPLATE_IDS));
+  return deserializeTemplateIds(getString(KEY_TEMPLATE_IDS));
 }
 
 // Stores template IDs. Accepts an array or comma-delimited string.
 export function setTemplateIds(val: string[]|string) {
   const idString = typeof val === 'string' ? val : serializeTemplateIds(val);
-  set(KEY_TEMPLATE_IDS, idString);
+  setString(KEY_TEMPLATE_IDS, idString);
   return deserializeTemplateIds(idString);
 }
 
 export function getWallet(): string {
-  return get(KEY_WALLET) || '';
+  return getString(KEY_WALLET) || '';
 }
 
 export function setWallet(address: string): void {
-  return set(KEY_WALLET, address);
+  return setString(KEY_WALLET, address);
 }
 
 function serializeTemplateIds(array: string[]) {
@@ -51,14 +53,14 @@ interface ColumnOptions {
 }
 
 export function setColumnOptions(options: ColumnOptions): void {
-  return set(KEY_COLUMN_OPTIONS, JSON.stringify(options));
+  return set<ColumnOptions>(KEY_COLUMN_OPTIONS, options);
 }
 
 export function getColumnOptions(): ColumnOptions {
-  const options = get(KEY_COLUMN_OPTIONS);
+  const options = get<ColumnOptions>(KEY_COLUMN_OPTIONS);
   if (options === undefined) {
     return { enabled: [] };
   }
 
-  return JSON.parse(options) as ColumnOptions;
+  return options;
 }

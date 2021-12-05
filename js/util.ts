@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/named
 import { TemplateRow } from './types.js';
 
 export function parseTokenValue(precision: number, amount: string) {

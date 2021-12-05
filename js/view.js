@@ -164,4 +164,11 @@ export function display(selector, show) {
     const elem = document.querySelector(selector);
     elem.classList[show ? 'remove' : 'add']('hidden');
 }
+export function bindWaxPrice(waxPrice) {
+    const waxPriceElem = document.getElementById('waxPrice');
+    if (waxPriceElem === null) {
+        throw Error('waxPrice element not found');
+    }
+    waxPriceElem.innerText = waxPrice.toString();
+}
 //# sourceMappingURL=view.js.map

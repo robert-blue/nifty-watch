@@ -1,24 +1,24 @@
 import { KEY_COLUMN_OPTIONS, KEY_TEMPLATE_IDS, KEY_WALLET, REFRESH_INTERVAL, } from './config.js';
-import { get, set } from './storage.js';
+import { get, getString, set, setString, } from './storage.js';
 export function getTemplateIds() {
     // QueryString, if present, has precedence over local storage
     const templateIds = new URLSearchParams(document.location.search).get('template_ids');
     if (templateIds) {
         return deserializeTemplateIds(templateIds);
     }
-    return deserializeTemplateIds(get(KEY_TEMPLATE_IDS));
+    return deserializeTemplateIds(getString(KEY_TEMPLATE_IDS));
 }
 // Stores template IDs. Accepts an array or comma-delimited string.
 export function setTemplateIds(val) {
     const idString = typeof val === 'string' ? val : serializeTemplateIds(val);
-    set(KEY_TEMPLATE_IDS, idString);
+    setString(KEY_TEMPLATE_IDS, idString);
     return deserializeTemplateIds(idString);
 }
 export function getWallet() {
-    return get(KEY_WALLET) || '';
+    return getString(KEY_WALLET) || '';
 }
 export function setWallet(address) {
-    return set(KEY_WALLET, address);
+    return setString(KEY_WALLET, address);
 }
 function serializeTemplateIds(array) {
     return array.join(',');
@@ -35,13 +35,13 @@ export function getRefreshInterval() {
     return REFRESH_INTERVAL;
 }
 export function setColumnOptions(options) {
-    return set(KEY_COLUMN_OPTIONS, JSON.stringify(options));
+    return set(KEY_COLUMN_OPTIONS, options);
 }
 export function getColumnOptions() {
     const options = get(KEY_COLUMN_OPTIONS);
     if (options === undefined) {
         return { enabled: [] };
     }
-    return JSON.parse(options);
+    return options;
 }
 //# sourceMappingURL=settings.js.map

@@ -3,7 +3,7 @@ import * as util from './util.js';
 // eslint-disable-next-line import/named
 import { AtomicListing, RowView, AtomicSale } from './types.js';
 
-const sem = new Semaphore(30, 30, 15);
+const sem = new Semaphore(5, 30, 15);
 
 async function atomicFetch(url: string, status: (msg?: string) => void): Promise<Response> {
   await sem.wait();

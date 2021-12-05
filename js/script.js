@@ -12,6 +12,7 @@ import * as settings from './settings.js';
 import * as util from './util.js';
 import * as data from './data.js';
 import * as view from './view.js';
+import { get, set } from './storage.js';
 import sortable from './vendor/sortable.js';
 let wallet = '';
 let templateIds = [];
@@ -19,16 +20,27 @@ let refreshTableButton;
 let setTemplateIDsButton;
 let setWalletButton;
 let shareButton;
+let cacheLoaded = {};
 function refreshRow(row, waxPrice) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         row.classList.add('updating');
         const templateId = (_a = row.dataset.templateId) !== null && _a !== void 0 ? _a : '';
-        const results = yield Promise.all([
-            yield data.getLastSold(templateId, view.setStatus),
-            yield data.getFloorListing(templateId, view.setStatus),
-        ]);
-        const model = data.transform(results[0], results[1], templateId, wallet);
+        let lastSold;
+        let floorListing;
+        if (!cacheLoaded[templateId]) {
+            const value = get(templateId);
+            if (value !== undefined) {
+                ({ lastSold, floorListing } = value);
+                cacheLoaded[templateId] = true;
+            }
+        }
+        if (!lastSold || !floorListing) {
+            lastSold = yield data.getLastSold(templateId, view.setStatus);
+            floorListing = yield data.getFloorListing(templateId, view.setStatus);
+            set(templateId, { lastSold, floorListing });
+        }
+        const model = data.transform(lastSold, floorListing, templateId, wallet);
         view.bindRow(row, model, waxPrice);
         row.classList.remove('updating');
         row.setAttribute('title', `last updated ${(new Date()).toLocaleTimeString()}`);
@@ -53,10 +65,13 @@ function supplementalRefresh(result) {
     else {
         refreshInterval = DEAD_HOURS_REFRESH_INTERVAL;
     }
-    clearTimeout(row.refreshTimeoutId);
+    if ('refreshTimeout' in row) {
+        clearTimeout(row.refreshTimeoutId);
+    }
     row.refreshTimeoutId = setTimeout(() => __awaiter(this, void 0, void 0, function* () {
-        const price = yield data.getWAXPrice();
-        supplementalRefresh(yield refreshRow(row, price));
+        const waxPrice = yield data.getWAXPrice();
+        view.bindWaxPrice(waxPrice);
+        supplementalRefresh(yield refreshRow(row, waxPrice));
         view.sortTable();
     }), refreshInterval);
 }
@@ -68,11 +83,7 @@ function refresh() {
         const tBody = getTableBody();
         tBody.classList.add('updating');
         const waxPrice = yield data.getWAXPrice();
-        const waxPriceElem = document.getElementById('waxPrice');
-        if (waxPriceElem === null) {
-            throw Error('waxPrice element not found');
-        }
-        waxPriceElem.innerText = waxPrice.toString();
+        view.bindWaxPrice(waxPrice);
         setWalletButtonText();
         setTemplateIDsButtonText();
         view.display('#noResults', templateIds.length === 0);
@@ -103,6 +114,7 @@ function setWallet() {
         wallet = input;
         settings.setWallet(wallet);
         yield view.drawTableRows(templateIds, wallet);
+        cacheLoaded = {};
         yield refresh();
     });
 }
@@ -127,6 +139,7 @@ function setTemplateIDs() {
             setTemplateIDsButtonText();
             cleanParams();
             yield view.drawTableRows(templateIds, wallet);
+            cacheLoaded = {};
             yield refresh();
         }
     });

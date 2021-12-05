@@ -189,3 +189,12 @@ export function display(selector: string, show: boolean) {
   const elem = document.querySelector(selector) as HTMLElement;
   elem.classList[show ? 'remove' : 'add']('hidden');
 }
+
+export function bindWaxPrice(waxPrice: number) {
+  const waxPriceElem = document.getElementById('waxPrice');
+  if (waxPriceElem === null) {
+    throw Error('waxPrice element not found');
+  }
+
+  waxPriceElem.innerText = waxPrice.toString();
+}
