@@ -107,7 +107,11 @@ export function sortTable() {
 
 export function bindRow(row: HTMLTableRowElement, m: RowView, waxPrice: number) {
   const floorPrice = row.querySelector('.price-wax-value') as HTMLElement;
-  floorPrice.innerHTML = `${Math.round(m.floorPrice * 100) / 100}`;
+  if (m.floorPrice === 0) {
+    floorPrice.innerHTML = 'N/A';
+  } else {
+    floorPrice.innerHTML = `${Math.round(m.floorPrice * 100) / 100}`;
+  }
 
   const floorPriceCell = row.querySelector('td.price-wax') as HTMLElement;
   floorPriceCell.dataset.sort = m.floorPrice.toString();
@@ -126,11 +130,13 @@ export function bindRow(row: HTMLTableRowElement, m: RowView, waxPrice: number) 
     target.title = `mint #${m.mintNumber} last sold for ${m.lastPrice} WAX`;
   } else {
     target.innerText = 'N/A';
-    target.title = 'No sales reported';
+    target.title = 'No sales or listings';
   }
 
   row.classList.remove('dead', 'hot', 'down', 'up', 'fresh', 'fire');
-  row.classList.add(...priceAction(m.lagHours, m.increasing, m.priceHistory));
+  if (m.lastPrice > 0 && m.floorPrice > 0) {
+    row.classList.add(...priceAction(m.lagHours, m.increasing, m.priceHistory));
+  }
 
   const collectionCell = row.querySelector('td.collection-name') as HTMLElement;
   collectionCell.dataset.sort = m.collectionName;
@@ -142,9 +148,13 @@ export function bindRow(row: HTMLTableRowElement, m: RowView, waxPrice: number) 
   bindLink(row, 'a.collection-name-link', m.collectionLink, m.collectionName);
   bindLink(row, 'a.schema-name-link', m.schemaLink, m.schemaName?.toLowerCase());
   bindLink(row, 'a.asset-name-link', m.listingsLink, m.assetName);
-  bindLink(row, 'a.history-link', m.historyLink, util.formatTimespan(
+
+  const lastSoldMS = m.lastSoldDate.getUTCMilliseconds();
+  const epochMS = (new Date(0)).getUTCMilliseconds();
+  const lag = (lastSoldMS === epochMS) ? 'N/A' : util.formatTimespan(
     Date.now() - m.lastSoldDate.getTime(),
-  ));
+  );
+  bindLink(row, 'a.history-link', m.historyLink, lag);
 
   if (m.rarity) {
     bindLink(row, 'a.rarity-link', m.rarityLink, m.rarity?.toLowerCase());
@@ -202,4 +212,19 @@ export function bindWaxPrice(waxPrice: number) {
   }
 
   waxPriceElem.innerText = waxPrice.toString();
+}
+
+export function bindLinks(m: RowView, templateId: string, wallet: string): RowView {
+  const b = m;
+  b.collectionLink = `https://wax.atomichub.io/explorer/collection/${m.collectionName}`;
+  b.templateLink = `https://wax.atomichub.io/explorer/template/${m.collectionName}/${templateId}`;
+
+  const rarity = (m.rarity) ? `&data:text.rarity=${m.rarity}` : '';
+  b.inventoryLink = `https://wax.atomichub.io/profile/${wallet}?collection_name=${m.collectionName}${rarity}&match=${m.assetName}&order=desc&sort=transferred`;
+  b.historyLink = `https://wax.atomichub.io/market/history?collection_name=${m.collectionName}${rarity}&match=${m.assetName}&order=desc&schema_name=${m.schemaName}&sort=updated&symbol=WAX`;
+  b.listingsLink = `https://wax.atomichub.io/market?collection_name=${m.collectionName}${rarity}&match=${m.assetName}&order=asc&schema_name=${m.schemaName}&sort=price&symbol=WAX`;
+  b.rarityLink = `https://wax.atomichub.io/market?collection_name=${m.collectionName}${rarity}&order=asc&schema_name=${m.schemaName}&sort=price&symbol=WAX`;
+  b.schemaLink = `https://wax.atomichub.io/market?collection_name=${m.collectionName}&order=asc&schema_name=${m.schemaName}&sort=price&symbol=WAX`;
+
+  return b;
 }

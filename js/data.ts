@@ -1,9 +1,10 @@
 import Semaphore from './vendor/semaphore.js';
 import * as util from './util.js';
-// eslint-disable-next-line import/named
 import {
-  AtomicListing, RowView, AtomicSale, AtomicAsset,
+// eslint-disable-next-line import/named
+  AtomicAsset, AtomicListing, AtomicSale, RowView,
 } from './types.js';
+import { bindLinks } from './view.js';
 
 const sem = new Semaphore(5, 30, 15);
 
@@ -138,7 +139,7 @@ export function transform(
   templateId: string,
   wallet: string,
 ): RowView {
-  const m: RowView = {
+  let m: RowView = {
     lagHours: 0,
     priceGapPercent: 0,
     historyLink: '',
@@ -149,22 +150,16 @@ export function transform(
     schemaLink: '',
     ...lastSold,
     ...floor,
+    collectionName: floor.collectionName || lastSold.collectionName,
   };
 
   m.lagHours = (Date.now() - m.lastSoldDate.getTime()) / 1000 / 60 / 60;
 
-  if (m.lastPrice > 0) {
+  if (m.lastPrice > 0 && m.floorPrice > 0) {
     m.priceGapPercent = ((m.floorPrice - m.lastPrice) / m.lastPrice) * 100;
   }
-  m.collectionLink = `https://wax.atomichub.io/explorer/collection/${m.collectionName}`;
-  m.templateLink = `https://wax.atomichub.io/explorer/template/${m.collectionName}/${templateId}`;
 
-  const rarity = (m.rarity) ? `&data:text.rarity=${m.rarity}` : '';
-  m.inventoryLink = `https://wax.atomichub.io/profile/${wallet}?collection_name=${m.collectionName}${rarity}&match=${m.assetName}&order=desc&sort=transferred`;
-  m.historyLink = `https://wax.atomichub.io/market/history?collection_name=${m.collectionName}${rarity}&match=${m.assetName}&order=desc&schema_name=${m.schemaName}&sort=updated&symbol=WAX`;
-  m.listingsLink = `https://wax.atomichub.io/market?collection_name=${m.collectionName}${rarity}&match=${m.assetName}&order=asc&schema_name=${m.schemaName}&sort=price&symbol=WAX`;
-  m.rarityLink = `https://wax.atomichub.io/market?collection_name=${m.collectionName}${rarity}&order=asc&schema_name=${m.schemaName}&sort=price&symbol=WAX`;
-  m.schemaLink = `https://wax.atomichub.io/market?collection_name=${m.collectionName}&order=asc&schema_name=${m.schemaName}&sort=price&symbol=WAX`;
+  m = bindLinks(m, templateId, wallet);
 
   return m;
 }

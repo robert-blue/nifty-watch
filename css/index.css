@@ -121,15 +121,19 @@ td .fas.fa-fire {
     color: orange;
 }
 
-.minute {
+a.history-link, a.history-link .second {
+  color: rgb(164, 157, 145);
+}
+
+a.history-link .minute {
     color: rgb(50,50,50)
 }
 
-.hour {
+a.history-link .hour {
     color: rgb(100,100,100)
 }
 
-.day {
+a.history-link .day {
     color: rgb(150,150,150)
 }
 

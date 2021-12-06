@@ -18,6 +18,7 @@ import {
 import { get, set } from './storage.js';
 
 import sortable from './vendor/sortable.js';
+import { bindLinks } from './view.js';
 
 let wallet = '';
 let templateIds: string[] = [];
@@ -75,12 +76,13 @@ async function refreshRow(row: HTMLTableRowElement, waxPrice: number) {
       inventoryLink: '',
       lagHours: 0,
       lastPrice: 0,
-      lastSoldDate: new Date(),
+      lastSoldDate: new Date(0),
       listingsLink: '',
       mintNumber: 0,
       schemaLink: '',
       templateLink: '',
     };
+    model = bindLinks(model, templateId, wallet);
   } else {
     model = data.transform(lastSold, floorListing, templateId, wallet);
   }
@@ -100,7 +102,9 @@ function supplementalRefresh(result: RowView) {
 
   let refreshInterval;
 
-  if (result.lagHours <= FIRE_HOURS) {
+  if (result.lagHours === 0) {
+    refreshInterval = FRESH_HOURS_REFRESH_INTERVAL;
+  } else if (result.lagHours <= FIRE_HOURS) {
     refreshInterval = FIRE_HOURS_REFRESH_INTERVAL;
   } else if (result.lagHours <= HOT_HOURS) {
     refreshInterval = HOT_HOURS_REFRESH_INTERVAL;

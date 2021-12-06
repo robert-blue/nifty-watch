@@ -14,6 +14,7 @@ import * as data from './data.js';
 import * as view from './view.js';
 import { get, set } from './storage.js';
 import sortable from './vendor/sortable.js';
+import { bindLinks } from './view.js';
 let wallet = '';
 let templateIds = [];
 let refreshTableButton;
@@ -48,7 +49,8 @@ function refreshRow(row, waxPrice) {
                 templateData = yield data.getTemplateData(templateId, view.setStatus);
                 set(cacheKey, templateData);
             }
-            model = Object.assign(Object.assign({}, templateData), { collectionLink: '', floorPrice: 0, historyLink: '', increasing: 0, inventoryLink: '', lagHours: 0, lastPrice: 0, lastSoldDate: new Date(), listingsLink: '', mintNumber: 0, schemaLink: '', templateLink: '' });
+            model = Object.assign(Object.assign({}, templateData), { collectionLink: '', floorPrice: 0, historyLink: '', increasing: 0, inventoryLink: '', lagHours: 0, lastPrice: 0, lastSoldDate: new Date(0), listingsLink: '', mintNumber: 0, schemaLink: '', templateLink: '' });
+            model = bindLinks(model, templateId, wallet);
         }
         else {
             model = data.transform(lastSold, floorListing, templateId, wallet);
@@ -65,7 +67,10 @@ function supplementalRefresh(result) {
     const { templateId } = result;
     const row = util.getTemplateRow(templateId);
     let refreshInterval;
-    if (result.lagHours <= FIRE_HOURS) {
+    if (result.lagHours === 0) {
+        refreshInterval = FRESH_HOURS_REFRESH_INTERVAL;
+    }
+    else if (result.lagHours <= FIRE_HOURS) {
         refreshInterval = FIRE_HOURS_REFRESH_INTERVAL;
     }
     else if (result.lagHours <= HOT_HOURS) {
