@@ -35,6 +35,21 @@ export function getWAXPrice() {
         return Number(data.wax.usd);
     });
 }
+export function getTemplateData(templateId, status) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const url = `https://wax.api.atomicassets.io/atomicassets/v1/templates?ids=${templateId}&page=1&limit=1&order=desc&sort=created`;
+        const response = yield atomicFetch(url, status);
+        const data = yield response.json();
+        const template = data.data[0];
+        return {
+            collectionName: template.collection.collection_name,
+            assetName: template.name,
+            rarity: template.immutable_data.rarity,
+            schemaName: template.schema.schema_name,
+            templateId,
+        };
+    });
+}
 export function getLastSold(templateId, status) {
     return __awaiter(this, void 0, void 0, function* () {
         const assetCount = 5;
@@ -93,6 +108,7 @@ export function getFloorListing(templateId, status) {
         const asset = floor.assets[0];
         return {
             assetName: asset.template.immutable_data.name || asset.schema.schema_name,
+            collectionName: floor.collection_name,
             floorPrice: util.parseTokenValue(floor.price.token_precision, floor.price.amount),
             mintNumber: asset.template_mint,
             rarity: asset.template.immutable_data.rarity,
@@ -104,7 +120,9 @@ export function getFloorListing(templateId, status) {
 export function transform(lastSold, floor, templateId, wallet) {
     const m = Object.assign(Object.assign({ lagHours: 0, priceGapPercent: 0, historyLink: '', listingsLink: '', collectionLink: '', templateLink: '', inventoryLink: '', schemaLink: '' }, lastSold), floor);
     m.lagHours = (Date.now() - m.lastSoldDate.getTime()) / 1000 / 60 / 60;
-    m.priceGapPercent = ((m.floorPrice - m.lastPrice) / m.lastPrice) * 100;
+    if (m.lastPrice > 0) {
+        m.priceGapPercent = ((m.floorPrice - m.lastPrice) / m.lastPrice) * 100;
+    }
     m.collectionLink = `https://wax.atomichub.io/explorer/collection/${m.collectionName}`;
     m.templateLink = `https://wax.atomichub.io/explorer/template/${m.collectionName}/${templateId}`;
     const rarity = (m.rarity) ? `&data:text.rarity=${m.rarity}` : '';

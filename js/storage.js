@@ -20,7 +20,10 @@ function setString(key, value) {
     return localStorage.setItem(key, value);
 }
 function get(key, defaultValue) {
-    const value = localStorage.getItem(key) || '{}';
+    const value = localStorage.getItem(key);
+    if (value === undefined || value === null) {
+        return defaultValue;
+    }
     try {
         return JSON.parse(value, JSONDateParser) || defaultValue;
     }

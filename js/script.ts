@@ -13,7 +13,7 @@ import * as data from './data.js';
 import * as view from './view.js';
 import {
   // eslint-disable-next-line import/named
-  AtomicListing, AtomicSale, RowView, TemplateRow,
+  AtomicAsset, AtomicListing, AtomicSale, RowView, TemplateRow,
 } from './types.js';
 import { get, set } from './storage.js';
 
@@ -56,15 +56,40 @@ async function refreshRow(row: HTMLTableRowElement, waxPrice: number) {
     set<cacheData>(templateId, { lastSold, floorListing });
   }
 
-  const model = data.transform(lastSold, floorListing, templateId, wallet);
+  let model: RowView;
+
+  if (lastSold.lastPrice === 0 && floorListing.floorPrice === 0) {
+    const cacheKey = `template-data:${templateId}`;
+    let templateData = get<AtomicAsset>(cacheKey);
+    if (!templateData) {
+      templateData = await data.getTemplateData(templateId, view.setStatus);
+      set<AtomicAsset>(cacheKey, templateData);
+    }
+
+    model = {
+      ...templateData,
+      collectionLink: '',
+      floorPrice: 0,
+      historyLink: '',
+      increasing: 0,
+      inventoryLink: '',
+      lagHours: 0,
+      lastPrice: 0,
+      lastSoldDate: new Date(),
+      listingsLink: '',
+      mintNumber: 0,
+      schemaLink: '',
+      templateLink: '',
+    };
+  } else {
+    model = data.transform(lastSold, floorListing, templateId, wallet);
+  }
+
   view.bindRow(row, model, waxPrice);
-
-  row.classList.remove('updating');
-
   row.setAttribute('title', `last updated ${(new Date()).toLocaleTimeString()}`);
   view.setTimestamp();
-
   view.sortTable();
+  row.classList.remove('updating');
 
   return model;
 }
@@ -73,7 +98,7 @@ function supplementalRefresh(result: RowView) {
   const { templateId } = result;
   const row = util.getTemplateRow(templateId);
 
-  let refreshInterval = 0;
+  let refreshInterval;
 
   if (result.lagHours <= FIRE_HOURS) {
     refreshInterval = FIRE_HOURS_REFRESH_INTERVAL;
@@ -204,6 +229,7 @@ async function deleteRowHandler(e: MouseEvent) {
   if (attr !== null) {
     const templateId = attr.toString();
 
+    // eslint-disable-next-line no-alert
     const doDelete = window.confirm(`Are you sure you want to remove this template (#${templateId})? `);
     if (!doDelete) {
       return;

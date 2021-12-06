@@ -1,7 +1,9 @@
 import Semaphore from './vendor/semaphore.js';
 import * as util from './util.js';
 // eslint-disable-next-line import/named
-import { AtomicListing, RowView, AtomicSale } from './types.js';
+import {
+  AtomicListing, RowView, AtomicSale, AtomicAsset,
+} from './types.js';
 
 const sem = new Semaphore(5, 30, 15);
 
@@ -28,6 +30,24 @@ export async function getWAXPrice(): Promise<number> {
   const response = await fetch(url);
   const data = await response.json();
   return Number(data.wax.usd);
+}
+
+export async function getTemplateData(
+  templateId: string,
+  status: (msg?: string | undefined) => void,
+): Promise<AtomicAsset> {
+  const url = `https://wax.api.atomicassets.io/atomicassets/v1/templates?ids=${templateId}&page=1&limit=1&order=desc&sort=created`;
+  const response = await atomicFetch(url, status);
+  const data = await response.json();
+  const template = data.data[0];
+
+  return {
+    collectionName: template.collection.collection_name,
+    assetName: template.name,
+    rarity: template.immutable_data.rarity,
+    schemaName: template.schema.schema_name,
+    templateId,
+  };
 }
 
 export async function getLastSold(
@@ -103,6 +123,7 @@ export async function getFloorListing(
 
   return {
     assetName: asset.template.immutable_data.name || asset.schema.schema_name,
+    collectionName: floor.collection_name,
     floorPrice: util.parseTokenValue(floor.price.token_precision, floor.price.amount),
     mintNumber: asset.template_mint,
     rarity: asset.template.immutable_data.rarity,
@@ -131,7 +152,10 @@ export function transform(
   };
 
   m.lagHours = (Date.now() - m.lastSoldDate.getTime()) / 1000 / 60 / 60;
-  m.priceGapPercent = ((m.floorPrice - m.lastPrice) / m.lastPrice) * 100;
+
+  if (m.lastPrice > 0) {
+    m.priceGapPercent = ((m.floorPrice - m.lastPrice) / m.lastPrice) * 100;
+  }
   m.collectionLink = `https://wax.atomichub.io/explorer/collection/${m.collectionName}`;
   m.templateLink = `https://wax.atomichub.io/explorer/template/${m.collectionName}/${templateId}`;
 

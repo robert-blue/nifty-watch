@@ -23,7 +23,11 @@ function setString(key: string, value: string) {
 }
 
 function get<T>(key: string, defaultValue?: T): T | undefined {
-  const value = localStorage.getItem(key) || '{}';
+  const value = localStorage.getItem(key);
+  if (value === undefined || value === null) {
+    return defaultValue;
+  }
+
   try {
     return JSON.parse(value, JSONDateParser) as T || defaultValue;
   } catch (e) {

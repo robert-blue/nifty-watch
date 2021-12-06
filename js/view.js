@@ -106,12 +106,18 @@ export function bindRow(row, m, waxPrice) {
     const usdPrice = row.querySelector('.price-usd-value');
     usdPrice.innerHTML = util.formatPrice(m.floorPrice * waxPrice);
     const gapCell = row.querySelector('td.price-gap');
-    gapCell.dataset.sort = m.priceGapPercent.toString();
+    gapCell.dataset.sort = (m.priceGapPercent) ? m.priceGapPercent.toString() : '';
     const target = row.querySelector('td.price-gap .price-gap-value');
-    target.innerText = util.formatPercent(m.priceGapPercent);
-    target.title = `mint #${m.mintNumber} last sold for ${m.lastPrice} WAX`;
     target.classList.remove('lower', 'higher');
-    target.classList.add(m.priceGapPercent < 0 ? 'lower' : 'higher');
+    if (m.priceGapPercent) {
+        target.innerText = util.formatPercent(m.priceGapPercent);
+        target.classList.add(m.priceGapPercent < 0 ? 'lower' : 'higher');
+        target.title = `mint #${m.mintNumber} last sold for ${m.lastPrice} WAX`;
+    }
+    else {
+        target.innerText = 'N/A';
+        target.title = 'No sales reported';
+    }
     row.classList.remove('dead', 'hot', 'down', 'up', 'fresh', 'fire');
     row.classList.add(...priceAction(m.lagHours, m.increasing, m.priceHistory));
     const collectionCell = row.querySelector('td.collection-name');

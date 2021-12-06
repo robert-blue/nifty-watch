@@ -40,19 +40,31 @@ function refreshRow(row, waxPrice) {
             floorListing = yield data.getFloorListing(templateId, view.setStatus);
             set(templateId, { lastSold, floorListing });
         }
-        const model = data.transform(lastSold, floorListing, templateId, wallet);
+        let model;
+        if (lastSold.lastPrice === 0 && floorListing.floorPrice === 0) {
+            const cacheKey = `template-data:${templateId}`;
+            let templateData = get(cacheKey);
+            if (!templateData) {
+                templateData = yield data.getTemplateData(templateId, view.setStatus);
+                set(cacheKey, templateData);
+            }
+            model = Object.assign(Object.assign({}, templateData), { collectionLink: '', floorPrice: 0, historyLink: '', increasing: 0, inventoryLink: '', lagHours: 0, lastPrice: 0, lastSoldDate: new Date(), listingsLink: '', mintNumber: 0, schemaLink: '', templateLink: '' });
+        }
+        else {
+            model = data.transform(lastSold, floorListing, templateId, wallet);
+        }
         view.bindRow(row, model, waxPrice);
-        row.classList.remove('updating');
         row.setAttribute('title', `last updated ${(new Date()).toLocaleTimeString()}`);
         view.setTimestamp();
         view.sortTable();
+        row.classList.remove('updating');
         return model;
     });
 }
 function supplementalRefresh(result) {
     const { templateId } = result;
     const row = util.getTemplateRow(templateId);
-    let refreshInterval = 0;
+    let refreshInterval;
     if (result.lagHours <= FIRE_HOURS) {
         refreshInterval = FIRE_HOURS_REFRESH_INTERVAL;
     }
@@ -170,6 +182,7 @@ function deleteRowHandler(e) {
         const attr = row.getAttribute('data-template-id');
         if (attr !== null) {
             const templateId = attr.toString();
+            // eslint-disable-next-line no-alert
             const doDelete = window.confirm(`Are you sure you want to remove this template (#${templateId})? `);
             if (!doDelete) {
                 return;

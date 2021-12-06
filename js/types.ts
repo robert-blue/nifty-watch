@@ -32,12 +32,11 @@ export interface AtomicListing extends AtomicAsset {
 export interface RowView extends AtomicListing, AtomicSale {
   lagHours: number
   templateLink: string
-  priceGapPercent: number
+  priceGapPercent?: number
   inventoryLink: string
   historyLink: string
   listingsLink: string
   collectionLink: string
   rarityLink?: string
   schemaLink: string;
-  templateId: string
 }
