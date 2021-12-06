@@ -107,24 +107,24 @@ export function sortTable() {
 
 export function bindRow(row: HTMLTableRowElement, m: RowView, waxPrice: number) {
   const floorPrice = row.querySelector('.price-wax-value') as HTMLElement;
-  if (m.floorPrice === 0) {
+  if (m.floorPrice === undefined) {
     floorPrice.innerHTML = 'N/A';
   } else {
     floorPrice.innerHTML = `${Math.round(m.floorPrice * 100) / 100}`;
   }
 
   const floorPriceCell = row.querySelector('td.price-wax') as HTMLElement;
-  floorPriceCell.dataset.sort = m.floorPrice.toString();
+  floorPriceCell.dataset.sort = (m.floorPrice || 0).toString();
 
   const usdPrice = row.querySelector('.price-usd-value') as HTMLElement;
-  usdPrice.innerHTML = util.formatPrice(m.floorPrice * waxPrice);
+  usdPrice.innerHTML = util.formatPrice((m.floorPrice || 0) * waxPrice);
 
   const gapCell = row.querySelector('td.price-gap') as HTMLElement;
   gapCell.dataset.sort = (m.priceGapPercent) ? m.priceGapPercent.toString() : '';
 
   const target = row.querySelector('td.price-gap .price-gap-value') as HTMLElement;
   target.classList.remove('lower', 'higher');
-  if (m.priceGapPercent) {
+  if (m.priceGapPercent !== undefined) {
     target.innerText = util.formatPercent(m.priceGapPercent);
     target.classList.add(m.priceGapPercent < 0 ? 'lower' : 'higher');
     target.title = `mint #${m.mintNumber} last sold for ${m.lastPrice} WAX`;
@@ -134,7 +134,7 @@ export function bindRow(row: HTMLTableRowElement, m: RowView, waxPrice: number) 
   }
 
   row.classList.remove('dead', 'hot', 'down', 'up', 'fresh', 'fire');
-  if (m.lastPrice > 0 && m.floorPrice > 0) {
+  if (m.lastPrice !== undefined && m.floorPrice !== undefined) {
     row.classList.add(...priceAction(m.lagHours, m.increasing, m.priceHistory));
   }
 
@@ -149,8 +149,8 @@ export function bindRow(row: HTMLTableRowElement, m: RowView, waxPrice: number) 
   bindLink(row, 'a.schema-name-link', m.schemaLink, m.schemaName?.toLowerCase());
   bindLink(row, 'a.asset-name-link', m.listingsLink, m.assetName);
 
-  const lastSoldMS = m.lastSoldDate.getUTCMilliseconds();
-  const epochMS = (new Date(0)).getUTCMilliseconds();
+  const lastSoldMS = m.lastSoldDate.getTime();
+  const epochMS = (new Date(0)).getTime();
   const lag = (lastSoldMS === epochMS) ? 'N/A' : util.formatTimespan(
     Date.now() - m.lastSoldDate.getTime(),
   );
@@ -170,8 +170,12 @@ function bindLink(row: HTMLTableRowElement, selector: string, href?: string, tex
   link.innerHTML = text || '';
 }
 
-function priceAction(lagHours: number, increasing: number, priceHistory?: [{date: Date, price: number}]) {
+function priceAction(lagHours: number|undefined, increasing: number, priceHistory?: [{date: Date, price: number}]) {
   const result: string[] = [];
+
+  if (lagHours === undefined) {
+    return [''];
+  }
 
   if (lagHours >= DEAD_HOURS) {
     return ['dead'];

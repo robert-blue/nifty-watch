@@ -63,7 +63,7 @@ export async function getLastSold(
   if (!data || !data.data || data.data.length === 0) {
     return {
       increasing: 0,
-      lastPrice: 0,
+      lastPrice: undefined,
       lastSoldDate: new Date(0),
       schemaName: '',
       templateId,
@@ -111,7 +111,7 @@ export async function getFloorListing(
   const floor = data.data[0];
 
   const m: AtomicListing = {
-    floorPrice: 0,
+    floorPrice: undefined,
     mintNumber: 0,
     templateId,
   };
@@ -140,8 +140,8 @@ export function transform(
   wallet: string,
 ): RowView {
   let m: RowView = {
-    lagHours: 0,
-    priceGapPercent: 0,
+    lagHours: undefined,
+    priceGapPercent: undefined,
     historyLink: '',
     listingsLink: '',
     collectionLink: '',
@@ -155,7 +155,7 @@ export function transform(
 
   m.lagHours = (Date.now() - m.lastSoldDate.getTime()) / 1000 / 60 / 60;
 
-  if (m.lastPrice > 0 && m.floorPrice > 0) {
+  if (m.lastPrice !== undefined && m.floorPrice !== undefined) {
     m.priceGapPercent = ((m.floorPrice - m.lastPrice) / m.lastPrice) * 100;
   }
 

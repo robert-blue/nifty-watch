@@ -59,28 +59,28 @@ async function refreshRow(row: HTMLTableRowElement, waxPrice: number) {
 
   let model: RowView;
 
-  if (lastSold.lastPrice === 0 && floorListing.floorPrice === 0) {
+  if (lastSold.lastPrice === undefined && floorListing.floorPrice === undefined) {
     const cacheKey = `template-data:${templateId}`;
     let templateData = get<AtomicAsset>(cacheKey);
-    if (!templateData) {
+    if (!templateData || templateData.collectionName === undefined) {
       templateData = await data.getTemplateData(templateId, view.setStatus);
       set<AtomicAsset>(cacheKey, templateData);
     }
 
     model = {
-      ...templateData,
       collectionLink: '',
-      floorPrice: 0,
+      floorPrice: undefined,
       historyLink: '',
       increasing: 0,
       inventoryLink: '',
-      lagHours: 0,
-      lastPrice: 0,
+      lagHours: undefined,
+      lastPrice: undefined,
       lastSoldDate: new Date(0),
       listingsLink: '',
       mintNumber: 0,
       schemaLink: '',
       templateLink: '',
+      ...templateData,
     };
     model = bindLinks(model, templateId, wallet);
   } else {
@@ -102,7 +102,7 @@ function supplementalRefresh(result: RowView) {
 
   let refreshInterval;
 
-  if (result.lagHours === 0) {
+  if (result.lagHours === undefined) {
     refreshInterval = FRESH_HOURS_REFRESH_INTERVAL;
   } else if (result.lagHours <= FIRE_HOURS) {
     refreshInterval = FIRE_HOURS_REFRESH_INTERVAL;

@@ -60,7 +60,7 @@ export function getLastSold(templateId, status) {
         if (!data || !data.data || data.data.length === 0) {
             return {
                 increasing: 0,
-                lastPrice: 0,
+                lastPrice: undefined,
                 lastSoldDate: new Date(0),
                 schemaName: '',
                 templateId,
@@ -99,7 +99,7 @@ export function getFloorListing(templateId, status) {
         const data = yield response.json();
         const floor = data.data[0];
         const m = {
-            floorPrice: 0,
+            floorPrice: undefined,
             mintNumber: 0,
             templateId,
         };
@@ -119,9 +119,9 @@ export function getFloorListing(templateId, status) {
     });
 }
 export function transform(lastSold, floor, templateId, wallet) {
-    let m = Object.assign(Object.assign(Object.assign({ lagHours: 0, priceGapPercent: 0, historyLink: '', listingsLink: '', collectionLink: '', templateLink: '', inventoryLink: '', schemaLink: '' }, lastSold), floor), { collectionName: floor.collectionName || lastSold.collectionName });
+    let m = Object.assign(Object.assign(Object.assign({ lagHours: undefined, priceGapPercent: undefined, historyLink: '', listingsLink: '', collectionLink: '', templateLink: '', inventoryLink: '', schemaLink: '' }, lastSold), floor), { collectionName: floor.collectionName || lastSold.collectionName });
     m.lagHours = (Date.now() - m.lastSoldDate.getTime()) / 1000 / 60 / 60;
-    if (m.lastPrice > 0 && m.floorPrice > 0) {
+    if (m.lastPrice !== undefined && m.floorPrice !== undefined) {
         m.priceGapPercent = ((m.floorPrice - m.lastPrice) / m.lastPrice) * 100;
     }
     m = bindLinks(m, templateId, wallet);

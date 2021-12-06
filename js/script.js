@@ -42,14 +42,14 @@ function refreshRow(row, waxPrice) {
             set(templateId, { lastSold, floorListing });
         }
         let model;
-        if (lastSold.lastPrice === 0 && floorListing.floorPrice === 0) {
+        if (lastSold.lastPrice === undefined && floorListing.floorPrice === undefined) {
             const cacheKey = `template-data:${templateId}`;
             let templateData = get(cacheKey);
-            if (!templateData) {
+            if (!templateData || templateData.collectionName === undefined) {
                 templateData = yield data.getTemplateData(templateId, view.setStatus);
                 set(cacheKey, templateData);
             }
-            model = Object.assign(Object.assign({}, templateData), { collectionLink: '', floorPrice: 0, historyLink: '', increasing: 0, inventoryLink: '', lagHours: 0, lastPrice: 0, lastSoldDate: new Date(0), listingsLink: '', mintNumber: 0, schemaLink: '', templateLink: '' });
+            model = Object.assign({ collectionLink: '', floorPrice: undefined, historyLink: '', increasing: 0, inventoryLink: '', lagHours: undefined, lastPrice: undefined, lastSoldDate: new Date(0), listingsLink: '', mintNumber: 0, schemaLink: '', templateLink: '' }, templateData);
             model = bindLinks(model, templateId, wallet);
         }
         else {
@@ -67,7 +67,7 @@ function supplementalRefresh(result) {
     const { templateId } = result;
     const row = util.getTemplateRow(templateId);
     let refreshInterval;
-    if (result.lagHours === 0) {
+    if (result.lagHours === undefined) {
         refreshInterval = FRESH_HOURS_REFRESH_INTERVAL;
     }
     else if (result.lagHours <= FIRE_HOURS) {
