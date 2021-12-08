@@ -42,9 +42,14 @@ function set<T>(key: string, value: T): void {
   return localStorage.setItem(key, JSON.stringify(value));
 }
 
+function remove(key: string): void {
+  localStorage.removeItem(key);
+}
+
 export {
   get,
   set,
+  remove,
   getString,
   setString,
 };

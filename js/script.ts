@@ -21,7 +21,7 @@ import sortable from './vendor/sortable.js';
 import { bindLinks } from './view.js';
 
 let wallet = '';
-let templateIds: string[] = [];
+let templateIds: number[] = [];
 
 let refreshTableButton: HTMLButtonElement;
 let setTemplateIDsButton: HTMLButtonElement;
@@ -195,7 +195,7 @@ async function setTemplateIDs() {
   }
 
   if (newTemplateIds.length > 0) {
-    templateIds = settings.setTemplateIds(newTemplateIds);
+    templateIds = settings.setTemplateIds(getSelectedPreset(), newTemplateIds);
     setTemplateIDsButtonText();
     cleanParams();
 
@@ -205,8 +205,17 @@ async function setTemplateIDs() {
   }
 }
 
+function getPresetSelect() : HTMLSelectElement {
+  return document.querySelector('#presetSelect') as HTMLSelectElement;
+}
+
+function getSelectedPreset(): number {
+  const presetSelect = getPresetSelect();
+  return Number(presetSelect.options[presetSelect.selectedIndex].value);
+}
+
 async function shareTemplateIds() {
-  const ids = settings.getTemplateIds();
+  const ids = settings.getTemplateIds(getSelectedPreset());
   const link = `https://nftgaze.com/?template_ids=${ids.join(',')}`;
   // eslint-disable-next-line no-alert
   prompt('Here is your sharable link to the current list of template ids', link);
@@ -231,7 +240,7 @@ async function deleteRowHandler(e: MouseEvent) {
   const row = util.findParentNode(element, 'TR');
   const attr = row.getAttribute('data-template-id');
   if (attr !== null) {
-    const templateId = attr.toString();
+    const templateId = Number(attr);
 
     // eslint-disable-next-line no-alert
     const doDelete = window.confirm(`Are you sure you want to remove this template (#${templateId})? `);
@@ -241,7 +250,7 @@ async function deleteRowHandler(e: MouseEvent) {
 
     const index = templateIds.indexOf(templateId);
     delete templateIds[index];
-    templateIds = settings.setTemplateIds(templateIds);
+    templateIds = settings.setTemplateIds(getSelectedPreset(), templateIds);
     cleanParams();
     setTemplateIDsButtonText();
     row.remove();
@@ -289,11 +298,11 @@ function saveColumnOptions() {
     }
   });
 
-  settings.setColumnOptions({ enabled });
+  settings.setColumnOptions(getSelectedPreset(), { enabled });
 }
 
 function loadColumnOptions() {
-  const options = settings.getColumnOptions();
+  const options = settings.getColumnOptions(getSelectedPreset());
   options.enabled.forEach((columnName) => {
     const checkbox = document.querySelector(`input[data-show-column=${columnName}]`) as HTMLInputElement;
     checkbox.checked = true;
@@ -320,7 +329,19 @@ function applyColumnVisibility() {
 
 (async () => {
   wallet = settings.getWallet();
-  templateIds = settings.getTemplateIds();
+
+  const presets = settings.getPresets();
+
+  const presetSelect = document.querySelector('#presetSelect') as HTMLSelectElement;
+  for (let i = 0; i < presets.length; i++) {
+    const preset = presets[i];
+    const option: HTMLOptionElement = new Option(preset.name, preset.id.toString());
+    presetSelect.add(option);
+  }
+
+  presetSelect.selectedIndex = 0;
+
+  templateIds = settings.getTemplateIds(getSelectedPreset());
 
   view.display('#noResults', templateIds.length === 0);
   view.display('#results', templateIds.length > 0);

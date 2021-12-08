@@ -152,7 +152,7 @@ function setTemplateIDs() {
             return;
         }
         if (newTemplateIds.length > 0) {
-            templateIds = settings.setTemplateIds(newTemplateIds);
+            templateIds = settings.setTemplateIds(getSelectedPreset(), newTemplateIds);
             setTemplateIDsButtonText();
             cleanParams();
             yield view.drawTableRows(templateIds, wallet);
@@ -161,9 +161,16 @@ function setTemplateIDs() {
         }
     });
 }
+function getPresetSelect() {
+    return document.querySelector('#presetSelect');
+}
+function getSelectedPreset() {
+    const presetSelect = getPresetSelect();
+    return Number(presetSelect.options[presetSelect.selectedIndex].value);
+}
 function shareTemplateIds() {
     return __awaiter(this, void 0, void 0, function* () {
-        const ids = settings.getTemplateIds();
+        const ids = settings.getTemplateIds(getSelectedPreset());
         const link = `https://nftgaze.com/?template_ids=${ids.join(',')}`;
         // eslint-disable-next-line no-alert
         prompt('Here is your sharable link to the current list of template ids', link);
@@ -186,7 +193,7 @@ function deleteRowHandler(e) {
         const row = util.findParentNode(element, 'TR');
         const attr = row.getAttribute('data-template-id');
         if (attr !== null) {
-            const templateId = attr.toString();
+            const templateId = Number(attr);
             // eslint-disable-next-line no-alert
             const doDelete = window.confirm(`Are you sure you want to remove this template (#${templateId})? `);
             if (!doDelete) {
@@ -194,7 +201,7 @@ function deleteRowHandler(e) {
             }
             const index = templateIds.indexOf(templateId);
             delete templateIds[index];
-            templateIds = settings.setTemplateIds(templateIds);
+            templateIds = settings.setTemplateIds(getSelectedPreset(), templateIds);
             cleanParams();
             setTemplateIDsButtonText();
             row.remove();
@@ -232,10 +239,10 @@ function saveColumnOptions() {
             enabled.push(columnName);
         }
     });
-    settings.setColumnOptions({ enabled });
+    settings.setColumnOptions(getSelectedPreset(), { enabled });
 }
 function loadColumnOptions() {
-    const options = settings.getColumnOptions();
+    const options = settings.getColumnOptions(getSelectedPreset());
     options.enabled.forEach((columnName) => {
         const checkbox = document.querySelector(`input[data-show-column=${columnName}]`);
         checkbox.checked = true;
@@ -258,7 +265,15 @@ function applyColumnVisibility() {
 }
 (() => __awaiter(void 0, void 0, void 0, function* () {
     wallet = settings.getWallet();
-    templateIds = settings.getTemplateIds();
+    const presets = settings.getPresets();
+    const presetSelect = document.querySelector('#presetSelect');
+    for (let i = 0; i < presets.length; i++) {
+        const preset = presets[i];
+        const option = new Option(preset.name, preset.id.toString());
+        presetSelect.add(option);
+    }
+    presetSelect.selectedIndex = 0;
+    templateIds = settings.getTemplateIds(getSelectedPreset());
     view.display('#noResults', templateIds.length === 0);
     view.display('#results', templateIds.length > 0);
     // FIXME: Need to figure out why templateIDs initialize to [0] when local storage is not initialized yet

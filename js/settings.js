@@ -1,18 +1,43 @@
-import { KEY_COLUMN_OPTIONS, KEY_TEMPLATE_IDS, KEY_WALLET, REFRESH_INTERVAL, } from './config.js';
-import { get, getString, set, setString, } from './storage.js';
-export function getTemplateIds() {
-    // QueryString, if present, has precedence over local storage
-    const templateIds = new URLSearchParams(document.location.search).get('template_ids');
-    if (templateIds) {
-        return deserializeTemplateIds(templateIds);
+import { KEY_COLUMN_OPTIONS, KEY_TEMPLATE_IDS, KEY_WALLET, LEGACY_KEY_TEMPLATE_IDS, } from './config.js';
+import { get, getString, remove, set, setString, } from './storage.js';
+export function getPresets() {
+    const defaultValues = [];
+    for (let i = 0; i < 9; i++) {
+        const preset = {
+            id: i,
+            name: `Preset ${i + 1}`,
+        };
+        defaultValues.push(preset);
     }
-    return deserializeTemplateIds(getString(KEY_TEMPLATE_IDS));
+    return get('presets') || defaultValues;
+}
+function getKey(presetNumber, key) {
+    return `${presetNumber}:${key}`;
+}
+export function getTemplateIds(presetNumber) {
+    // QueryString, if present, has precedence over local storage
+    const queryString = new URLSearchParams(document.location.search).get(LEGACY_KEY_TEMPLATE_IDS);
+    if (queryString) {
+        return deserializeTemplateIds(queryString);
+    }
+    const templateIds = get(getKey(presetNumber, KEY_TEMPLATE_IDS));
+    if (templateIds) {
+        return templateIds;
+    }
+    const legacyIds = deserializeTemplateIds(getString(LEGACY_KEY_TEMPLATE_IDS));
+    if (legacyIds && legacyIds.length > 0) {
+        setTemplateIds(presetNumber, legacyIds);
+        console.debug('Old templateID format found. Deleting.');
+        remove(LEGACY_KEY_TEMPLATE_IDS);
+        return legacyIds;
+    }
+    return [];
 }
 // Stores template IDs. Accepts an array or comma-delimited string.
-export function setTemplateIds(val) {
-    const idString = typeof val === 'string' ? val : serializeTemplateIds(val);
-    setString(KEY_TEMPLATE_IDS, idString);
-    return deserializeTemplateIds(idString);
+export function setTemplateIds(presetNumber, val) {
+    const ids = typeof val === 'string' ? deserializeTemplateIds(val) : val;
+    set(getKey(presetNumber, KEY_TEMPLATE_IDS), ids);
+    return ids;
 }
 export function getWallet() {
     return getString(KEY_WALLET) || '';
@@ -20,25 +45,18 @@ export function getWallet() {
 export function setWallet(address) {
     return setString(KEY_WALLET, address);
 }
-function serializeTemplateIds(array) {
-    return array.join(',');
-}
 function deserializeTemplateIds(str) {
-    return (str || '').split(',').map((x) => x).filter((x) => x !== '').sort();
+    console.log('deserialize', str);
+    return (str || '')
+        .split(',')
+        .map((x) => Number(x)).filter((x) => x !== null && !Number.isNaN(x) && x > 0)
+        .sort();
 }
-export function getRefreshInterval() {
-    const urlParams = new URLSearchParams(document.location.search);
-    const interval = Number(urlParams.get('refresh_interval'));
-    if (interval) {
-        return interval * 1000;
-    }
-    return REFRESH_INTERVAL;
+export function setColumnOptions(presetNumber, options) {
+    return set(`${presetNumber}:${KEY_COLUMN_OPTIONS}`, options);
 }
-export function setColumnOptions(options) {
-    return set(KEY_COLUMN_OPTIONS, options);
-}
-export function getColumnOptions() {
-    const options = get(KEY_COLUMN_OPTIONS);
+export function getColumnOptions(presetNumber) {
+    const options = get(`${presetNumber}:${KEY_COLUMN_OPTIONS}`);
     if (options === undefined) {
         return { enabled: [] };
     }

@@ -12,6 +12,7 @@ export interface AtomicAsset {
   collectionName?: string
   schemaName?: string
   rarity?: string
+  timestamp: Date
 }
 
 /** Recent sale data from AtomicHub */

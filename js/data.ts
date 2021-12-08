@@ -48,6 +48,7 @@ export async function getTemplateData(
     rarity: template.immutable_data.rarity,
     schemaName: template.schema.schema_name,
     templateId,
+    timestamp: new Date(),
   };
 }
 
@@ -67,6 +68,7 @@ export async function getLastSold(
       lastSoldDate: new Date(0),
       schemaName: '',
       templateId,
+      timestamp: new Date(),
     };
   }
 
@@ -97,6 +99,7 @@ export async function getLastSold(
     rarity: asset.template.immutable_data.rarity,
     schemaName: asset.schema.schema_name,
     templateId,
+    timestamp: new Date(),
   };
 }
 
@@ -114,6 +117,7 @@ export async function getFloorListing(
     floorPrice: undefined,
     mintNumber: 0,
     templateId,
+    timestamp: new Date(),
   };
 
   if (!floor) {
@@ -130,6 +134,7 @@ export async function getFloorListing(
     rarity: asset.template.immutable_data.rarity,
     schemaName: asset.schema.schema_name,
     templateId,
+    timestamp: new Date(),
   };
 }
 

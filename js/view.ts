@@ -17,7 +17,7 @@ interface HasRefreshTimeout extends HTMLTableRowElement {
   refreshTimeoutId?: number
 }
 
-export async function drawTableRows(templateIds: string[], wallet: string) {
+export async function drawTableRows(templateIds: number[], wallet: string) {
   if (templateIds.length === 0) {
     return;
   }

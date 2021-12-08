@@ -36,5 +36,8 @@ function set(key, value) {
     console.log('set', key, value);
     return localStorage.setItem(key, JSON.stringify(value));
 }
-export { get, set, getString, setString, };
+function remove(key) {
+    localStorage.removeItem(key);
+}
+export { get, set, remove, getString, setString, };
 //# sourceMappingURL=storage.js.map

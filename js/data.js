@@ -48,6 +48,7 @@ export function getTemplateData(templateId, status) {
             rarity: template.immutable_data.rarity,
             schemaName: template.schema.schema_name,
             templateId,
+            timestamp: new Date(),
         };
     });
 }
@@ -64,6 +65,7 @@ export function getLastSold(templateId, status) {
                 lastSoldDate: new Date(0),
                 schemaName: '',
                 templateId,
+                timestamp: new Date(),
             };
         }
         const last = data.data[0];
@@ -89,6 +91,7 @@ export function getLastSold(templateId, status) {
             rarity: asset.template.immutable_data.rarity,
             schemaName: asset.schema.schema_name,
             templateId,
+            timestamp: new Date(),
         };
     });
 }
@@ -102,6 +105,7 @@ export function getFloorListing(templateId, status) {
             floorPrice: undefined,
             mintNumber: 0,
             templateId,
+            timestamp: new Date(),
         };
         if (!floor) {
             return m;
@@ -115,6 +119,7 @@ export function getFloorListing(templateId, status) {
             rarity: asset.template.immutable_data.rarity,
             schemaName: asset.schema.schema_name,
             templateId,
+            timestamp: new Date(),
         };
     });
 }

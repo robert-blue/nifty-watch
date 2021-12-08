@@ -2,7 +2,7 @@ body {
     background-color: black;
 }
 
-td, th {
+#main-table td, #main-table th {
     border-bottom-color: #121212;
     padding: .5rem 1.5rem;
 }
@@ -241,4 +241,12 @@ tr td.asset-name i.hot {
 
 #exchangeTable td:first-child {
   padding-right: 0;
+}
+
+select {
+  color: white;
+}
+
+select option {
+  background-color: black;
 }
