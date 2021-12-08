@@ -43,7 +43,7 @@ export function getTemplateIds(presetNumber) {
     }
     const templateIds = get(getKey(presetNumber, KEY_TEMPLATE_IDS));
     if (templateIds) {
-        return templateIds;
+        return templateIds.filter((t) => Number.isInteger(t));
     }
     const legacyIds = deserializeTemplateIds(getString(LEGACY_KEY_TEMPLATE_IDS));
     if (legacyIds && legacyIds.length > 0) {
