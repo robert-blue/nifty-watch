@@ -8,7 +8,7 @@ import {
   HOT_HOURS_REFRESH_INTERVAL,
 } from './config.js';
 import * as settings from './settings.js';
-import { getTemplateIds } from './settings.js';
+import { getQueryStringTemplateIds, getTemplateIds } from './settings.js';
 import * as util from './util.js';
 import * as data from './data.js';
 import * as view from './view.js';
@@ -256,9 +256,29 @@ function setWalletButtonText() {
   setWalletButton.innerText = wallet || 'No wallet set';
 }
 
+function toggleExpand(e: MouseEvent) {
+  console.log('expand', e);
+  const target = e.target as HTMLElement;
+  const classes = ['fa-maximize', 'fa-minimize'];
+  document.body.classList.remove('maximize');
+
+  if (target.classList.contains(classes[0])) {
+    target.classList.remove(classes[0]);
+    target.classList.add(classes[1]);
+    document.body.classList.add('maximize');
+  } else {
+    target.classList.remove(classes[1]);
+    target.classList.add(classes[0]);
+  }
+}
+
 function bindUI() {
   const headerCell = document.querySelector('#main-table th.dir-u, #main-table th.dir-d');
   sortable(headerCell as HTMLTableCellElement);
+
+  const expandButton = document.querySelector('#expandButton') as HTMLElement;
+  console.log('expandbutton', expandButton);
+  expandButton.addEventListener('click', toggleExpand);
 
   refreshTableButton = document.querySelector('#refreshTableButton') as HTMLButtonElement;
   setTemplateIDsButton = document.querySelector('#setTemplateIDsButton') as HTMLButtonElement;
@@ -325,6 +345,9 @@ function applyColumnVisibility() {
 async function handlePresetChange(e: Event) {
   const select = e.target as HTMLSelectElement;
   const preset = Number(select.options[select.selectedIndex].value);
+  if (preset > -1) {
+    cleanParams();
+  }
 
   cacheLoaded = {};
   templateIds = getTemplateIds(preset);
@@ -342,7 +365,13 @@ function bindPresetSelect() {
     presetSelect.add(option);
   }
 
-  presetSelect.selectedIndex = 0;
+  if (getQueryStringTemplateIds().length > 0) {
+    presetSelect.add(new Option('Shared View', '-1'));
+    presetSelect.selectedIndex = 9;
+  } else {
+    presetSelect.selectedIndex = 0;
+  }
+
   presetSelect.addEventListener('change', handlePresetChange);
 }
 

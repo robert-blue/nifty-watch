@@ -28,11 +28,18 @@ export function getPresets() {
 function getKey(presetNumber, key) {
     return `${presetNumber}:${key}`;
 }
+export function getQueryStringTemplateIds() {
+    const queryString = new URLSearchParams(document.location.search).get('template_ids');
+    console.log('qs', queryString);
+    return deserializeTemplateIds(queryString || undefined) || [];
+}
 export function getTemplateIds(presetNumber) {
     // QueryString, if present, has precedence over local storage
-    const queryString = new URLSearchParams(document.location.search).get(LEGACY_KEY_TEMPLATE_IDS);
-    if (queryString) {
-        return deserializeTemplateIds(queryString);
+    if (presetNumber < 0) {
+        const queryStringTemplateIds = getQueryStringTemplateIds();
+        if (queryStringTemplateIds.length > 0) {
+            return queryStringTemplateIds;
+        }
     }
     const templateIds = get(getKey(presetNumber, KEY_TEMPLATE_IDS));
     if (templateIds) {
@@ -50,7 +57,10 @@ export function getTemplateIds(presetNumber) {
 // Stores template IDs. Accepts an array or comma-delimited string.
 export function setTemplateIds(presetNumber, val) {
     const ids = typeof val === 'string' ? deserializeTemplateIds(val) : val;
-    set(getKey(presetNumber, KEY_TEMPLATE_IDS), ids);
+    // Don't persist values if they come from the QueryString which will be -1
+    if (presetNumber >= 0) {
+        set(getKey(presetNumber, KEY_TEMPLATE_IDS), ids);
+    }
     // // Set preset name
     // const counts: {[key: string]: number} = {};
     // for (const id of ids) {

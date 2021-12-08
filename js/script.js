@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { DEAD_HOURS_REFRESH_INTERVAL, FIRE_HOURS, FIRE_HOURS_REFRESH_INTERVAL, FRESH_HOURS, FRESH_HOURS_REFRESH_INTERVAL, HOT_HOURS, HOT_HOURS_REFRESH_INTERVAL, } from './config.js';
 import * as settings from './settings.js';
-import { getTemplateIds } from './settings.js';
+import { getQueryStringTemplateIds, getTemplateIds } from './settings.js';
 import * as util from './util.js';
 import * as data from './data.js';
 import * as view from './view.js';
@@ -212,9 +212,27 @@ function deleteRowHandler(e) {
 function setWalletButtonText() {
     setWalletButton.innerText = wallet || 'No wallet set';
 }
+function toggleExpand(e) {
+    console.log('expand', e);
+    const target = e.target;
+    const classes = ['fa-maximize', 'fa-minimize'];
+    document.body.classList.remove('maximize');
+    if (target.classList.contains(classes[0])) {
+        target.classList.remove(classes[0]);
+        target.classList.add(classes[1]);
+        document.body.classList.add('maximize');
+    }
+    else {
+        target.classList.remove(classes[1]);
+        target.classList.add(classes[0]);
+    }
+}
 function bindUI() {
     const headerCell = document.querySelector('#main-table th.dir-u, #main-table th.dir-d');
     sortable(headerCell);
+    const expandButton = document.querySelector('#expandButton');
+    console.log('expandbutton', expandButton);
+    expandButton.addEventListener('click', toggleExpand);
     refreshTableButton = document.querySelector('#refreshTableButton');
     setTemplateIDsButton = document.querySelector('#setTemplateIDsButton');
     setWalletButton = document.querySelector('#setWalletButton');
@@ -268,6 +286,9 @@ function handlePresetChange(e) {
     return __awaiter(this, void 0, void 0, function* () {
         const select = e.target;
         const preset = Number(select.options[select.selectedIndex].value);
+        if (preset > -1) {
+            cleanParams();
+        }
         cacheLoaded = {};
         templateIds = getTemplateIds(preset);
         yield view.drawTableRows(templateIds, wallet);
@@ -282,7 +303,13 @@ function bindPresetSelect() {
         const option = new Option(preset.name, preset.id.toString());
         presetSelect.add(option);
     }
-    presetSelect.selectedIndex = 0;
+    if (getQueryStringTemplateIds().length > 0) {
+        presetSelect.add(new Option('Shared View', '-1'));
+        presetSelect.selectedIndex = 9;
+    }
+    else {
+        presetSelect.selectedIndex = 0;
+    }
     presetSelect.addEventListener('change', handlePresetChange);
 }
 (() => __awaiter(void 0, void 0, void 0, function* () {

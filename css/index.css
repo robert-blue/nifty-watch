@@ -256,6 +256,16 @@ select option {
     margin-top: -1.5rem;
 }
 
-.header {
+.maximize .header, .maximize .footer {
   display: none;
+}
+
+
+
+#expandButton {
+  cursor: pointer;
+}
+
+#expandButton:hover {
+  color: white;
 }
