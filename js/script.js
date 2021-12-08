@@ -9,12 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { DEAD_HOURS_REFRESH_INTERVAL, FIRE_HOURS, FIRE_HOURS_REFRESH_INTERVAL, FRESH_HOURS, FRESH_HOURS_REFRESH_INTERVAL, HOT_HOURS, HOT_HOURS_REFRESH_INTERVAL, } from './config.js';
 import * as settings from './settings.js';
+import { getTemplateIds } from './settings.js';
 import * as util from './util.js';
 import * as data from './data.js';
 import * as view from './view.js';
+import { bindLinks } from './view.js';
 import { get, set } from './storage.js';
 import sortable from './vendor/sortable.js';
-import { bindLinks } from './view.js';
 let wallet = '';
 let templateIds = [];
 let refreshTableButton;
@@ -263,8 +264,17 @@ function applyColumnVisibility() {
     });
     saveColumnOptions();
 }
-(() => __awaiter(void 0, void 0, void 0, function* () {
-    wallet = settings.getWallet();
+function handlePresetChange(e) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const select = e.target;
+        const preset = Number(select.options[select.selectedIndex].value);
+        cacheLoaded = {};
+        templateIds = getTemplateIds(preset);
+        yield view.drawTableRows(templateIds, wallet);
+        yield refresh();
+    });
+}
+function bindPresetSelect() {
     const presets = settings.getPresets();
     const presetSelect = document.querySelector('#presetSelect');
     for (let i = 0; i < presets.length; i++) {
@@ -273,6 +283,11 @@ function applyColumnVisibility() {
         presetSelect.add(option);
     }
     presetSelect.selectedIndex = 0;
+    presetSelect.addEventListener('change', handlePresetChange);
+}
+(() => __awaiter(void 0, void 0, void 0, function* () {
+    wallet = settings.getWallet();
+    bindPresetSelect();
     templateIds = settings.getTemplateIds(getSelectedPreset());
     view.display('#noResults', templateIds.length === 0);
     view.display('#results', templateIds.length > 0);

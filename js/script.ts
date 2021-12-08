@@ -8,17 +8,17 @@ import {
   HOT_HOURS_REFRESH_INTERVAL,
 } from './config.js';
 import * as settings from './settings.js';
+import { getTemplateIds } from './settings.js';
 import * as util from './util.js';
 import * as data from './data.js';
 import * as view from './view.js';
+import { bindLinks } from './view.js';
 import {
-  // eslint-disable-next-line import/named
-  AtomicAsset, AtomicListing, AtomicSale, RowView, TemplateRow,
+  AtomicAsset, AtomicListing, AtomicSale, CacheData, RowView, TemplateRow,
 } from './types.js';
 import { get, set } from './storage.js';
 
 import sortable from './vendor/sortable.js';
-import { bindLinks } from './view.js';
 
 let wallet = '';
 let templateIds: number[] = [];
@@ -27,11 +27,6 @@ let refreshTableButton: HTMLButtonElement;
 let setTemplateIDsButton: HTMLButtonElement;
 let setWalletButton: HTMLButtonElement;
 let shareButton: HTMLButtonElement;
-
-interface cacheData {
-  lastSold: AtomicSale
-  floorListing: AtomicListing
-}
 
 let cacheLoaded: { [templateId: string]: boolean } = {};
 
@@ -44,7 +39,7 @@ async function refreshRow(row: HTMLTableRowElement, waxPrice: number) {
   let floorListing: AtomicListing | undefined;
 
   if (!cacheLoaded[templateId]) {
-    const value = get<cacheData>(templateId);
+    const value = get<CacheData>(templateId);
     if (value !== undefined) {
       ({ lastSold, floorListing } = value);
       cacheLoaded[templateId] = true;
@@ -54,7 +49,7 @@ async function refreshRow(row: HTMLTableRowElement, waxPrice: number) {
   if (!lastSold || !floorListing) {
     lastSold = await data.getLastSold(templateId, view.setStatus);
     floorListing = await data.getFloorListing(templateId, view.setStatus);
-    set<cacheData>(templateId, { lastSold, floorListing });
+    set<CacheData>(templateId, { lastSold, floorListing });
   }
 
   let model: RowView;
@@ -327,9 +322,17 @@ function applyColumnVisibility() {
   saveColumnOptions();
 }
 
-(async () => {
-  wallet = settings.getWallet();
+async function handlePresetChange(e: Event) {
+  const select = e.target as HTMLSelectElement;
+  const preset = Number(select.options[select.selectedIndex].value);
 
+  cacheLoaded = {};
+  templateIds = getTemplateIds(preset);
+  await view.drawTableRows(templateIds, wallet);
+  await refresh();
+}
+
+function bindPresetSelect() {
   const presets = settings.getPresets();
 
   const presetSelect = document.querySelector('#presetSelect') as HTMLSelectElement;
@@ -340,6 +343,12 @@ function applyColumnVisibility() {
   }
 
   presetSelect.selectedIndex = 0;
+  presetSelect.addEventListener('change', handlePresetChange);
+}
+
+(async () => {
+  wallet = settings.getWallet();
+  bindPresetSelect();
 
   templateIds = settings.getTemplateIds(getSelectedPreset());
 

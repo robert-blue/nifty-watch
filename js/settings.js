@@ -3,9 +3,23 @@ import { get, getString, remove, set, setString, } from './storage.js';
 export function getPresets() {
     const defaultValues = [];
     for (let i = 0; i < 9; i++) {
+        const ids = getTemplateIds(i);
+        // Set preset name
+        const counts = {};
+        for (const id of ids) {
+            const data = get(id.toString());
+            if (data) {
+                const asset = data.lastSold || data.floorListing;
+                const collection = asset.collectionName || '';
+                counts[collection] = (counts[collection] || 0) + 1;
+            }
+        }
+        let ordered = [...new Set(Object.keys(counts))];
+        ordered = ordered.sort((a, b) => counts[b] - counts[a]);
+        console.log('ordered', ordered);
         const preset = {
             id: i,
-            name: `Preset ${i + 1}`,
+            name: `Preset ${i + 1} - (${ids.length}) ${ordered.slice(0, 5).join(', ')}`,
         };
         defaultValues.push(preset);
     }
@@ -37,6 +51,20 @@ export function getTemplateIds(presetNumber) {
 export function setTemplateIds(presetNumber, val) {
     const ids = typeof val === 'string' ? deserializeTemplateIds(val) : val;
     set(getKey(presetNumber, KEY_TEMPLATE_IDS), ids);
+    // // Set preset name
+    // const counts: {[key: string]: number} = {};
+    // for (const id of ids) {
+    //   const data = get<CacheData>(id.toString());
+    //   if (data) {
+    //     const asset = data.lastSold || data.floorListing;
+    //     const collection = asset.collectionName || '';
+    //     counts[collection] = (counts[collection] || 0) + 1;
+    //   }
+    // }
+    //
+    // let ordered = [...new Set(Object.keys(counts))];
+    // ordered = ordered.sort((a, b) => counts[b] - counts[a]);
+    // console.log('ordered', ordered);
     return ids;
 }
 export function getWallet() {
@@ -62,4 +90,8 @@ export function getColumnOptions(presetNumber) {
     }
     return options;
 }
+// Cleanup
+(() => {
+    remove('0.columnOptions');
+})();
 //# sourceMappingURL=settings.js.map

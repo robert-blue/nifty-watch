@@ -250,3 +250,12 @@ select {
 select option {
   background-color: black;
 }
+
+.status-row {
+    margin-bottom: 0.5rem;
+    margin-top: -1.5rem;
+}
+
+.header {
+  display: none;
+}

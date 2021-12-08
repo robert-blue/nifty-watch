@@ -41,3 +41,8 @@ export interface RowView extends AtomicListing, AtomicSale {
   rarityLink?: string
   schemaLink: string;
 }
+
+export interface CacheData {
+  lastSold: AtomicSale
+  floorListing: AtomicListing
+}

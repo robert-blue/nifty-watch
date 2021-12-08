@@ -23,13 +23,16 @@ function setString(key: string, value: string) {
 }
 
 function get<T>(key: string, defaultValue?: T): T | undefined {
+  console.debug('get', key);
   const value = localStorage.getItem(key);
   if (value === undefined || value === null) {
     return defaultValue;
   }
 
   try {
-    return JSON.parse(value, JSONDateParser) as T || defaultValue;
+    const parsed = JSON.parse(value, JSONDateParser) as T;
+    console.debug('get', key, parsed);
+    return parsed || defaultValue;
   } catch (e) {
     console.error(e);
   }
@@ -38,11 +41,12 @@ function get<T>(key: string, defaultValue?: T): T | undefined {
 }
 
 function set<T>(key: string, value: T): void {
-  console.log('set', key, value);
+  console.debug('set', key, value);
   return localStorage.setItem(key, JSON.stringify(value));
 }
 
 function remove(key: string): void {
+  console.debug('remove', key);
   localStorage.removeItem(key);
 }
 

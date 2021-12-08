@@ -46,17 +46,27 @@
           <th class="text-right" title="percentage difference between last sold WAX price and floor WAX price">Gap</th>
           <th class="dir-u" title="elapsed time since last sale">Lag</th>
           <th class="no-sort text-right">USD</th>
-          <th class="no-sort"></th>
+          <th class="no-sort"><i class="fa-solid fa-maximize" id="expandButton"></i></th>
         </tr>
         </thead>
         <tbody id="exchangeTable"></tbody>
       </table>
     </div>
   </div>
+  <div class="row status-row">
+    <div class="column">
+      WAX = $<span id="waxPrice"></span>
+      &nbsp;&nbsp;|&nbsp;&nbsp;
+      Updated <span id="timestamp"></span>
+      &nbsp;&nbsp;|&nbsp;&nbsp;
+      Updates automatically based on lag time
+      <span id="refreshStatus"></span>
+      <div class="float-right">WAX Donations: <span class="donation-address">mo.xy</span></div>
+    </div>
+  </div>
   <div class="row">
     <div class="column">
       <button id="refreshTableButton">Refresh</button>
-      <span id="refreshStatus"></span>
     </div>
     <div class="column buttons-right">
       <select id="presetSelect"></select>
@@ -67,17 +77,6 @@
         <label class="float-left"><input type="checkbox" data-show-column="schema-name"/> Schema</label>
         <label class="float-left"><input type="checkbox" data-show-column="rarity"/> Rarity</label>
       </div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="column">
-      WAX = $<span id="waxPrice"></span>
-      &nbsp;&nbsp;|&nbsp;&nbsp;
-      Updated <span id="timestamp"></span>
-      &nbsp;&nbsp;|&nbsp;&nbsp;
-      Updates automatically based on lag time
-
-      <div class="float-right">WAX Donations: <span class="donation-address">mo.xy</span></div>
     </div>
   </div>
 </div>

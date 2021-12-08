@@ -4,6 +4,7 @@ import {
 import {
   get, getString, remove, set, setString,
 } from './storage.js';
+import { CacheData } from './types';
 
 interface Preset {
   id: number
@@ -13,9 +14,25 @@ interface Preset {
 export function getPresets(): Preset[] {
   const defaultValues: Preset[] = [];
   for (let i = 0; i < 9; i++) {
+    const ids = getTemplateIds(i);
+    // Set preset name
+    const counts: {[key: string]: number} = {};
+    for (const id of ids) {
+      const data = get<CacheData>(id.toString());
+      if (data) {
+        const asset = data.lastSold || data.floorListing;
+        const collection = asset.collectionName || '';
+        counts[collection] = (counts[collection] || 0) + 1;
+      }
+    }
+
+    let ordered = [...new Set(Object.keys(counts))];
+    ordered = ordered.sort((a, b) => counts[b] - counts[a]);
+    console.log('ordered', ordered);
+
     const preset = {
       id: i,
-      name: `Preset ${i + 1}`,
+      name: `Preset ${i + 1} - (${ids.length}) ${ordered.slice(0, 5).join(', ')}`,
     };
 
     defaultValues.push(preset);
@@ -55,6 +72,22 @@ export function getTemplateIds(presetNumber: number): number[] {
 export function setTemplateIds(presetNumber: number, val: number[]|string) {
   const ids: number[] = typeof val === 'string' ? deserializeTemplateIds(val) : val;
   set<number[]>(getKey(presetNumber, KEY_TEMPLATE_IDS), ids);
+
+  // // Set preset name
+  // const counts: {[key: string]: number} = {};
+  // for (const id of ids) {
+  //   const data = get<CacheData>(id.toString());
+  //   if (data) {
+  //     const asset = data.lastSold || data.floorListing;
+  //     const collection = asset.collectionName || '';
+  //     counts[collection] = (counts[collection] || 0) + 1;
+  //   }
+  // }
+  //
+  // let ordered = [...new Set(Object.keys(counts))];
+  // ordered = ordered.sort((a, b) => counts[b] - counts[a]);
+  // console.log('ordered', ordered);
+
   return ids;
 }
 
@@ -92,3 +125,8 @@ export function getColumnOptions(presetNumber: number): ColumnOptions {
 
   return options;
 }
+
+// Cleanup
+(() => {
+  remove('0.columnOptions');
+})();

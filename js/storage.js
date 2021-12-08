@@ -20,12 +20,15 @@ function setString(key, value) {
     return localStorage.setItem(key, value);
 }
 function get(key, defaultValue) {
+    console.debug('get', key);
     const value = localStorage.getItem(key);
     if (value === undefined || value === null) {
         return defaultValue;
     }
     try {
-        return JSON.parse(value, JSONDateParser) || defaultValue;
+        const parsed = JSON.parse(value, JSONDateParser);
+        console.debug('get', key, parsed);
+        return parsed || defaultValue;
     }
     catch (e) {
         console.error(e);
@@ -33,10 +36,11 @@ function get(key, defaultValue) {
     return defaultValue;
 }
 function set(key, value) {
-    console.log('set', key, value);
+    console.debug('set', key, value);
     return localStorage.setItem(key, JSON.stringify(value));
 }
 function remove(key) {
+    console.debug('remove', key);
     localStorage.removeItem(key);
 }
 export { get, set, remove, getString, setString, };
