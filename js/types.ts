@@ -15,18 +15,22 @@ export interface AtomicAsset {
   timestamp: Date
 }
 
+export interface AssetSale {date: Date, price: number, seller: string}
+
 /** Recent sale data from AtomicHub */
 export interface AtomicSale extends AtomicAsset {
   increasing: number
   lastPrice?: number
   lastSoldDate: Date
-  priceHistory?: [{date: Date, price: number}]
+  priceHistory: AssetSale[]
 }
 
 /** Asset listed for sale on AtomicHub */
 export interface AtomicListing extends AtomicAsset {
   floorPrice?: number
   mintNumber: number
+  seller: string
+  listings: AssetSale[]
 }
 
 /** Composite model of asset data retrieved from AtomicHub.io */

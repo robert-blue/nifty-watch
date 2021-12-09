@@ -1,7 +1,8 @@
 import Semaphore from './vendor/semaphore.js';
 import * as util from './util.js';
 import {
-// eslint-disable-next-line import/named
+  AssetSale,
+  // eslint-disable-next-line import/named
   AtomicAsset, AtomicListing, AtomicSale, RowView,
 } from './types.js';
 import { bindLinks } from './view.js';
@@ -68,13 +69,14 @@ export async function getLastSold(
       lastSoldDate: new Date(0),
       schemaName: '',
       templateId,
+      priceHistory: [],
       timestamp: new Date(),
     };
   }
 
   const last = data.data[0];
 
-  const priceHistory: [{ date: Date, price: number }] = data.data.map((d: any) => ({
+  const priceHistory: AssetSale[] = data.data.map((d: any) => ({
     date: new Date(Number(d.updated_at_time)),
     price: util.parseTokenValue(d.price.token_precision, d.price.amount),
   })).reverse();
@@ -99,7 +101,7 @@ export async function getLastSold(
     rarity: asset.template.immutable_data.rarity,
     schemaName: asset.schema.schema_name,
     templateId,
-    timestamp: new Date(),
+    timestamp: new Date(Number(asset.updated_at_time)),
   };
 }
 
@@ -107,34 +109,52 @@ export async function getFloorListing(
   templateId: string,
   status: (msg?: string | undefined) => void,
 ): Promise<AtomicListing> {
-  const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales/templates?symbol=WAX&state=1&max_assets=1&template_id=${templateId}&order=asc&sort=price`;
+  const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?symbol=WAX&state=1&max_assets=1&template_id=${templateId}&page=1&limit=5&order=asc&sort=price`;
   const response = await atomicFetch(url, status);
 
   const data = await response.json();
-  const floor = data.data[0];
-
-  const m: AtomicListing = {
-    floorPrice: undefined,
-    mintNumber: 0,
-    templateId,
-    timestamp: new Date(),
-  };
-
-  if (!floor) {
-    return m;
+  if (data.data.length === 0) {
+    return {
+      floorPrice: undefined,
+      mintNumber: 0,
+      seller: '',
+      templateId,
+      timestamp: new Date(),
+      listings: [],
+    };
   }
 
+  interface response {
+    assets: Record<string, any>[]
+    collection_name: string,
+    seller: string,
+    updated_at_time: string,
+    price: Record<string, any>
+  }
+
+  const listings: AssetSale[] = data.data.map((floor: response) => {
+    const asset = floor.assets[0];
+    return {
+      date: new Date(Number(asset.updated_at_time)),
+      price: util.parseTokenValue(floor.price.token_precision, floor.price.amount),
+      seller: floor.seller,
+    };
+  });
+
+  const floor = data.data[0];
   const asset = floor.assets[0];
 
   return {
     assetName: asset.template.immutable_data.name || asset.schema.schema_name,
     collectionName: floor.collection_name,
     floorPrice: util.parseTokenValue(floor.price.token_precision, floor.price.amount),
+    listings,
     mintNumber: asset.template_mint,
     rarity: asset.template.immutable_data.rarity,
     schemaName: asset.schema.schema_name,
+    seller: asset.seller,
     templateId,
-    timestamp: new Date(),
+    timestamp: new Date(Number(asset.updated_at_time)),
   };
 }
 

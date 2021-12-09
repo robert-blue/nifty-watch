@@ -1,7 +1,8 @@
 import { DEAD_HOURS, FRESH_HOURS, HOT_HOURS } from './config.js';
 import * as util from './util.js';
 // eslint-disable-next-line import/named
-import { RowView, Sortable } from './types.js';
+import { AssetSale, RowView, Sortable } from './types.js';
+import { getWallet } from './settings.js';
 
 export function setStatus(msg?: string) {
   const statusElem = document.getElementById('refreshStatus') as HTMLElement;
@@ -46,6 +47,7 @@ export async function drawTableRows(templateIds: number[], wallet: string) {
     <i class="fa-solid fa-fire-flame-curved hot" title="[hot] last 5 sales occurred within the last ${HOT_HOURS} hours"></i>
     <i class="fa-solid fa-arrow-trend-up up" title="[trending] 3 of the last 4 sales had same or increasing price"></i>
     <i class="fa-solid fa-arrow-trend-down down" title="[down] 3 of the last 4 sales had decreasing price"></i>
+    <i class="fa-solid fa-triangle-exclamation sale-imminent"></i>
     <i class="fa-solid fa-rotate"></i>
   </td>
   <td class="price-wax" style="text-align:right"><span class="price-wax-value"></span> WAX</td>
@@ -138,6 +140,22 @@ export function bindRow(row: HTMLTableRowElement, m: RowView, waxPrice: number) 
     row.classList.add(...priceAction(m.lagHours, m.increasing, m.priceHistory));
   }
 
+  row.classList.remove('sale-imminent');
+  const rowDataset = row.dataset;
+  for (let i = m.listings.length; i > 0; i--) {
+    const listing = m.listings[i - 1];
+    if (listing.seller.toLowerCase() === getWallet()) {
+      row.classList.add('sale-imminent');
+      rowDataset.fromFloor = i.toString();
+      const icon = row.querySelector('i.sale-imminent') as HTMLElement;
+      if (i === 1) {
+        icon.title = 'Your listing is at the floor!';
+      } else {
+        icon.title = `Your listing is ${i - 1} away from the floor`;
+      }
+    }
+  }
+
   const collectionCell = row.querySelector('td.collection-name') as HTMLElement;
   collectionCell.dataset.sort = m.collectionName;
 
@@ -170,7 +188,7 @@ function bindLink(row: HTMLTableRowElement, selector: string, href?: string, tex
   link.innerHTML = text || '';
 }
 
-function priceAction(lagHours: number|undefined, increasing: number, priceHistory?: [{date: Date, price: number}]) {
+function priceAction(lagHours: number|undefined, increasing: number, priceHistory?: AssetSale[]) {
   const result: string[] = [];
 
   if (lagHours === undefined) {

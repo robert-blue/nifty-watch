@@ -14,6 +14,7 @@ import * as data from './data.js';
 import * as view from './view.js';
 import { bindLinks } from './view.js';
 import {
+  // eslint-disable-next-line import/named
   AtomicAsset, AtomicListing, AtomicSale, CacheData, RowView, TemplateRow,
 } from './types.js';
 import { get, set } from './storage.js';
@@ -63,6 +64,7 @@ async function refreshRow(row: HTMLTableRowElement, waxPrice: number) {
     }
 
     model = {
+      seller: '',
       collectionLink: '',
       floorPrice: undefined,
       historyLink: '',
@@ -71,8 +73,10 @@ async function refreshRow(row: HTMLTableRowElement, waxPrice: number) {
       lagHours: undefined,
       lastPrice: undefined,
       lastSoldDate: new Date(0),
+      listings: [],
       listingsLink: '',
       mintNumber: 0,
+      priceHistory: [],
       schemaLink: '',
       templateLink: '',
       ...templateData,

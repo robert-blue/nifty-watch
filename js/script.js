@@ -50,7 +50,7 @@ function refreshRow(row, waxPrice) {
                 templateData = yield data.getTemplateData(templateId, view.setStatus);
                 set(cacheKey, templateData);
             }
-            model = Object.assign({ collectionLink: '', floorPrice: undefined, historyLink: '', increasing: 0, inventoryLink: '', lagHours: undefined, lastPrice: undefined, lastSoldDate: new Date(0), listingsLink: '', mintNumber: 0, schemaLink: '', templateLink: '' }, templateData);
+            model = Object.assign({ seller: '', collectionLink: '', floorPrice: undefined, historyLink: '', increasing: 0, inventoryLink: '', lagHours: undefined, lastPrice: undefined, lastSoldDate: new Date(0), listings: [], listingsLink: '', mintNumber: 0, priceHistory: [], schemaLink: '', templateLink: '' }, templateData);
             model = bindLinks(model, templateId, wallet);
         }
         else {

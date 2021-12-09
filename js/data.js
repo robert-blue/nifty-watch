@@ -65,6 +65,7 @@ export function getLastSold(templateId, status) {
                 lastSoldDate: new Date(0),
                 schemaName: '',
                 templateId,
+                priceHistory: [],
                 timestamp: new Date(),
             };
         }
@@ -91,35 +92,46 @@ export function getLastSold(templateId, status) {
             rarity: asset.template.immutable_data.rarity,
             schemaName: asset.schema.schema_name,
             templateId,
-            timestamp: new Date(),
+            timestamp: new Date(Number(asset.updated_at_time)),
         };
     });
 }
 export function getFloorListing(templateId, status) {
     return __awaiter(this, void 0, void 0, function* () {
-        const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales/templates?symbol=WAX&state=1&max_assets=1&template_id=${templateId}&order=asc&sort=price`;
+        const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?symbol=WAX&state=1&max_assets=1&template_id=${templateId}&page=1&limit=5&order=asc&sort=price`;
         const response = yield atomicFetch(url, status);
         const data = yield response.json();
-        const floor = data.data[0];
-        const m = {
-            floorPrice: undefined,
-            mintNumber: 0,
-            templateId,
-            timestamp: new Date(),
-        };
-        if (!floor) {
-            return m;
+        if (data.data.length === 0) {
+            return {
+                floorPrice: undefined,
+                mintNumber: 0,
+                seller: '',
+                templateId,
+                timestamp: new Date(),
+                listings: [],
+            };
         }
+        const listings = data.data.map((floor) => {
+            const asset = floor.assets[0];
+            return {
+                date: new Date(Number(asset.updated_at_time)),
+                price: util.parseTokenValue(floor.price.token_precision, floor.price.amount),
+                seller: floor.seller,
+            };
+        });
+        const floor = data.data[0];
         const asset = floor.assets[0];
         return {
             assetName: asset.template.immutable_data.name || asset.schema.schema_name,
             collectionName: floor.collection_name,
             floorPrice: util.parseTokenValue(floor.price.token_precision, floor.price.amount),
+            listings,
             mintNumber: asset.template_mint,
             rarity: asset.template.immutable_data.rarity,
             schemaName: asset.schema.schema_name,
+            seller: asset.seller,
             templateId,
-            timestamp: new Date(),
+            timestamp: new Date(Number(asset.updated_at_time)),
         };
     });
 }

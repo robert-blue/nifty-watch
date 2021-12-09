@@ -6,7 +6,8 @@ export function getPresets() {
         const ids = getTemplateIds(i);
         // Set preset name
         const counts = {};
-        for (const id of ids) {
+        for (let i1 = 0; i1 < ids.length; i1++) {
+            const id = ids[i1];
             const data = get(id.toString());
             if (data) {
                 const asset = data.lastSold || data.floorListing;
@@ -78,7 +79,7 @@ export function setTemplateIds(presetNumber, val) {
     return ids;
 }
 export function getWallet() {
-    return getString(KEY_WALLET) || '';
+    return (getString(KEY_WALLET) || '').toLowerCase();
 }
 export function setWallet(address) {
     return setString(KEY_WALLET, address);

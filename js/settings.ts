@@ -4,7 +4,8 @@ import {
 import {
   get, getString, remove, set, setString,
 } from './storage.js';
-import { CacheData } from './types';
+// eslint-disable-next-line import/named
+import { CacheData } from './types.js';
 
 interface Preset {
   id: number
@@ -17,7 +18,8 @@ export function getPresets(): Preset[] {
     const ids = getTemplateIds(i);
     // Set preset name
     const counts: {[key: string]: number} = {};
-    for (const id of ids) {
+    for (let i1 = 0; i1 < ids.length; i1++) {
+      const id = ids[i1];
       const data = get<CacheData>(id.toString());
       if (data) {
         const asset = data.lastSold || data.floorListing;
@@ -103,7 +105,7 @@ export function setTemplateIds(presetNumber: number, val: number[]|string): numb
 }
 
 export function getWallet(): string {
-  return getString(KEY_WALLET) || '';
+  return (getString(KEY_WALLET) || '').toLowerCase();
 }
 
 export function setWallet(address: string): void {

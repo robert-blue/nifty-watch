@@ -141,6 +141,23 @@ tr td.asset-name i.hot, tr td.asset-name i.dead, tr td.asset-name i.down, tr td.
     display: none;
 }
 
+tr i.sale-imminent {
+  display: none;
+}
+
+tr.sale-imminent i.sale-imminent {
+  display: inline-block;
+}
+
+tr.sale-imminent[data-from-floor="1"] i.sale-imminent {
+  color: yellow;
+  animation: pulse 2s linear infinite;
+}
+
+tr.sale-imminent[data-from-floor="2"] i.sale-imminent, tr.sale-imminent[data-from-floor="3"] i.sale-imminent, tr.sale-imminent[data-from-floor="4"] i.sale-imminent, tr.sale-imminent[data-from-floor="5"] i.sale-imminent {
+  color: orange;
+}
+
 tr td.asset-name i.down {
     color: red;
 }
@@ -222,6 +239,21 @@ tr td.asset-name i.hot {
   }
 }
 
+@keyframes pulse {
+  0% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+
 #exchangeTable tr:hover, #exchangeTable tr:hover:nth-of-type(odd)  {
     background-color: #121212;
 }
@@ -244,7 +276,8 @@ tr td.asset-name i.hot {
 }
 
 select {
-  color: white;
+  color: #606c76;
+  border-color: #606c76;
 }
 
 select option {
@@ -269,3 +302,4 @@ select option {
 #expandButton:hover {
   color: white;
 }
+
