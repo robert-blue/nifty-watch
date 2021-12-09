@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "es6",
+    "target": "es2016",
+    "module": "es2015",
     "moduleResolution": "classic",
     "noEmit": false,
     "declaration": true,
@@ -20,7 +20,7 @@
     "experimentalDecorators": true,
     "sourceMap": true,
     "lib": [
-      "ES6",
+      "es2016",
       "DOM"
     ]
   },

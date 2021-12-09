@@ -1,9 +1,8 @@
 import Semaphore from './vendor/semaphore.js';
 import * as util from './util.js';
 import {
-  AssetSale,
   // eslint-disable-next-line import/named
-  AtomicAsset, AtomicListing, AtomicSale, RowView,
+  AssetSale, AtomicAsset, AtomicListing, AtomicSale, RowView,
 } from './types.js';
 import { bindLinks } from './view.js';
 
@@ -79,6 +78,7 @@ export async function getLastSold(
   const priceHistory: AssetSale[] = data.data.map((d: any) => ({
     date: new Date(Number(d.updated_at_time)),
     price: util.parseTokenValue(d.price.token_precision, d.price.amount),
+    seller: d.seller,
   })).reverse();
 
   const prices: number[] = priceHistory.map((p) => p.price);

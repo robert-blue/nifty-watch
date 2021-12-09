@@ -104,8 +104,16 @@ export function setTemplateIds(presetNumber: number, val: number[]|string): numb
   return ids;
 }
 
+export function getWallets(): string[] {
+  return (getString(KEY_WALLET) || '')
+    .toLowerCase()
+    .split(',')
+    .map((s) => s.trim());
+}
+
 export function getWallet(): string {
-  return (getString(KEY_WALLET) || '').toLowerCase();
+  const wallets = getWallets();
+  return (wallets) ? wallets[0] : '';
 }
 
 export function setWallet(address: string): void {

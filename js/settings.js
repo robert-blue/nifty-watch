@@ -78,8 +78,15 @@ export function setTemplateIds(presetNumber, val) {
     // console.log('ordered', ordered);
     return ids;
 }
+export function getWallets() {
+    return (getString(KEY_WALLET) || '')
+        .toLowerCase()
+        .split(',')
+        .map((s) => s.trim());
+}
 export function getWallet() {
-    return (getString(KEY_WALLET) || '').toLowerCase();
+    const wallets = getWallets();
+    return (wallets) ? wallets[0] : '';
 }
 export function setWallet(address) {
     return setString(KEY_WALLET, address);

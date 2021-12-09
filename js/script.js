@@ -16,7 +16,6 @@ import * as view from './view.js';
 import { bindLinks } from './view.js';
 import { get, set } from './storage.js';
 import sortable from './vendor/sortable.js';
-let wallet = '';
 let templateIds = [];
 let refreshTableButton;
 let setTemplateIDsButton;
@@ -27,6 +26,7 @@ function refreshRow(row, waxPrice) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         row.classList.add('updating');
+        const wallet = settings.getWallet();
         const templateId = (_a = row.dataset.templateId) !== null && _a !== void 0 ? _a : '';
         let lastSold;
         let floorListing;
@@ -56,7 +56,7 @@ function refreshRow(row, waxPrice) {
         else {
             model = data.transform(lastSold, floorListing, templateId, wallet);
         }
-        view.bindRow(row, model, waxPrice);
+        view.bindRow(row, model, waxPrice, settings.getWallets());
         row.setAttribute('title', `last updated ${(new Date()).toLocaleTimeString()}`);
         view.setTimestamp();
         view.sortTable();
@@ -83,7 +83,7 @@ function supplementalRefresh(result) {
     else {
         refreshInterval = DEAD_HOURS_REFRESH_INTERVAL;
     }
-    if ('refreshTimeout' in row) {
+    if (Object.getOwnPropertyNames(row).includes('refreshTimeout')) {
         clearTimeout(row.refreshTimeoutId);
     }
     row.refreshTimeoutId = setTimeout(() => __awaiter(this, void 0, void 0, function* () {
@@ -125,13 +125,13 @@ function clearTimeouts(rows) {
 function setWallet() {
     return __awaiter(this, void 0, void 0, function* () {
         // eslint-disable-next-line no-alert
-        const input = prompt('Enter your wallet address', wallet);
+        const input = prompt('Enter your wallet address', settings.getWallets().join(','));
         if (input === null) {
             throw new Error('No wallet address provided');
         }
-        wallet = input;
+        const wallet = input.trim().replace(' ', '').toLowerCase();
         settings.setWallet(wallet);
-        yield view.drawTableRows(templateIds, wallet);
+        yield view.drawTableRows(templateIds, settings.getWallet());
         cacheLoaded = {};
         yield refresh();
     });
@@ -156,7 +156,7 @@ function setTemplateIDs() {
             templateIds = settings.setTemplateIds(getSelectedPreset(), newTemplateIds);
             setTemplateIDsButtonText();
             cleanParams();
-            yield view.drawTableRows(templateIds, wallet);
+            yield view.drawTableRows(templateIds, settings.getWallet());
             cacheLoaded = {};
             yield refresh();
         }
@@ -210,10 +210,9 @@ function deleteRowHandler(e) {
     });
 }
 function setWalletButtonText() {
-    setWalletButton.innerText = wallet || 'No wallet set';
+    setWalletButton.innerText = settings.getWallet() || 'No wallet set';
 }
 function toggleExpand(e) {
-    console.log('expand', e);
     const target = e.target;
     const classes = ['fa-maximize', 'fa-minimize'];
     document.body.classList.remove('maximize');
@@ -291,7 +290,7 @@ function handlePresetChange(e) {
         }
         cacheLoaded = {};
         templateIds = getTemplateIds(preset);
-        yield view.drawTableRows(templateIds, wallet);
+        yield view.drawTableRows(templateIds, settings.getWallet());
         yield refresh();
     });
 }
@@ -313,7 +312,6 @@ function bindPresetSelect() {
     presetSelect.addEventListener('change', handlePresetChange);
 }
 (() => __awaiter(void 0, void 0, void 0, function* () {
-    wallet = settings.getWallet();
     bindPresetSelect();
     templateIds = settings.getTemplateIds(getSelectedPreset());
     view.display('#noResults', templateIds.length === 0);
@@ -323,7 +321,7 @@ function bindPresetSelect() {
         templateIds = [];
     }
     bindUI();
-    yield view.drawTableRows(templateIds, wallet);
+    yield view.drawTableRows(templateIds, settings.getWallet());
     yield refresh();
 }))();
 //# sourceMappingURL=script.js.map

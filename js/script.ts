@@ -21,7 +21,6 @@ import { get, set } from './storage.js';
 
 import sortable from './vendor/sortable.js';
 
-let wallet = '';
 let templateIds: number[] = [];
 
 let refreshTableButton: HTMLButtonElement;
@@ -34,6 +33,7 @@ let cacheLoaded: { [templateId: string]: boolean } = {};
 async function refreshRow(row: HTMLTableRowElement, waxPrice: number) {
   row.classList.add('updating');
 
+  const wallet = settings.getWallet();
   const templateId = row.dataset.templateId ?? '';
 
   let lastSold: AtomicSale | undefined;
@@ -86,7 +86,7 @@ async function refreshRow(row: HTMLTableRowElement, waxPrice: number) {
     model = data.transform(lastSold, floorListing, templateId, wallet);
   }
 
-  view.bindRow(row, model, waxPrice);
+  view.bindRow(row, model, waxPrice, settings.getWallets());
   row.setAttribute('title', `last updated ${(new Date()).toLocaleTimeString()}`);
   view.setTimestamp();
   view.sortTable();
@@ -113,7 +113,7 @@ function supplementalRefresh(result: RowView) {
     refreshInterval = DEAD_HOURS_REFRESH_INTERVAL;
   }
 
-  if ('refreshTimeout' in row) {
+  if (Object.getOwnPropertyNames(row).includes('refreshTimeout')) {
     clearTimeout(row.refreshTimeoutId);
   }
 
@@ -163,15 +163,15 @@ function clearTimeouts(rows: Array<TemplateRow>) {
 
 async function setWallet() {
   // eslint-disable-next-line no-alert
-  const input = prompt('Enter your wallet address', wallet);
+  const input = prompt('Enter your wallet address', settings.getWallets().join(','));
   if (input === null) {
     throw new Error('No wallet address provided');
   }
 
-  wallet = input;
+  const wallet = input.trim().replace(' ', '').toLowerCase();
 
   settings.setWallet(wallet);
-  await view.drawTableRows(templateIds, wallet);
+  await view.drawTableRows(templateIds, settings.getWallet());
   cacheLoaded = {};
   await refresh();
 }
@@ -198,7 +198,7 @@ async function setTemplateIDs() {
     setTemplateIDsButtonText();
     cleanParams();
 
-    await view.drawTableRows(templateIds, wallet);
+    await view.drawTableRows(templateIds, settings.getWallet());
     cacheLoaded = {};
     await refresh();
   }
@@ -257,11 +257,10 @@ async function deleteRowHandler(e: MouseEvent) {
 }
 
 function setWalletButtonText() {
-  setWalletButton.innerText = wallet || 'No wallet set';
+  setWalletButton.innerText = settings.getWallet() || 'No wallet set';
 }
 
 function toggleExpand(e: MouseEvent) {
-  console.log('expand', e);
   const target = e.target as HTMLElement;
   const classes = ['fa-maximize', 'fa-minimize'];
   document.body.classList.remove('maximize');
@@ -355,7 +354,7 @@ async function handlePresetChange(e: Event) {
 
   cacheLoaded = {};
   templateIds = getTemplateIds(preset);
-  await view.drawTableRows(templateIds, wallet);
+  await view.drawTableRows(templateIds, settings.getWallet());
   await refresh();
 }
 
@@ -380,7 +379,6 @@ function bindPresetSelect() {
 }
 
 (async () => {
-  wallet = settings.getWallet();
   bindPresetSelect();
 
   templateIds = settings.getTemplateIds(getSelectedPreset());
@@ -395,6 +393,6 @@ function bindPresetSelect() {
 
   bindUI();
 
-  await view.drawTableRows(templateIds, wallet);
+  await view.drawTableRows(templateIds, settings.getWallet());
   await refresh();
 })();

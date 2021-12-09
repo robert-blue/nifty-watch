@@ -141,11 +141,15 @@ tr td.asset-name i.hot, tr td.asset-name i.dead, tr td.asset-name i.down, tr td.
     display: none;
 }
 
-tr i.sale-imminent {
+tr.sold i.sold {
+  color: darkgreen;
+}
+
+tr i.sale-imminent, tr i.sold {
   display: none;
 }
 
-tr.sale-imminent i.sale-imminent {
+tr.sale-imminent i.sale-imminent, tr.sold i.sold {
   display: inline-block;
 }
 

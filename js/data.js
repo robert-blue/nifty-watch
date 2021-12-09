@@ -73,6 +73,7 @@ export function getLastSold(templateId, status) {
         const priceHistory = data.data.map((d) => ({
             date: new Date(Number(d.updated_at_time)),
             price: util.parseTokenValue(d.price.token_precision, d.price.amount),
+            seller: d.seller,
         })).reverse();
         const prices = priceHistory.map((p) => p.price);
         let increases = 0;

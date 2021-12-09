@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { DEAD_HOURS, FRESH_HOURS, HOT_HOURS } from './config.js';
 import * as util from './util.js';
-import { getWallet } from './settings.js';
 export function setStatus(msg) {
     const statusElem = document.getElementById('refreshStatus');
     statusElem.innerText = msg !== null && msg !== void 0 ? msg : '';
@@ -46,6 +45,7 @@ export function drawTableRows(templateIds, wallet) {
     <i class="fa-solid fa-arrow-trend-up up" title="[trending] 3 of the last 4 sales had same or increasing price"></i>
     <i class="fa-solid fa-arrow-trend-down down" title="[down] 3 of the last 4 sales had decreasing price"></i>
     <i class="fa-solid fa-triangle-exclamation sale-imminent"></i>
+    <i class="fa-solid fa-hand-holding-dollar sold" title="Your NFT sold in the last 5 sales!"></i>
     <i class="fa-solid fa-rotate"></i>
   </td>
   <td class="price-wax" style="text-align:right"><span class="price-wax-value"></span> WAX</td>
@@ -99,7 +99,36 @@ export function sortTable() {
         console.warn('#main-table not sortable');
     }
 }
-export function bindRow(row, m, waxPrice) {
+function bindImminent(row, m, wallets) {
+    row.classList.remove('sale-imminent');
+    const rowDataset = row.dataset;
+    if (!m.listings) {
+        return;
+    }
+    for (let i = m.listings.length; i > 0; i--) {
+        const listing = m.listings[i - 1];
+        if (listing.seller && wallets.includes(listing.seller.toLowerCase())) {
+            row.classList.add('sale-imminent');
+            rowDataset.fromFloor = i.toString();
+            const icon = row.querySelector('i.sale-imminent');
+            if (i === 1) {
+                icon.title = `Your listing for ${listing.price} WAX is at the floor!`;
+            }
+            else {
+                icon.title = `Your listing for ${listing.price} WAX is ${i - 1} away from the floor`;
+            }
+        }
+    }
+}
+function bindSold(row, m, wallets) {
+    row.classList.remove('sold');
+    m.priceHistory.forEach((history) => {
+        if (history.seller && wallets.includes(history.seller.toLowerCase())) {
+            row.classList.add('sold');
+        }
+    });
+}
+export function bindRow(row, m, waxPrice, wallets) {
     var _a, _b;
     const floorPrice = row.querySelector('.price-wax-value');
     if (m.floorPrice === undefined) {
@@ -129,22 +158,8 @@ export function bindRow(row, m, waxPrice) {
     if (m.lastPrice !== undefined && m.floorPrice !== undefined) {
         row.classList.add(...priceAction(m.lagHours, m.increasing, m.priceHistory));
     }
-    row.classList.remove('sale-imminent');
-    const rowDataset = row.dataset;
-    for (let i = m.listings.length; i > 0; i--) {
-        const listing = m.listings[i - 1];
-        if (listing.seller.toLowerCase() === getWallet()) {
-            row.classList.add('sale-imminent');
-            rowDataset.fromFloor = i.toString();
-            const icon = row.querySelector('i.sale-imminent');
-            if (i === 1) {
-                icon.title = 'Your listing is at the floor!';
-            }
-            else {
-                icon.title = `Your listing is ${i - 1} away from the floor`;
-            }
-        }
-    }
+    bindImminent(row, m, wallets);
+    bindSold(row, m, wallets);
     const collectionCell = row.querySelector('td.collection-name');
     collectionCell.dataset.sort = m.collectionName;
     const lagCell = row.querySelector('td.lag');
