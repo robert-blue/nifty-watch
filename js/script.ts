@@ -14,7 +14,6 @@ import * as data from './data.js';
 import * as view from './view.js';
 import { bindLinks } from './view.js';
 import {
-  // eslint-disable-next-line import/named
   AtomicAsset, AtomicListing, AtomicSale, CacheData, RowView, TemplateRow,
 } from './types.js';
 import { get, set } from './storage.js';
@@ -162,6 +161,8 @@ function clearTimeouts(rows: Array<TemplateRow>) {
 }
 
 async function setWallet() {
+  util.logEvent('#buttonSetWallet', 'set wallet button clicked', 'button event');
+
   // eslint-disable-next-line no-alert
   const input = prompt('Enter your wallet address', settings.getWallets().join(','));
   if (input === null) {
@@ -187,6 +188,8 @@ function cleanParams() {
 }
 
 async function setTemplateIDs() {
+  util.logEvent('#buttonSetTemplateIds', 'set template ids button clicked', 'button event');
+
   // eslint-disable-next-line no-alert
   const newTemplateIds = prompt('Enter your templateIDs delimited by commas', templateIds.join(','));
   if (newTemplateIds === null) {
@@ -214,6 +217,8 @@ function getSelectedPreset(): number {
 }
 
 async function shareTemplateIds() {
+  util.logEvent('#buttonShareTemplateIds', 'share template ids button clicked', 'button event');
+
   const ids = settings.getTemplateIds(getSelectedPreset());
   const link = `https://nftgaze.com/?template_ids=${ids.join(',')}`;
   // eslint-disable-next-line no-alert
@@ -261,6 +266,8 @@ function setWalletButtonText() {
 }
 
 function toggleExpand(e: MouseEvent) {
+  util.logEvent('#buttonToggleExpand', 'toggle expand button clicked', 'button event');
+
   const target = e.target as HTMLElement;
   const classes = ['fa-maximize', 'fa-minimize'];
   document.body.classList.remove('maximize');
@@ -273,6 +280,11 @@ function toggleExpand(e: MouseEvent) {
     target.classList.remove(classes[1]);
     target.classList.add(classes[0]);
   }
+}
+
+async function refreshHandler() {
+  util.logEvent('#buttonRefresh', 'refresh button clicked', 'button event');
+  await refresh();
 }
 
 function bindUI() {
@@ -288,7 +300,7 @@ function bindUI() {
   setWalletButton = document.querySelector('#setWalletButton') as HTMLButtonElement;
   shareButton = document.querySelector('#shareButton') as HTMLButtonElement;
 
-  refreshTableButton.addEventListener('click', refresh);
+  refreshTableButton.addEventListener('click', refreshHandler);
   setTemplateIDsButton.addEventListener('click', setTemplateIDs);
   setWalletButton.addEventListener('click', setWallet);
   shareButton.addEventListener('click', shareTemplateIds);
@@ -346,6 +358,8 @@ function applyColumnVisibility() {
 }
 
 async function handlePresetChange(e: Event) {
+  util.logEvent('#selectChangePreset', 'preset select changed', 'select event');
+
   const select = e.target as HTMLSelectElement;
   const preset = Number(select.options[select.selectedIndex].value);
   if (preset > -1) {

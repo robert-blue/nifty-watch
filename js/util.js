@@ -51,4 +51,18 @@ export function findParentNode(element, nodeName) {
     }
     return parent;
 }
+export function logEvent(href, title, type) {
+    try {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        if (clicky) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            clicky.log(href, title, type);
+        }
+    }
+    catch (e) {
+        console.error(e);
+    }
+}
 //# sourceMappingURL=util.js.map

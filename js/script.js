@@ -124,6 +124,7 @@ function clearTimeouts(rows) {
 }
 function setWallet() {
     return __awaiter(this, void 0, void 0, function* () {
+        util.logEvent('#buttonSetWallet', 'set wallet button clicked', 'button event');
         // eslint-disable-next-line no-alert
         const input = prompt('Enter your wallet address', settings.getWallets().join(','));
         if (input === null) {
@@ -147,6 +148,7 @@ function cleanParams() {
 }
 function setTemplateIDs() {
     return __awaiter(this, void 0, void 0, function* () {
+        util.logEvent('#buttonSetTemplateIds', 'set template ids button clicked', 'button event');
         // eslint-disable-next-line no-alert
         const newTemplateIds = prompt('Enter your templateIDs delimited by commas', templateIds.join(','));
         if (newTemplateIds === null) {
@@ -171,6 +173,7 @@ function getSelectedPreset() {
 }
 function shareTemplateIds() {
     return __awaiter(this, void 0, void 0, function* () {
+        util.logEvent('#buttonShareTemplateIds', 'share template ids button clicked', 'button event');
         const ids = settings.getTemplateIds(getSelectedPreset());
         const link = `https://nftgaze.com/?template_ids=${ids.join(',')}`;
         // eslint-disable-next-line no-alert
@@ -213,6 +216,7 @@ function setWalletButtonText() {
     setWalletButton.innerText = settings.getWallet() || 'No wallet set';
 }
 function toggleExpand(e) {
+    util.logEvent('#buttonToggleExpand', 'toggle expand button clicked', 'button event');
     const target = e.target;
     const classes = ['fa-maximize', 'fa-minimize'];
     document.body.classList.remove('maximize');
@@ -226,6 +230,12 @@ function toggleExpand(e) {
         target.classList.add(classes[0]);
     }
 }
+function refreshHandler() {
+    return __awaiter(this, void 0, void 0, function* () {
+        util.logEvent('#buttonRefresh', 'refresh button clicked', 'button event');
+        yield refresh();
+    });
+}
 function bindUI() {
     const headerCell = document.querySelector('#main-table th.dir-u, #main-table th.dir-d');
     sortable(headerCell);
@@ -236,7 +246,7 @@ function bindUI() {
     setTemplateIDsButton = document.querySelector('#setTemplateIDsButton');
     setWalletButton = document.querySelector('#setWalletButton');
     shareButton = document.querySelector('#shareButton');
-    refreshTableButton.addEventListener('click', refresh);
+    refreshTableButton.addEventListener('click', refreshHandler);
     setTemplateIDsButton.addEventListener('click', setTemplateIDs);
     setWalletButton.addEventListener('click', setWallet);
     shareButton.addEventListener('click', shareTemplateIds);
@@ -283,6 +293,7 @@ function applyColumnVisibility() {
 }
 function handlePresetChange(e) {
     return __awaiter(this, void 0, void 0, function* () {
+        util.logEvent('#selectChangePreset', 'preset select changed', 'select event');
         const select = e.target;
         const preset = Number(select.options[select.selectedIndex].value);
         if (preset > -1) {

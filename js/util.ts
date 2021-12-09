@@ -66,3 +66,17 @@ export function findParentNode(element: HTMLElement, nodeName: string): HTMLElem
 
   return parent;
 }
+
+export function logEvent(href: string, title: string, type: string) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    if (clicky) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      clicky.log(href, title, type);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
