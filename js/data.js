@@ -72,6 +72,7 @@ export function getLastSold(templateId, status) {
         const last = data.data[0];
         const priceHistory = data.data.map((d) => ({
             date: new Date(Number(d.updated_at_time)),
+            id: last.sale_id,
             price: util.parseTokenValue(d.price.token_precision, d.price.amount),
             seller: d.seller,
         })).reverse();
@@ -118,6 +119,7 @@ export function getFloorListing(templateId, status) {
                 date: new Date(Number(asset.updated_at_time)),
                 price: util.parseTokenValue(floor.price.token_precision, floor.price.amount),
                 seller: floor.seller,
+                id: floor.sale_id,
             };
         });
         const floor = data.data[0];

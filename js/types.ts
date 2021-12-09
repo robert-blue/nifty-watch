@@ -15,7 +15,7 @@ export interface AtomicAsset {
   timestamp: Date
 }
 
-export interface AssetSale {date: Date, price: number, seller: string}
+export interface AssetSale {date: Date, id: string, price: number, seller: string}
 
 /** Recent sale data from AtomicHub */
 export interface AtomicSale extends AtomicAsset {

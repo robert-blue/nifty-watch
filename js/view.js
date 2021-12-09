@@ -44,8 +44,12 @@ export function drawTableRows(templateIds, wallet) {
     <i class="fa-solid fa-fire-flame-curved hot" title="[hot] last 5 sales occurred within the last ${HOT_HOURS} hours"></i>
     <i class="fa-solid fa-arrow-trend-up up" title="[trending] 3 of the last 4 sales had same or increasing price"></i>
     <i class="fa-solid fa-arrow-trend-down down" title="[down] 3 of the last 4 sales had decreasing price"></i>
-    <i class="fa-solid fa-triangle-exclamation sale-imminent"></i>
-    <i class="fa-solid fa-hand-holding-dollar sold" title="Your NFT sold in the last 5 sales!"></i>
+    <a href="" target="_blank" class="sale-imminent">
+        <i class="fa-solid fa-triangle-exclamation sale-imminent"></i>
+    </a>
+    <a href="" target="_blank" class="sold">
+        <i class="fa-solid fa-hand-holding-dollar sold" title="Your NFT sold in the last 5 sales!"></i>
+        </a>
     <i class="fa-solid fa-rotate"></i>
   </td>
   <td class="price-wax" style="text-align:right"><span class="price-wax-value"></span> WAX</td>
@@ -110,6 +114,8 @@ function bindImminent(row, m, wallets) {
         if (listing.seller && wallets.includes(listing.seller.toLowerCase())) {
             row.classList.add('sale-imminent');
             rowDataset.fromFloor = i.toString();
+            const link = row.querySelector('a.sale-imminent');
+            link.href = `https://wax.atomichub.io/market/sale/${listing.id}`;
             const icon = row.querySelector('i.sale-imminent');
             if (i === 1) {
                 icon.title = `Your listing for ${listing.price} WAX is at the floor!`;
@@ -125,6 +131,8 @@ function bindSold(row, m, wallets) {
     m.priceHistory.forEach((history) => {
         if (history.seller && wallets.includes(history.seller.toLowerCase())) {
             row.classList.add('sold');
+            const link = row.querySelector('a.sold');
+            link.href = `https://wax.atomichub.io/market/sale/${history.id}`;
         }
     });
 }

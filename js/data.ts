@@ -77,6 +77,7 @@ export async function getLastSold(
 
   const priceHistory: AssetSale[] = data.data.map((d: any) => ({
     date: new Date(Number(d.updated_at_time)),
+    id: last.sale_id,
     price: util.parseTokenValue(d.price.token_precision, d.price.amount),
     seller: d.seller,
   })).reverse();
@@ -127,6 +128,7 @@ export async function getFloorListing(
   interface response {
     assets: Record<string, any>[]
     collection_name: string,
+    sale_id: string;
     seller: string,
     updated_at_time: string,
     price: Record<string, any>
@@ -138,6 +140,7 @@ export async function getFloorListing(
       date: new Date(Number(asset.updated_at_time)),
       price: util.parseTokenValue(floor.price.token_precision, floor.price.amount),
       seller: floor.seller,
+      id: floor.sale_id,
     };
   });
 
