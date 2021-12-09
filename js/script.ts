@@ -161,7 +161,7 @@ function clearTimeouts(rows: Array<TemplateRow>) {
 }
 
 async function setWallet() {
-  util.logEvent('#buttonSetWallet', 'set wallet button clicked', 'button event');
+  util.logEvent('#button/set-wallet', 'set wallet button clicked');
 
   // eslint-disable-next-line no-alert
   const input = prompt('Enter your wallet address', settings.getWallets().join(','));
@@ -188,7 +188,7 @@ function cleanParams() {
 }
 
 async function setTemplateIDs() {
-  util.logEvent('#buttonSetTemplateIds', 'set template ids button clicked', 'button event');
+  util.logEvent('#button/set-template-ids', 'set template ids button clicked');
 
   // eslint-disable-next-line no-alert
   const newTemplateIds = prompt('Enter your templateIDs delimited by commas', templateIds.join(','));
@@ -217,7 +217,7 @@ function getSelectedPreset(): number {
 }
 
 async function shareTemplateIds() {
-  util.logEvent('#buttonShareTemplateIds', 'share template ids button clicked', 'button event');
+  util.logEvent('#button/share-template-ids', 'share template ids button clicked');
 
   const ids = settings.getTemplateIds(getSelectedPreset());
   const link = `https://nftgaze.com/?template_ids=${ids.join(',')}`;
@@ -266,7 +266,7 @@ function setWalletButtonText() {
 }
 
 function toggleExpand(e: MouseEvent) {
-  util.logEvent('#buttonToggleExpand', 'toggle expand button clicked', 'button event');
+  util.logEvent('#button/toggle-expand', 'toggle expand button clicked', 'button event');
 
   const target = e.target as HTMLElement;
   const classes = ['fa-maximize', 'fa-minimize'];
@@ -283,7 +283,7 @@ function toggleExpand(e: MouseEvent) {
 }
 
 async function refreshHandler() {
-  util.logEvent('#buttonRefresh', 'refresh button clicked', 'button event');
+  util.logEvent('#button/refresh', 'refresh button clicked');
   await refresh();
 }
 
@@ -358,7 +358,7 @@ function applyColumnVisibility() {
 }
 
 async function handlePresetChange(e: Event) {
-  util.logEvent('#selectChangePreset', 'preset select changed', 'select event');
+  util.logEvent('#select/preset', 'preset select changed');
 
   const select = e.target as HTMLSelectElement;
   const preset = Number(select.options[select.selectedIndex].value);

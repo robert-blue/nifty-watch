@@ -67,7 +67,7 @@ export function findParentNode(element: HTMLElement, nodeName: string): HTMLElem
   return parent;
 }
 
-export function logEvent(href: string, title: string, type: string) {
+export function logEvent(href: string, title: string, type?: string) {
   try {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
