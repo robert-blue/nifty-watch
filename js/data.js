@@ -52,9 +52,9 @@ export function getTemplateData(templateId, status) {
         };
     });
 }
-export function getWalletSaleTemplateIds(wallet, status, sort = 'price') {
+export function getWalletSaleTemplateIds(wallet, status, sort = 'price', sortOrder = 'desc') {
     return __awaiter(this, void 0, void 0, function* () {
-        const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?state=1&max_assets=1&seller=${wallet}&page=1&limit=30&order=desc&sort=${sort}`;
+        const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?state=1&max_assets=1&seller=${wallet}&page=1&limit=30&order=${sortOrder}&sort=${sort}`;
         const response = yield atomicFetch(url, status);
         const data = yield response.json();
         if (!data || data.data.length === 0) {

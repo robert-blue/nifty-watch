@@ -303,7 +303,7 @@ function handlePresetChange(e) {
         if (preset < -1) {
             const walletPreset = Number(((preset * -1) - 2).toString().split('.')[0]);
             const wallet = settings.getWallets()[walletPreset];
-            const decimal = (preset.toString()).split('.')[1] || 0;
+            const decimal = Number((preset.toString()).split('.')[1] || 0);
             let sort;
             switch (decimal) {
                 case 0:
