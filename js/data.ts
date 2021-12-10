@@ -63,8 +63,10 @@ export async function getTemplateData(
 export async function getWalletSaleTemplateIds(
   wallet: string,
   status: (msg?: string | undefined) => void,
+  sort = 'price',
+
 ): Promise<number[]> {
-  const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?state=1&max_assets=1&seller=${wallet}&page=1&limit=30&order=desc&sort=price`;
+  const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?state=1&max_assets=1&seller=${wallet}&page=1&limit=30&order=desc&sort=${sort}`;
   const response = await atomicFetch(url, status);
   const data = await response.json();
   if (!data || data.data.length === 0) {

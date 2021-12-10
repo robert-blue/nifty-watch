@@ -301,9 +301,21 @@ function handlePresetChange(e) {
             cleanParams();
         }
         if (preset < -1) {
-            const walletPreset = (preset * -1) - 2;
+            const walletPreset = Number(((preset * -1) - 2).toString().split('.')[0]);
             const wallet = settings.getWallets()[walletPreset];
-            templateIds = yield data.getWalletSaleTemplateIds(wallet, view.setStatus);
+            const decimal = (preset.toString()).split('.')[1] || 0;
+            let sort;
+            switch (decimal) {
+                case 0:
+                    sort = 'price';
+                    break;
+                case 1:
+                    sort = 'updated';
+                    break;
+                default:
+                    sort = 'price';
+            }
+            templateIds = yield data.getWalletSaleTemplateIds(wallet, view.setStatus, sort);
             setTemplateIDsButton.disabled = true;
         }
         else {
@@ -339,6 +351,7 @@ function bindPresetSelect() {
             const wallet = wallets[i];
             const preset = ((i + 1) * -1) - 1;
             presetSelect.add(new Option(`Highest listed for ${wallet}`, preset.toString()));
+            presetSelect.add(new Option(`Recently listed for ${wallet}`, `${preset.toString()}.1`));
         }
         presetSelect.addEventListener('change', handlePresetChange);
     });
