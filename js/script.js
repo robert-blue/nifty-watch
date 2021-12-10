@@ -124,7 +124,7 @@ function clearTimeouts(rows) {
 }
 function setWallet() {
     return __awaiter(this, void 0, void 0, function* () {
-        util.logEvent('#button/set-wallet', 'set wallet button clicked');
+        util.logEvent('#button/set-wallet', 'set wallet');
         // eslint-disable-next-line no-alert
         const input = prompt('Enter your wallet address', settings.getWallets().join(','));
         if (input === null) {
@@ -149,7 +149,7 @@ function cleanParams() {
 }
 function setTemplateIDs() {
     return __awaiter(this, void 0, void 0, function* () {
-        util.logEvent('#button/set-template-ids', 'set template ids button clicked');
+        util.logEvent('#button/set-template-ids', 'set template ids');
         // eslint-disable-next-line no-alert
         const newTemplateIds = prompt('Enter your templateIDs delimited by commas', templateIds.join(','));
         if (newTemplateIds === null) {
@@ -217,7 +217,7 @@ function setWalletButtonText() {
     setWalletButton.innerText = settings.getWallet() || 'No wallet set';
 }
 function toggleExpand(e) {
-    util.logEvent('#button/toggle-expand', 'toggle expand button clicked', 'button event');
+    util.logEvent('#button/maximize', 'maximize');
     const target = e.target;
     const classes = ['fa-maximize', 'fa-minimize'];
     document.body.classList.remove('maximize');
@@ -233,7 +233,7 @@ function toggleExpand(e) {
 }
 function refreshHandler() {
     return __awaiter(this, void 0, void 0, function* () {
-        util.logEvent('#button/refresh', 'refresh button clicked');
+        util.logEvent('#button/refresh', 'refresh');
         yield refresh();
     });
 }
@@ -241,7 +241,6 @@ function bindUI() {
     const headerCell = document.querySelector('#main-table th.dir-u, #main-table th.dir-d');
     sortable(headerCell);
     const expandButton = document.querySelector('#expandButton');
-    console.log('expandbutton', expandButton);
     expandButton.addEventListener('click', toggleExpand);
     refreshTableButton = document.querySelector('#refreshTableButton');
     setTemplateIDsButton = document.querySelector('#setTemplateIDsButton');
@@ -278,6 +277,7 @@ function loadColumnOptions() {
     });
 }
 function applyColumnVisibility() {
+    util.logEvent('#checkbox/visible-columns', 'change visible columns');
     const table = document.getElementById('main-table');
     const checkboxes = document.querySelectorAll('input[data-show-column]');
     checkboxes.forEach((checkbox) => {

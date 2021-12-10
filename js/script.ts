@@ -17,7 +17,6 @@ import {
   AtomicAsset, AtomicListing, AtomicSale, CacheData, RowView, TemplateRow,
 } from './types.js';
 import { get, set } from './storage.js';
-
 import sortable from './vendor/sortable.js';
 
 let templateIds: number[] = [];
@@ -161,7 +160,7 @@ function clearTimeouts(rows: Array<TemplateRow>) {
 }
 
 async function setWallet() {
-  util.logEvent('#button/set-wallet', 'set wallet button clicked');
+  util.logEvent('#button/set-wallet', 'set wallet');
 
   // eslint-disable-next-line no-alert
   const input = prompt('Enter your wallet address', settings.getWallets().join(','));
@@ -189,7 +188,7 @@ function cleanParams() {
 }
 
 async function setTemplateIDs() {
-  util.logEvent('#button/set-template-ids', 'set template ids button clicked');
+  util.logEvent('#button/set-template-ids', 'set template ids');
 
   // eslint-disable-next-line no-alert
   const newTemplateIds = prompt('Enter your templateIDs delimited by commas', templateIds.join(','));
@@ -267,7 +266,7 @@ function setWalletButtonText() {
 }
 
 function toggleExpand(e: MouseEvent) {
-  util.logEvent('#button/toggle-expand', 'toggle expand button clicked', 'button event');
+  util.logEvent('#button/maximize', 'maximize');
 
   const target = e.target as HTMLElement;
   const classes = ['fa-maximize', 'fa-minimize'];
@@ -284,7 +283,7 @@ function toggleExpand(e: MouseEvent) {
 }
 
 async function refreshHandler() {
-  util.logEvent('#button/refresh', 'refresh button clicked');
+  util.logEvent('#button/refresh', 'refresh');
   await refresh();
 }
 
@@ -293,7 +292,6 @@ function bindUI() {
   sortable(headerCell as HTMLTableCellElement);
 
   const expandButton = document.querySelector('#expandButton') as HTMLElement;
-  console.log('expandbutton', expandButton);
   expandButton.addEventListener('click', toggleExpand);
 
   refreshTableButton = document.querySelector('#refreshTableButton') as HTMLButtonElement;
@@ -341,6 +339,8 @@ function loadColumnOptions() {
 }
 
 function applyColumnVisibility() {
+  util.logEvent('#checkbox/visible-columns', 'change visible columns');
+
   const table = document.getElementById('main-table') as HTMLTableElement;
 
   const checkboxes = document.querySelectorAll('input[data-show-column]') as NodeListOf<HTMLInputElement>;
