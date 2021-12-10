@@ -17,7 +17,6 @@ export function getPresets() {
         }
         let ordered = [...new Set(Object.keys(counts))];
         ordered = ordered.sort((a, b) => counts[b] - counts[a]);
-        console.log('ordered', ordered);
         const preset = {
             id: i,
             name: `Preset ${i + 1} - (${ids.length}) ${ordered.slice(0, 5).join(', ')}`,
@@ -59,7 +58,7 @@ export function getTemplateIds(presetNumber) {
 export function setTemplateIds(presetNumber, val) {
     const ids = typeof val === 'string' ? deserializeTemplateIds(val) : val;
     // Don't persist values if they come from the QueryString which will be -1
-    if (presetNumber >= 0) {
+    if (presetNumber !== -1) {
         set(getKey(presetNumber, KEY_TEMPLATE_IDS), ids);
     }
     // // Set preset name

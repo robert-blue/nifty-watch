@@ -132,6 +132,7 @@ function setWallet() {
         }
         const wallet = input.trim().replace(' ', '').toLowerCase();
         settings.setWallet(wallet);
+        yield bindPresetSelect();
         yield view.drawTableRows(templateIds, settings.getWallet());
         cacheLoaded = {};
         yield refresh();
@@ -293,37 +294,57 @@ function applyColumnVisibility() {
 }
 function handlePresetChange(e) {
     return __awaiter(this, void 0, void 0, function* () {
-        util.logEvent('#select/preset', 'preset select changed');
         const select = e.target;
         const preset = Number(select.options[select.selectedIndex].value);
+        util.logEvent('#select/preset', `preset ${preset}`);
         if (preset > -1) {
             cleanParams();
         }
-        cacheLoaded = {};
-        templateIds = getTemplateIds(preset);
+        if (preset < -1) {
+            const walletPreset = (preset * -1) - 2;
+            const wallet = settings.getWallets()[walletPreset];
+            templateIds = yield data.getWalletSaleTemplateIds(wallet, view.setStatus);
+            setTemplateIDsButton.disabled = true;
+        }
+        else {
+            cacheLoaded = {};
+            templateIds = getTemplateIds(preset);
+            setTemplateIDsButton.disabled = false;
+        }
         yield view.drawTableRows(templateIds, settings.getWallet());
         yield refresh();
     });
 }
 function bindPresetSelect() {
-    const presets = settings.getPresets();
-    const presetSelect = document.querySelector('#presetSelect');
-    for (let i = 0; i < presets.length; i++) {
-        const preset = presets[i];
-        const option = new Option(preset.name, preset.id.toString());
-        presetSelect.add(option);
-    }
-    if (getQueryStringTemplateIds().length > 0) {
-        presetSelect.add(new Option('Shared View', '-1'));
-        presetSelect.selectedIndex = 9;
-    }
-    else {
-        presetSelect.selectedIndex = 0;
-    }
-    presetSelect.addEventListener('change', handlePresetChange);
+    return __awaiter(this, void 0, void 0, function* () {
+        const presets = settings.getPresets();
+        const presetSelect = document.querySelector('#presetSelect');
+        while (presetSelect.options.length) {
+            presetSelect.options.remove(presetSelect.options.length - 1);
+        }
+        for (let i = 0; i < presets.length; i++) {
+            const preset = presets[i];
+            const option = new Option(preset.name, preset.id.toString());
+            presetSelect.add(option);
+        }
+        // Shared view preset
+        if (getQueryStringTemplateIds().length > 0) {
+            presetSelect.add(new Option('Shared View', '-1'));
+            presetSelect.selectedIndex = 9;
+        }
+        else {
+            presetSelect.selectedIndex = 0;
+        }
+        for (let i = 0, wallets = settings.getWallets(); i < wallets.length; i++) {
+            const wallet = wallets[i];
+            const preset = ((i + 1) * -1) - 1;
+            presetSelect.add(new Option(`Highest listed for ${wallet}`, preset.toString()));
+        }
+        presetSelect.addEventListener('change', handlePresetChange);
+    });
 }
 (() => __awaiter(void 0, void 0, void 0, function* () {
-    bindPresetSelect();
+    yield bindPresetSelect();
     templateIds = settings.getTemplateIds(getSelectedPreset());
     view.display('#noResults', templateIds.length === 0);
     view.display('#results', templateIds.length > 0);

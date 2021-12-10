@@ -153,13 +153,13 @@ tr.sale-imminent i.sale-imminent, tr.sold i.sold {
   display: inline-block;
 }
 
-tr.sale-imminent[data-from-floor="1"] i.sale-imminent {
-  color: yellow;
-  animation: pulse 2s linear infinite;
+
+tr i.sale-imminent {
+  color: orange;
 }
 
-tr.sale-imminent[data-from-floor="2"] i.sale-imminent, tr.sale-imminent[data-from-floor="3"] i.sale-imminent, tr.sale-imminent[data-from-floor="4"] i.sale-imminent, tr.sale-imminent[data-from-floor="5"] i.sale-imminent {
-  color: orange;
+tr.sale-imminent[data-from-floor="1"] i.sale-imminent {
+  animation: pulse 2s linear infinite;
 }
 
 tr td.asset-name i.down {
@@ -305,5 +305,16 @@ select option {
 
 #expandButton:hover {
   color: white;
+}
+
+div.row.status-row .column {
+  margin: 1.25rem 1rem 2rem 1.5rem;
+      font-variant: proportional-nums;
+  /*font-family: -webkit-pictograph;*/
+
+}
+
+body {
+  font-family: 'Segoe UI Symbol', 'Roboto', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif
 }
 

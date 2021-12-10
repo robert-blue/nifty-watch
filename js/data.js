@@ -52,6 +52,21 @@ export function getTemplateData(templateId, status) {
         };
     });
 }
+export function getWalletSaleTemplateIds(wallet, status) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?state=1&max_assets=1&seller=${wallet}&page=1&limit=30&order=desc&sort=price`;
+        const response = yield atomicFetch(url, status);
+        const data = yield response.json();
+        if (!data || data.data.length === 0) {
+            return [];
+        }
+        const filtered = data.data
+            .map((t) => { var _a, _b; return Number((_b = (_a = t.assets[0]) === null || _a === void 0 ? void 0 : _a.template) === null || _b === void 0 ? void 0 : _b.template_id); })
+            .filter((id) => Number.isInteger(id));
+        const unique = [...new Set(filtered)];
+        return unique.slice(0, 20);
+    });
+}
 export function getLastSold(templateId, status) {
     return __awaiter(this, void 0, void 0, function* () {
         const assetCount = 5;

@@ -20,6 +20,7 @@ export function getPresets(): Preset[] {
     const counts: {[key: string]: number} = {};
     for (let i1 = 0; i1 < ids.length; i1++) {
       const id = ids[i1];
+
       const data = get<CacheData>(id.toString());
       if (data) {
         const asset = data.lastSold || data.floorListing;
@@ -30,7 +31,6 @@ export function getPresets(): Preset[] {
 
     let ordered = [...new Set(Object.keys(counts))];
     ordered = ordered.sort((a, b) => counts[b] - counts[a]);
-    console.log('ordered', ordered);
 
     const preset = {
       id: i,
@@ -83,7 +83,7 @@ export function setTemplateIds(presetNumber: number, val: number[]|string): numb
   const ids: number[] = typeof val === 'string' ? deserializeTemplateIds(val) : val;
 
   // Don't persist values if they come from the QueryString which will be -1
-  if (presetNumber >= 0) {
+  if (presetNumber !== -1) {
     set<number[]>(getKey(presetNumber, KEY_TEMPLATE_IDS), ids);
   }
   // // Set preset name

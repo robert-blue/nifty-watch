@@ -172,6 +172,7 @@ async function setWallet() {
   const wallet = input.trim().replace(' ', '').toLowerCase();
 
   settings.setWallet(wallet);
+  await bindPresetSelect();
   await view.drawTableRows(templateIds, settings.getWallet());
   cacheLoaded = {};
   await refresh();
@@ -358,30 +359,46 @@ function applyColumnVisibility() {
 }
 
 async function handlePresetChange(e: Event) {
-  util.logEvent('#select/preset', 'preset select changed');
-
   const select = e.target as HTMLSelectElement;
   const preset = Number(select.options[select.selectedIndex].value);
+
+  util.logEvent('#select/preset', `preset ${preset}`);
+
   if (preset > -1) {
     cleanParams();
   }
 
-  cacheLoaded = {};
-  templateIds = getTemplateIds(preset);
+  if (preset < -1) {
+    const walletPreset = (preset * -1) - 2;
+    const wallet = settings.getWallets()[walletPreset];
+    templateIds = await data.getWalletSaleTemplateIds(wallet, view.setStatus);
+    setTemplateIDsButton.disabled = true;
+  } else {
+    cacheLoaded = {};
+    templateIds = getTemplateIds(preset);
+    setTemplateIDsButton.disabled = false;
+  }
+
   await view.drawTableRows(templateIds, settings.getWallet());
   await refresh();
 }
 
-function bindPresetSelect() {
+async function bindPresetSelect() {
   const presets = settings.getPresets();
 
   const presetSelect = document.querySelector('#presetSelect') as HTMLSelectElement;
+
+  while (presetSelect.options.length) {
+    presetSelect.options.remove(presetSelect.options.length - 1);
+  }
+
   for (let i = 0; i < presets.length; i++) {
     const preset = presets[i];
     const option: HTMLOptionElement = new Option(preset.name, preset.id.toString());
     presetSelect.add(option);
   }
 
+  // Shared view preset
   if (getQueryStringTemplateIds().length > 0) {
     presetSelect.add(new Option('Shared View', '-1'));
     presetSelect.selectedIndex = 9;
@@ -389,11 +406,18 @@ function bindPresetSelect() {
     presetSelect.selectedIndex = 0;
   }
 
+  for (let i = 0, wallets = settings.getWallets(); i < wallets.length; i++) {
+    const wallet = wallets[i];
+    const preset = ((i + 1) * -1) - 1;
+
+    presetSelect.add(new Option(`Highest listed for ${wallet}`, preset.toString()));
+  }
+
   presetSelect.addEventListener('change', handlePresetChange);
 }
 
 (async () => {
-  bindPresetSelect();
+  await bindPresetSelect();
 
   templateIds = settings.getTemplateIds(getSelectedPreset());
 

@@ -1,12 +1,20 @@
 import Semaphore from './vendor/semaphore.js';
 import * as util from './util.js';
 import {
-  // eslint-disable-next-line import/named
   AssetSale, AtomicAsset, AtomicListing, AtomicSale, RowView,
 } from './types.js';
 import { bindLinks } from './view.js';
 
 const sem = new Semaphore(5, 30, 15);
+
+interface AtomicSaleResponse {
+  assets: Record<string, any>[]
+  collection_name: string,
+  sale_id: string;
+  seller: string,
+  updated_at_time: string,
+  price: Record<string, any>
+}
 
 async function atomicFetch(url: string, status: (msg?: string) => void): Promise<Response> {
   await sem.wait();
@@ -52,6 +60,25 @@ export async function getTemplateData(
   };
 }
 
+export async function getWalletSaleTemplateIds(
+  wallet: string,
+  status: (msg?: string | undefined) => void,
+): Promise<number[]> {
+  const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?state=1&max_assets=1&seller=${wallet}&page=1&limit=30&order=desc&sort=price`;
+  const response = await atomicFetch(url, status);
+  const data = await response.json();
+  if (!data || data.data.length === 0) {
+    return [];
+  }
+
+  const filtered: number[] = data.data
+    .map((t: AtomicSaleResponse) => Number(t.assets[0]?.template?.template_id))
+    .filter((id: number) => Number.isInteger(id));
+
+  const unique = [...new Set(filtered)];
+  return unique.slice(0, 20);
+}
+
 export async function getLastSold(
   templateId: string,
   status: (msg?: string | undefined) => void,
@@ -75,7 +102,7 @@ export async function getLastSold(
 
   const last = data.data[0];
 
-  const priceHistory: AssetSale[] = data.data.map((d: any) => ({
+  const priceHistory: AssetSale[] = data.data.map((d: AtomicSaleResponse) => ({
     date: new Date(Number(d.updated_at_time)),
     id: last.sale_id,
     price: util.parseTokenValue(d.price.token_precision, d.price.amount),
@@ -125,16 +152,7 @@ export async function getFloorListing(
     };
   }
 
-  interface response {
-    assets: Record<string, any>[]
-    collection_name: string,
-    sale_id: string;
-    seller: string,
-    updated_at_time: string,
-    price: Record<string, any>
-  }
-
-  const listings: AssetSale[] = data.data.map((floor: response) => {
+  const listings: AssetSale[] = data.data.map((floor: AtomicSaleResponse) => {
     const asset = floor.assets[0];
     return {
       date: new Date(Number(asset.updated_at_time)),
