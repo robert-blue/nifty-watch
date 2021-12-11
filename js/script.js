@@ -28,19 +28,20 @@ function refreshRow(row, waxPrice) {
         row.classList.add('updating');
         const wallet = settings.getWallet();
         const templateId = (_a = row.dataset.templateId) !== null && _a !== void 0 ? _a : '';
+        let timestamp;
         let lastSold;
         let floorListing;
         if (!cacheLoaded[templateId]) {
             const value = get(templateId);
             if (value !== undefined) {
-                ({ lastSold, floorListing } = value);
+                ({ lastSold, floorListing, timestamp } = value);
                 cacheLoaded[templateId] = true;
             }
         }
         if (!lastSold || !floorListing) {
             lastSold = yield data.getLastSold(templateId, view.setStatus);
             floorListing = yield data.getFloorListing(templateId, view.setStatus);
-            set(templateId, { lastSold, floorListing });
+            set(templateId, { lastSold, floorListing, timestamp: new Date() });
         }
         let model;
         if (lastSold.lastPrice === undefined && floorListing.floorPrice === undefined) {
@@ -56,8 +57,9 @@ function refreshRow(row, waxPrice) {
         else {
             model = data.transform(lastSold, floorListing, templateId, wallet);
         }
+        timestamp = timestamp || new Date();
         view.bindRow(row, model, waxPrice, settings.getWallets());
-        row.setAttribute('title', `last updated ${(new Date()).toLocaleTimeString()}`);
+        row.setAttribute('title', `last updated ${timestamp.toLocaleTimeString()} on ${timestamp.toLocaleDateString()}`);
         view.setTimestamp();
         view.sortTable();
         row.classList.remove('updating');

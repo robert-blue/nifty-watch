@@ -49,4 +49,5 @@ export interface RowView extends AtomicListing, AtomicSale {
 export interface CacheData {
   lastSold: AtomicSale
   floorListing: AtomicListing
+  timestamp?: Date
 }

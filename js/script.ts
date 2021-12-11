@@ -34,13 +34,14 @@ async function refreshRow(row: HTMLTableRowElement, waxPrice: number) {
   const wallet = settings.getWallet();
   const templateId = row.dataset.templateId ?? '';
 
+  let timestamp: Date | undefined;
   let lastSold: AtomicSale | undefined;
   let floorListing: AtomicListing | undefined;
 
   if (!cacheLoaded[templateId]) {
     const value = get<CacheData>(templateId);
     if (value !== undefined) {
-      ({ lastSold, floorListing } = value);
+      ({ lastSold, floorListing, timestamp } = value);
       cacheLoaded[templateId] = true;
     }
   }
@@ -48,7 +49,7 @@ async function refreshRow(row: HTMLTableRowElement, waxPrice: number) {
   if (!lastSold || !floorListing) {
     lastSold = await data.getLastSold(templateId, view.setStatus);
     floorListing = await data.getFloorListing(templateId, view.setStatus);
-    set<CacheData>(templateId, { lastSold, floorListing });
+    set<CacheData>(templateId, { lastSold, floorListing, timestamp: new Date() });
   }
 
   let model: RowView;
@@ -84,8 +85,9 @@ async function refreshRow(row: HTMLTableRowElement, waxPrice: number) {
     model = data.transform(lastSold, floorListing, templateId, wallet);
   }
 
+  timestamp = timestamp || new Date();
   view.bindRow(row, model, waxPrice, settings.getWallets());
-  row.setAttribute('title', `last updated ${(new Date()).toLocaleTimeString()}`);
+  row.setAttribute('title', `last updated ${timestamp.toLocaleTimeString()} on ${timestamp.toLocaleDateString()}`);
   view.setTimestamp();
   view.sortTable();
   row.classList.remove('updating');
