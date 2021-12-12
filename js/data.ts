@@ -56,7 +56,8 @@ export async function getTemplateData(
     rarity: template.immutable_data.rarity,
     schemaName: template.schema.schema_name,
     templateId,
-    timestamp: new Date(),
+    timestamp: new Date(Number(template.created_at_time)),
+    fetchDate: new Date(),
   };
 }
 
@@ -100,6 +101,7 @@ export async function getLastSold(
       templateId,
       priceHistory: [],
       timestamp: new Date(),
+      fetchDate: new Date(),
     };
   }
 
@@ -133,6 +135,7 @@ export async function getLastSold(
     schemaName: asset.schema.schema_name,
     templateId,
     timestamp: new Date(Number(asset.updated_at_time)),
+    fetchDate: new Date(),
   };
 }
 
@@ -151,6 +154,7 @@ export async function getFloorListing(
       seller: '',
       templateId,
       timestamp: new Date(),
+      fetchDate: new Date(),
       listings: [],
     };
   }
@@ -179,6 +183,7 @@ export async function getFloorListing(
     seller: asset.seller,
     templateId,
     timestamp: new Date(Number(asset.updated_at_time)),
+    fetchDate: new Date(),
   };
 }
 
@@ -200,6 +205,7 @@ export function transform(
     ...lastSold,
     ...floor,
     collectionName: floor.collectionName || lastSold.collectionName,
+    fetchDate: floor.fetchDate || lastSold.fetchDate,
   };
 
   m.lagHours = (Date.now() - m.lastSoldDate.getTime()) / 1000 / 60 / 60;

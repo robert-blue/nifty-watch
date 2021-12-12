@@ -48,7 +48,8 @@ export function getTemplateData(templateId, status) {
             rarity: template.immutable_data.rarity,
             schemaName: template.schema.schema_name,
             templateId,
-            timestamp: new Date(),
+            timestamp: new Date(Number(template.created_at_time)),
+            fetchDate: new Date(),
         };
     });
 }
@@ -82,6 +83,7 @@ export function getLastSold(templateId, status) {
                 templateId,
                 priceHistory: [],
                 timestamp: new Date(),
+                fetchDate: new Date(),
             };
         }
         const last = data.data[0];
@@ -110,6 +112,7 @@ export function getLastSold(templateId, status) {
             schemaName: asset.schema.schema_name,
             templateId,
             timestamp: new Date(Number(asset.updated_at_time)),
+            fetchDate: new Date(),
         };
     });
 }
@@ -125,6 +128,7 @@ export function getFloorListing(templateId, status) {
                 seller: '',
                 templateId,
                 timestamp: new Date(),
+                fetchDate: new Date(),
                 listings: [],
             };
         }
@@ -150,11 +154,12 @@ export function getFloorListing(templateId, status) {
             seller: asset.seller,
             templateId,
             timestamp: new Date(Number(asset.updated_at_time)),
+            fetchDate: new Date(),
         };
     });
 }
 export function transform(lastSold, floor, templateId, wallet) {
-    let m = Object.assign(Object.assign(Object.assign({ lagHours: undefined, priceGapPercent: undefined, historyLink: '', listingsLink: '', collectionLink: '', templateLink: '', inventoryLink: '', schemaLink: '' }, lastSold), floor), { collectionName: floor.collectionName || lastSold.collectionName });
+    let m = Object.assign(Object.assign(Object.assign({ lagHours: undefined, priceGapPercent: undefined, historyLink: '', listingsLink: '', collectionLink: '', templateLink: '', inventoryLink: '', schemaLink: '' }, lastSold), floor), { collectionName: floor.collectionName || lastSold.collectionName, fetchDate: floor.fetchDate || lastSold.fetchDate });
     m.lagHours = (Date.now() - m.lastSoldDate.getTime()) / 1000 / 60 / 60;
     if (m.lastPrice !== undefined && m.floorPrice !== undefined) {
         m.priceGapPercent = ((m.floorPrice - m.lastPrice) / m.lastPrice) * 100;

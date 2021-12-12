@@ -13,6 +13,7 @@ export interface AtomicAsset {
   schemaName?: string
   rarity?: string
   timestamp: Date
+  fetchDate: Date
 }
 
 export interface AssetSale {date: Date, id: string, price: number, seller: string}

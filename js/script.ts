@@ -1,4 +1,6 @@
 import {
+  CATCHUP_REFRESH_INTERVAL,
+  DEAD_HOURS,
   DEAD_HOURS_REFRESH_INTERVAL,
   FIRE_HOURS,
   FIRE_HOURS_REFRESH_INTERVAL,
@@ -79,7 +81,9 @@ async function refreshRow(row: HTMLTableRowElement, waxPrice: number) {
       schemaLink: '',
       templateLink: '',
       ...templateData,
+      fetchDate: templateData.fetchDate || new Date(),
     };
+
     model = bindLinks(model, templateId, wallet);
   } else {
     model = data.transform(lastSold, floorListing, templateId, wallet);
@@ -95,27 +99,40 @@ async function refreshRow(row: HTMLTableRowElement, waxPrice: number) {
   return model;
 }
 
+function calculateInterval(lagHours: number|undefined, fetchDate: Date|undefined) {
+  if (fetchDate === undefined) {
+    return CATCHUP_REFRESH_INTERVAL;
+  }
+
+  const intervals = [
+    { hours: FIRE_HOURS, interval: FIRE_HOURS_REFRESH_INTERVAL },
+    { hours: HOT_HOURS, interval: HOT_HOURS_REFRESH_INTERVAL },
+    { hours: FRESH_HOURS, interval: FRESH_HOURS_REFRESH_INTERVAL },
+    { hours: DEAD_HOURS, interval: DEAD_HOURS_REFRESH_INTERVAL },
+  ];
+
+  const interval = intervals
+    .sort((a, b) => a.hours - b.hours)
+    .reduce((previousValue, currentValue) => (
+      (lagHours && lagHours <= currentValue.hours) ? previousValue : currentValue));
+
+  const lastFetchSpan = Date.now() - fetchDate.getTime();
+  if (lastFetchSpan > interval.interval) {
+    return CATCHUP_REFRESH_INTERVAL;
+  }
+
+  return interval.interval;
+}
+
 function supplementalRefresh(result: RowView) {
   const { templateId } = result;
   const row = util.getTemplateRow(templateId);
 
-  let refreshInterval;
-
-  if (result.lagHours === undefined) {
-    refreshInterval = FRESH_HOURS_REFRESH_INTERVAL;
-  } else if (result.lagHours <= FIRE_HOURS) {
-    refreshInterval = FIRE_HOURS_REFRESH_INTERVAL;
-  } else if (result.lagHours <= HOT_HOURS) {
-    refreshInterval = HOT_HOURS_REFRESH_INTERVAL;
-  } else if (result.lagHours <= FRESH_HOURS) {
-    refreshInterval = FRESH_HOURS_REFRESH_INTERVAL;
-  } else {
-    refreshInterval = DEAD_HOURS_REFRESH_INTERVAL;
-  }
-
   if (Object.getOwnPropertyNames(row).includes('refreshTimeout')) {
     clearTimeout(row.refreshTimeoutId);
   }
+
+  const refreshInterval = calculateInterval(result.lagHours, result.fetchDate);
 
   row.refreshTimeoutId = setTimeout(async () => {
     const waxPrice = await data.getWAXPrice();

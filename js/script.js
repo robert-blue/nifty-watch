@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { DEAD_HOURS_REFRESH_INTERVAL, FIRE_HOURS, FIRE_HOURS_REFRESH_INTERVAL, FRESH_HOURS, FRESH_HOURS_REFRESH_INTERVAL, HOT_HOURS, HOT_HOURS_REFRESH_INTERVAL, } from './config.js';
+import { CATCHUP_REFRESH_INTERVAL, DEAD_HOURS, DEAD_HOURS_REFRESH_INTERVAL, FIRE_HOURS, FIRE_HOURS_REFRESH_INTERVAL, FRESH_HOURS, FRESH_HOURS_REFRESH_INTERVAL, HOT_HOURS, HOT_HOURS_REFRESH_INTERVAL, } from './config.js';
 import * as settings from './settings.js';
 import { getQueryStringTemplateIds, getTemplateIds } from './settings.js';
 import * as util from './util.js';
@@ -51,7 +51,7 @@ function refreshRow(row, waxPrice) {
                 templateData = yield data.getTemplateData(templateId, view.setStatus);
                 set(cacheKey, templateData);
             }
-            model = Object.assign({ seller: '', collectionLink: '', floorPrice: undefined, historyLink: '', increasing: 0, inventoryLink: '', lagHours: undefined, lastPrice: undefined, lastSoldDate: new Date(0), listings: [], listingsLink: '', mintNumber: 0, priceHistory: [], schemaLink: '', templateLink: '' }, templateData);
+            model = Object.assign(Object.assign({ seller: '', collectionLink: '', floorPrice: undefined, historyLink: '', increasing: 0, inventoryLink: '', lagHours: undefined, lastPrice: undefined, lastSoldDate: new Date(0), listings: [], listingsLink: '', mintNumber: 0, priceHistory: [], schemaLink: '', templateLink: '' }, templateData), { fetchDate: templateData.fetchDate || new Date() });
             model = bindLinks(model, templateId, wallet);
         }
         else {
@@ -66,28 +66,32 @@ function refreshRow(row, waxPrice) {
         return model;
     });
 }
+function calculateInterval(lagHours, fetchDate) {
+    if (fetchDate === undefined) {
+        return CATCHUP_REFRESH_INTERVAL;
+    }
+    const intervals = [
+        { hours: FIRE_HOURS, interval: FIRE_HOURS_REFRESH_INTERVAL },
+        { hours: HOT_HOURS, interval: HOT_HOURS_REFRESH_INTERVAL },
+        { hours: FRESH_HOURS, interval: FRESH_HOURS_REFRESH_INTERVAL },
+        { hours: DEAD_HOURS, interval: DEAD_HOURS_REFRESH_INTERVAL },
+    ];
+    const interval = intervals
+        .sort((a, b) => a.hours - b.hours)
+        .reduce((previousValue, currentValue) => ((lagHours && lagHours <= currentValue.hours) ? previousValue : currentValue));
+    const lastFetchSpan = Date.now() - fetchDate.getTime();
+    if (lastFetchSpan > interval.interval) {
+        return CATCHUP_REFRESH_INTERVAL;
+    }
+    return interval.interval;
+}
 function supplementalRefresh(result) {
     const { templateId } = result;
     const row = util.getTemplateRow(templateId);
-    let refreshInterval;
-    if (result.lagHours === undefined) {
-        refreshInterval = FRESH_HOURS_REFRESH_INTERVAL;
-    }
-    else if (result.lagHours <= FIRE_HOURS) {
-        refreshInterval = FIRE_HOURS_REFRESH_INTERVAL;
-    }
-    else if (result.lagHours <= HOT_HOURS) {
-        refreshInterval = HOT_HOURS_REFRESH_INTERVAL;
-    }
-    else if (result.lagHours <= FRESH_HOURS) {
-        refreshInterval = FRESH_HOURS_REFRESH_INTERVAL;
-    }
-    else {
-        refreshInterval = DEAD_HOURS_REFRESH_INTERVAL;
-    }
     if (Object.getOwnPropertyNames(row).includes('refreshTimeout')) {
         clearTimeout(row.refreshTimeoutId);
     }
+    const refreshInterval = calculateInterval(result.lagHours, result.fetchDate);
     row.refreshTimeoutId = setTimeout(() => __awaiter(this, void 0, void 0, function* () {
         const waxPrice = yield data.getWAXPrice();
         view.bindWaxPrice(waxPrice);
