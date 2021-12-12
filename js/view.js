@@ -178,7 +178,7 @@ export function bindRow(row, m, waxPrice, wallets) {
     bindLink(row, 'a.asset-name-link', m.listingsLink, m.assetName);
     const lastSoldMS = m.lastSoldDate.getTime();
     const epochMS = (new Date(0)).getTime();
-    const lag = (lastSoldMS === epochMS) ? 'N/A' : util.formatTimespan(Date.now() - m.lastSoldDate.getTime());
+    const lag = (lastSoldMS === epochMS) ? 'N/A' : util.formatTimeSpan(util.getTimeSpan(m.lastSoldDate));
     bindLink(row, 'a.history-link', m.historyLink, lag);
     if (m.rarity) {
         bindLink(row, 'a.rarity-link', m.rarityLink, (_b = m.rarity) === null || _b === void 0 ? void 0 : _b.toLowerCase());

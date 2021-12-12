@@ -200,9 +200,7 @@ export function bindRow(row: HTMLTableRowElement, m: RowView, waxPrice: number, 
 
   const lastSoldMS = m.lastSoldDate.getTime();
   const epochMS = (new Date(0)).getTime();
-  const lag = (lastSoldMS === epochMS) ? 'N/A' : util.formatTimespan(
-    Date.now() - m.lastSoldDate.getTime(),
-  );
+  const lag = (lastSoldMS === epochMS) ? 'N/A' : util.formatTimeSpan(util.getTimeSpan(m.lastSoldDate));
   bindLink(row, 'a.history-link', m.historyLink, lag);
 
   if (m.rarity) {

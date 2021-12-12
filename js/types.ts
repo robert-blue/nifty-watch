@@ -51,3 +51,11 @@ export interface CacheData {
   floorListing: AtomicListing
   timestamp?: Date
 }
+
+export interface TimeSpan {
+  readonly milliseconds: number
+  readonly seconds: number
+  readonly minutes: number
+  readonly hours: number
+  readonly days: number
+}

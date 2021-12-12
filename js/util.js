@@ -11,27 +11,41 @@ export function formatPercent(value) {
     const percentage = Math.floor(value * 100) / 100;
     return `${prefix}${percentage}%`;
 }
-export function formatTimespan(milliseconds) {
-    let msec = milliseconds;
-    const dd = Math.floor(msec / 1000 / 60 / 60 / 24);
-    msec -= dd * 1000 * 60 * 60 * 24;
-    const hh = Math.floor(msec / 1000 / 60 / 60);
-    msec -= hh * 1000 * 60 * 60;
-    const mm = Math.floor(msec / 1000 / 60);
-    msec -= mm * 1000 * 60;
-    const ss = Math.floor(msec / 1000);
+export function getTimeSpan(firstDate, secondDate = new Date()) {
+    let ms;
+    const start = firstDate.getTime();
+    const end = secondDate.getTime();
+    if (start >= end) {
+        ms = start - end;
+    }
+    else {
+        ms = end - start;
+    }
+    const dd = Math.floor(ms / 1000 / 60 / 60 / 24);
+    ms -= dd * 1000 * 60 * 60 * 24;
+    const hh = Math.floor(ms / 1000 / 60 / 60);
+    ms -= hh * 1000 * 60 * 60;
+    const mm = Math.floor(ms / 1000 / 60);
+    ms -= mm * 1000 * 60;
+    const ss = Math.floor(ms / 1000);
+    ms -= ss * 1000;
+    return {
+        days: dd, hours: hh, milliseconds: ms, minutes: mm, seconds: ss,
+    };
+}
+export function formatTimeSpan(timespan) {
     let output = '';
-    if (dd) {
-        output = `<span class="day">${dd}d</span>`;
+    if (timespan.days) {
+        output = `<span class="day">${timespan.days}d</span>`;
     }
-    if (hh) {
-        output += `<span class="hour">${hh}h</span>`;
+    if (timespan.hours) {
+        output += `<span class="hour">${timespan.hours}h</span>`;
     }
-    if (!dd && mm) {
-        output += `<span class="minute">${mm}m</span>`;
+    if (!timespan.days && timespan.minutes) {
+        output += `<span class="minute">${timespan.minutes}m</span>`;
     }
-    if (!dd && !hh && !mm && ss) {
-        output = `<span class="second">${ss}s</span>`;
+    if (!timespan.days && !timespan.hours && !timespan.minutes && timespan.seconds) {
+        output = `<span class="second">${timespan.seconds}s</span>`;
     }
     return output;
 }
