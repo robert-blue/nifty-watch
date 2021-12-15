@@ -61,14 +61,24 @@ export async function getTemplateData(
   };
 }
 
-export async function getWalletSaleTemplateIds(
+export async function getWalletTemplateIds(
   wallet: string,
   status: (msg?: string | undefined) => void,
-  sort = 'price',
+  type = 'sales',
+  sort = 'updated',
   sortOrder = 'desc',
 
 ): Promise<number[]> {
-  const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?state=1&max_assets=1&seller=${wallet}&page=1&limit=30&order=${sortOrder}&sort=${sort}`;
+  let url: string;
+
+  if (type === 'sales') {
+    url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?state=1&max_assets=1&seller=${wallet}&page=1&limit=30&order=${sortOrder}&sort=${sort}`;
+  } else if (type === 'assets') {
+    url = `https://wax.api.atomicassets.io/atomicmarket/v1/assets?owner=${wallet}&page=1&limit=50&order=${sortOrder}&sort=${sort}`;
+  } else {
+    throw new Error(`Unknown type ${type}`);
+  }
+
   const response = await atomicFetch(url, status);
   const data = await response.json();
   if (!data || data.data.length === 0) {
@@ -76,7 +86,10 @@ export async function getWalletSaleTemplateIds(
   }
 
   const filtered: number[] = data.data
-    .map((t: AtomicSaleResponse) => Number(t.assets[0]?.template?.template_id))
+    .map((t: AtomicSaleResponse) => {
+      const asset = (t.assets) ? t.assets[0] : t;
+      return Number(asset.template?.template_id);
+    })
     .filter((id: number) => Number.isInteger(id));
 
   const unique = [...new Set(filtered)];

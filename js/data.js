@@ -53,16 +53,29 @@ export function getTemplateData(templateId, status) {
         };
     });
 }
-export function getWalletSaleTemplateIds(wallet, status, sort = 'price', sortOrder = 'desc') {
+export function getWalletTemplateIds(wallet, status, type = 'sales', sort = 'updated', sortOrder = 'desc') {
     return __awaiter(this, void 0, void 0, function* () {
-        const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?state=1&max_assets=1&seller=${wallet}&page=1&limit=30&order=${sortOrder}&sort=${sort}`;
+        let url;
+        if (type === 'sales') {
+            url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?state=1&max_assets=1&seller=${wallet}&page=1&limit=30&order=${sortOrder}&sort=${sort}`;
+        }
+        else if (type === 'assets') {
+            url = `https://wax.api.atomicassets.io/atomicmarket/v1/assets?owner=${wallet}&page=1&limit=50&order=${sortOrder}&sort=${sort}`;
+        }
+        else {
+            throw new Error(`Unknown type ${type}`);
+        }
         const response = yield atomicFetch(url, status);
         const data = yield response.json();
         if (!data || data.data.length === 0) {
             return [];
         }
         const filtered = data.data
-            .map((t) => { var _a, _b; return Number((_b = (_a = t.assets[0]) === null || _a === void 0 ? void 0 : _a.template) === null || _b === void 0 ? void 0 : _b.template_id); })
+            .map((t) => {
+            var _a;
+            const asset = (t.assets) ? t.assets[0] : t;
+            return Number((_a = asset.template) === null || _a === void 0 ? void 0 : _a.template_id);
+        })
             .filter((id) => Number.isInteger(id));
         const unique = [...new Set(filtered)];
         return unique.slice(0, 20);

@@ -311,17 +311,30 @@ function handlePresetChange(e) {
             const wallet = settings.getWallets()[walletPreset];
             const decimal = Number((preset.toString()).split('.')[1] || 0);
             let sort;
+            let type;
+            const sortOrder = 'desc';
             switch (decimal) {
                 case 0:
                     sort = 'price';
+                    type = 'sales';
                     break;
                 case 1:
                     sort = 'updated';
+                    type = 'sales';
+                    break;
+                case 2:
+                    sort = 'median_price';
+                    type = 'assets';
+                    break;
+                case 3:
+                    sort = 'updated';
+                    type = 'assets';
                     break;
                 default:
                     sort = 'price';
+                    type = 'sales';
             }
-            templateIds = yield data.getWalletSaleTemplateIds(wallet, view.setStatus, sort);
+            templateIds = yield data.getWalletTemplateIds(wallet, view.setStatus, type, sort, sortOrder);
             setTemplateIDsButton.disabled = true;
         }
         else {
@@ -356,8 +369,10 @@ function bindPresetSelect() {
         for (let i = 0, wallets = settings.getWallets(); i < wallets.length; i++) {
             const wallet = wallets[i];
             const preset = ((i + 1) * -1) - 1;
-            presetSelect.add(new Option(`Highest listed for ${wallet}`, preset.toString()));
-            presetSelect.add(new Option(`Recently listed for ${wallet}`, `${preset.toString()}.1`));
+            presetSelect.add(new Option(`🎈 Highest listed for ${wallet}`, preset.toString()));
+            presetSelect.add(new Option(`📋 Recently listed for ${wallet}`, `${preset.toString()}.1`));
+            presetSelect.add(new Option(`🏆 Highest valued for ${wallet}`, `${preset.toString()}.2`));
+            presetSelect.add(new Option(`📅 Recently obtained for ${wallet}`, `${preset.toString()}.3`));
         }
         presetSelect.addEventListener('change', handlePresetChange);
     });
