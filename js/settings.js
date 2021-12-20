@@ -61,20 +61,6 @@ export function setTemplateIds(presetNumber, val) {
     if (presetNumber !== -1) {
         set(getKey(presetNumber, KEY_TEMPLATE_IDS), ids);
     }
-    // // Set preset name
-    // const counts: {[key: string]: number} = {};
-    // for (const id of ids) {
-    //   const data = get<CacheData>(id.toString());
-    //   if (data) {
-    //     const asset = data.lastSold || data.floorListing;
-    //     const collection = asset.collectionName || '';
-    //     counts[collection] = (counts[collection] || 0) + 1;
-    //   }
-    // }
-    //
-    // let ordered = [...new Set(Object.keys(counts))];
-    // ordered = ordered.sort((a, b) => counts[b] - counts[a]);
-    // console.log('ordered', ordered);
     return ids;
 }
 export function getWallets() {
@@ -91,21 +77,19 @@ export function setWallet(address) {
     return setString(KEY_WALLET, address);
 }
 function deserializeTemplateIds(str) {
-    console.log('deserialize', str);
     return (str || '')
         .split(',')
         .map((x) => Number(x)).filter((x) => x !== null && !Number.isNaN(x) && x > 0)
         .sort();
 }
 export function setColumnOptions(presetNumber, options) {
+    console.log('setColumnOptions', presetNumber, options);
     return set(`${presetNumber}:${KEY_COLUMN_OPTIONS}`, options);
 }
 export function getColumnOptions(presetNumber) {
     const options = get(`${presetNumber}:${KEY_COLUMN_OPTIONS}`);
-    if (options === undefined) {
-        return { enabled: [] };
-    }
-    return options;
+    console.log('getColumnOptions', presetNumber, options);
+    return options || { enabled: [] };
 }
 // Cleanup
 (() => {

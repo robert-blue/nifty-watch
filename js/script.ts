@@ -99,7 +99,7 @@ async function refreshRow(row: HTMLTableRowElement, waxPrice: number) {
   return model;
 }
 
-function calculateInterval(lagHours: number|undefined, fetchDate: Date|undefined) {
+function calculateInterval(lagHours: number | undefined, fetchDate: Date | undefined) {
   if (fetchDate === undefined) {
     return CATCHUP_REFRESH_INTERVAL;
   }
@@ -226,7 +226,7 @@ async function setTemplateIDs() {
   }
 }
 
-function getPresetSelect() : HTMLSelectElement {
+function getPresetSelect(): HTMLSelectElement {
   return document.querySelector('#presetSelect') as HTMLSelectElement;
 }
 
@@ -329,10 +329,15 @@ function bindUI() {
 
   const checkboxes = document.querySelectorAll('input[data-show-column]') as NodeListOf<HTMLInputElement>;
   checkboxes.forEach((checkbox) => {
-    checkbox.addEventListener('change', applyColumnVisibility);
+    checkbox.addEventListener('change', handleColumnVisibilityChange);
   });
 
   applyColumnVisibility();
+}
+
+function handleColumnVisibilityChange() {
+  applyColumnVisibility();
+  saveColumnOptions();
 }
 
 function saveColumnOptions() {
@@ -351,9 +356,11 @@ function saveColumnOptions() {
 
 function loadColumnOptions() {
   const options = settings.getColumnOptions(getSelectedPreset());
-  options.enabled.forEach((columnName) => {
-    const checkbox = document.querySelector(`input[data-show-column=${columnName}]`) as HTMLInputElement;
-    checkbox.checked = true;
+  const checkboxes = document.querySelectorAll('input[data-show-column]') as NodeListOf<HTMLInputElement>;
+
+  checkboxes.forEach((checkbox) => {
+    const columnName = checkbox.dataset.showColumn;
+    checkbox.checked = (columnName && options.enabled.includes(columnName));
   });
 }
 
@@ -361,7 +368,6 @@ function applyColumnVisibility() {
   util.logEvent('#checkbox/visible-columns', 'change visible columns');
 
   const table = document.getElementById('main-table') as HTMLTableElement;
-
   const checkboxes = document.querySelectorAll('input[data-show-column]') as NodeListOf<HTMLInputElement>;
 
   checkboxes.forEach((checkbox) => {
@@ -373,8 +379,6 @@ function applyColumnVisibility() {
       table.classList.remove(className);
     }
   });
-
-  saveColumnOptions();
 }
 
 async function handlePresetChange(e: Event) {
@@ -426,6 +430,8 @@ async function handlePresetChange(e: Event) {
     setTemplateIDsButton.disabled = false;
   }
 
+  loadColumnOptions();
+  applyColumnVisibility();
   await view.drawTableRows(templateIds, settings.getWallet());
   await refresh();
 }
@@ -460,7 +466,7 @@ async function bindPresetSelect() {
     presetSelect.add(new Option(`🎈 Highest listed for ${wallet}`, preset.toString()));
     presetSelect.add(new Option(`📋 Recently listed for ${wallet}`, `${preset.toString()}.1`));
     presetSelect.add(new Option(`🏆 Highest valued for ${wallet}`, `${preset.toString()}.2`));
-    presetSelect.add(new Option(`📅 Recently obtained for ${wallet}`, `${preset.toString()}.3`));
+    presetSelect.add(new Option(`📅 Recently updated for ${wallet}`, `${preset.toString()}.3`));
   }
 
   presetSelect.addEventListener('change', handlePresetChange);

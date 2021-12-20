@@ -260,9 +260,13 @@ function bindUI() {
     loadColumnOptions();
     const checkboxes = document.querySelectorAll('input[data-show-column]');
     checkboxes.forEach((checkbox) => {
-        checkbox.addEventListener('change', applyColumnVisibility);
+        checkbox.addEventListener('change', handleColumnVisibilityChange);
     });
     applyColumnVisibility();
+}
+function handleColumnVisibilityChange() {
+    applyColumnVisibility();
+    saveColumnOptions();
 }
 function saveColumnOptions() {
     const checkboxes = document.querySelectorAll('input[data-show-column]');
@@ -277,9 +281,10 @@ function saveColumnOptions() {
 }
 function loadColumnOptions() {
     const options = settings.getColumnOptions(getSelectedPreset());
-    options.enabled.forEach((columnName) => {
-        const checkbox = document.querySelector(`input[data-show-column=${columnName}]`);
-        checkbox.checked = true;
+    const checkboxes = document.querySelectorAll('input[data-show-column]');
+    checkboxes.forEach((checkbox) => {
+        const columnName = checkbox.dataset.showColumn;
+        checkbox.checked = (columnName && options.enabled.includes(columnName));
     });
 }
 function applyColumnVisibility() {
@@ -296,7 +301,6 @@ function applyColumnVisibility() {
             table.classList.remove(className);
         }
     });
-    saveColumnOptions();
 }
 function handlePresetChange(e) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -342,6 +346,8 @@ function handlePresetChange(e) {
             templateIds = getTemplateIds(preset);
             setTemplateIDsButton.disabled = false;
         }
+        loadColumnOptions();
+        applyColumnVisibility();
         yield view.drawTableRows(templateIds, settings.getWallet());
         yield refresh();
     });
@@ -372,7 +378,7 @@ function bindPresetSelect() {
             presetSelect.add(new Option(`🎈 Highest listed for ${wallet}`, preset.toString()));
             presetSelect.add(new Option(`📋 Recently listed for ${wallet}`, `${preset.toString()}.1`));
             presetSelect.add(new Option(`🏆 Highest valued for ${wallet}`, `${preset.toString()}.2`));
-            presetSelect.add(new Option(`📅 Recently obtained for ${wallet}`, `${preset.toString()}.3`));
+            presetSelect.add(new Option(`📅 Recently updated for ${wallet}`, `${preset.toString()}.3`));
         }
         presetSelect.addEventListener('change', handlePresetChange);
     });
