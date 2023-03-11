@@ -71,10 +71,12 @@ export async function getWalletTemplateIds(
 ): Promise<number[]> {
   let url: string;
 
+  const host = 'https://aa.wax.blacklusion.io';
+
   if (type === 'sales') {
-    url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?state=1&max_assets=1&seller=${wallet}&page=1&limit=30&order=${sortOrder}&sort=${sort}`;
+    url = `${host}/atomicmarket/v2/sales?state=1&max_assets=1&seller=${wallet}&page=1&limit=30&order=${sortOrder}&sort=${sort}`;
   } else if (type === 'assets') {
-    url = `https://wax.api.atomicassets.io/atomicmarket/v1/assets?owner=${wallet}&page=1&limit=50&order=${sortOrder}&sort=${sort}`;
+    url = `${host}/atomicmarket/v1/assets?owner=${wallet}&page=1&limit=50&order=${sortOrder}&sort=${sort}`;
   } else {
     throw new Error(`Unknown type ${type}`);
   }
@@ -101,7 +103,10 @@ export async function getLastSold(
   status: (msg?: string | undefined) => void,
 ): Promise<AtomicSale> {
   const assetCount = 5;
-  const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?symbol=WAX&state=3&max_assets=1&template_id=${templateId}&page=1&limit=${assetCount}&order=desc&sort=updated`;
+
+  const host = 'https://atomic-wax-mainnet.wecan.dev';
+
+  const url = `${host}/atomicmarket/v2/sales?symbol=WAX&state=3&max_assets=1&template_id=${templateId}&page=1&limit=${assetCount}&order=desc&sort=updated`;
   const response = await atomicFetch(url, status);
   const data = await response.json();
 
@@ -156,7 +161,7 @@ export async function getFloorListing(
   templateId: string,
   status: (msg?: string | undefined) => void,
 ): Promise<AtomicListing> {
-  const url = `https://wax.api.atomicassets.io/atomicmarket/v1/sales?symbol=WAX&state=1&max_assets=1&template_id=${templateId}&page=1&limit=5&order=asc&sort=price`;
+  const url = `https://wax.api.atomicassets.io/atomicmarket/v2/sales?symbol=WAX&state=1&max_assets=1&template_id=${templateId}&page=1&limit=5&order=asc&sort=price`;
   const response = await atomicFetch(url, status);
 
   const data = await response.json();
