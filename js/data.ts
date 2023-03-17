@@ -5,7 +5,21 @@ import {
 } from './types.js';
 import { bindLinks } from './view.js';
 
-const sem = new Semaphore(5, 30, 15);
+let ATOMIC_ENDPOINTS: string[] = [];
+const ATOMIC_ENDPOINT_EXCLUSIONS: string[] = [
+  'cryptolions',
+  'eosarabia',
+  'hivebp',
+  'eosusa',
+  '3dkrender',
+  'wizardsguild',
+  'dapplica',
+  'neftyblocks',
+  'eosauthority',
+  'eosdublin',
+];
+
+// const sem = new Semaphore(5, 30, 15);
 
 interface AtomicSaleResponse {
   assets: Record<string, any>[]
@@ -16,18 +30,48 @@ interface AtomicSaleResponse {
   price: Record<string, any>
 }
 
-async function atomicFetch(url: string, status: (msg?: string) => void): Promise<Response> {
-  await sem.wait();
-  let response: Response = await fetch(url);
+async function selectAtomicEndpoint() {
+  if (ATOMIC_ENDPOINTS.length === 0) {
+    const url = 'https://validate.eosnation.io/wax/reports/endpoints.json';
+
+    try {
+      const jsondata = await fetch(url);
+      const data = await jsondata.json();
+
+      ATOMIC_ENDPOINTS = data.report.atomic_https.map((r) => r[1]).filter((f) => ATOMIC_ENDPOINT_EXCLUSIONS.some(
+        (p) => f.includes(p),
+      ) === false);
+    } catch (e) {
+      console.error(e);
+      throw e;
+    }
+  }
+
+  const randomIndex = Math.floor(Math.random() * ATOMIC_ENDPOINTS.length);
+  return ATOMIC_ENDPOINTS[randomIndex];
+}
+
+async function atomicFetch(url: string, status: (msg?: string) => void, attempt = 0): Promise<Response> {
+  // await sem.wait();
+  const host = await selectAtomicEndpoint();
+  let response: Response = await fetch(host + url);
 
   while (response.status === 429) {
     status('AtomicHub rate limit reached. Pausing updates.');
     await util.sleep(5 * 1000);
-    response = await fetch(url);
+
+    try {
+      response = await fetch(url);
+    } catch (e) {
+      if (attempt < 6) {
+        return atomicFetch(url, status, attempt + 1);
+      }
+    }
+
     status();
   }
 
-  await sem.release();
+  // await sem.release();
   return response;
 }
 
@@ -45,7 +89,7 @@ export async function getTemplateData(
   templateId: string,
   status: (msg?: string | undefined) => void,
 ): Promise<AtomicAsset> {
-  const url = `https://wax.api.atomicassets.io/atomicassets/v1/templates?ids=${templateId}&page=1&limit=1&order=desc&sort=created`;
+  const url = `/atomicassets/v1/templates?ids=${templateId}&page=1&limit=1&order=desc&sort=created`;
   const response = await atomicFetch(url, status);
   const data = await response.json();
   const template = data.data[0];
@@ -67,16 +111,13 @@ export async function getWalletTemplateIds(
   type = 'sales',
   sort = 'updated',
   sortOrder = 'desc',
-
 ): Promise<number[]> {
   let url: string;
 
-  const host = 'https://aa.wax.blacklusion.io';
-
   if (type === 'sales') {
-    url = `${host}/atomicmarket/v2/sales?state=1&max_assets=1&seller=${wallet}&page=1&limit=30&order=${sortOrder}&sort=${sort}`;
+    url = `/atomicmarket/v2/sales?state=1&max_assets=1&seller=${wallet}&page=1&limit=30&order=${sortOrder}&sort=${sort}`;
   } else if (type === 'assets') {
-    url = `${host}/atomicmarket/v1/assets?owner=${wallet}&page=1&limit=50&order=${sortOrder}&sort=${sort}`;
+    url = `/atomicmarket/v1/assets?owner=${wallet}&page=1&limit=50&order=${sortOrder}&sort=${sort}`;
   } else {
     throw new Error(`Unknown type ${type}`);
   }
@@ -104,9 +145,7 @@ export async function getLastSold(
 ): Promise<AtomicSale> {
   const assetCount = 5;
 
-  const host = 'https://atomic-wax-mainnet.wecan.dev';
-
-  const url = `${host}/atomicmarket/v2/sales?symbol=WAX&state=3&max_assets=1&template_id=${templateId}&page=1&limit=${assetCount}&order=desc&sort=updated`;
+  const url = `/atomicmarket/v2/sales?symbol=WAX&state=3&max_assets=1&template_id=${templateId}&page=1&limit=${assetCount}&order=desc&sort=updated`;
   const response = await atomicFetch(url, status);
   const data = await response.json();
 
@@ -161,7 +200,7 @@ export async function getFloorListing(
   templateId: string,
   status: (msg?: string | undefined) => void,
 ): Promise<AtomicListing> {
-  const url = `https://wax.api.atomicassets.io/atomicmarket/v2/sales?symbol=WAX&state=1&max_assets=1&template_id=${templateId}&page=1&limit=5&order=asc&sort=price`;
+  const url = `/atomicmarket/v2/sales?symbol=WAX&state=1&max_assets=1&template_id=${templateId}&page=1&limit=5&order=asc&sort=price`;
   const response = await atomicFetch(url, status);
 
   const data = await response.json();

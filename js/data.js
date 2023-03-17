@@ -7,21 +7,58 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import Semaphore from './vendor/semaphore.js';
 import * as util from './util.js';
 import { bindLinks } from './view.js';
-const sem = new Semaphore(5, 30, 15);
-function atomicFetch(url, status) {
+let ATOMIC_ENDPOINTS = [];
+const ATOMIC_ENDPOINT_EXCLUSIONS = [
+    'cryptolions',
+    'eosarabia',
+    'hivebp',
+    'eosusa',
+    '3dkrender',
+    'wizardsguild',
+    'dapplica',
+    'neftyblocks',
+    'eosauthority',
+    'eosdublin',
+];
+function selectAtomicEndpoint() {
     return __awaiter(this, void 0, void 0, function* () {
-        yield sem.wait();
-        let response = yield fetch(url);
+        if (ATOMIC_ENDPOINTS.length === 0) {
+            const url = 'https://validate.eosnation.io/wax/reports/endpoints.json';
+            try {
+                const jsondata = yield fetch(url);
+                const data = yield jsondata.json();
+                ATOMIC_ENDPOINTS = data.report.atomic_https.map((r) => r[1]).filter((f) => ATOMIC_ENDPOINT_EXCLUSIONS.some((p) => f.includes(p)) === false);
+            }
+            catch (e) {
+                console.error(e);
+                throw e;
+            }
+        }
+        const randomIndex = Math.floor(Math.random() * ATOMIC_ENDPOINTS.length);
+        return ATOMIC_ENDPOINTS[randomIndex];
+    });
+}
+function atomicFetch(url, status, attempt = 0) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // await sem.wait();
+        const host = yield selectAtomicEndpoint();
+        let response = yield fetch(host + url);
         while (response.status === 429) {
             status('AtomicHub rate limit reached. Pausing updates.');
             yield util.sleep(5 * 1000);
-            response = yield fetch(url);
+            try {
+                response = yield fetch(url);
+            }
+            catch (e) {
+                if (attempt < 6) {
+                    return atomicFetch(url, status, attempt + 1);
+                }
+            }
             status();
         }
-        yield sem.release();
+        // await sem.release();
         return response;
     });
 }
@@ -38,7 +75,7 @@ export function getWAXPrice() {
 }
 export function getTemplateData(templateId, status) {
     return __awaiter(this, void 0, void 0, function* () {
-        const url = `https://wax.api.atomicassets.io/atomicassets/v1/templates?ids=${templateId}&page=1&limit=1&order=desc&sort=created`;
+        const url = `/atomicassets/v1/templates?ids=${templateId}&page=1&limit=1&order=desc&sort=created`;
         const response = yield atomicFetch(url, status);
         const data = yield response.json();
         const template = data.data[0];
@@ -56,12 +93,11 @@ export function getTemplateData(templateId, status) {
 export function getWalletTemplateIds(wallet, status, type = 'sales', sort = 'updated', sortOrder = 'desc') {
     return __awaiter(this, void 0, void 0, function* () {
         let url;
-        const host = 'https://aa.wax.blacklusion.io';
         if (type === 'sales') {
-            url = `${host}/atomicmarket/v2/sales?state=1&max_assets=1&seller=${wallet}&page=1&limit=30&order=${sortOrder}&sort=${sort}`;
+            url = `/atomicmarket/v2/sales?state=1&max_assets=1&seller=${wallet}&page=1&limit=30&order=${sortOrder}&sort=${sort}`;
         }
         else if (type === 'assets') {
-            url = `${host}/atomicmarket/v1/assets?owner=${wallet}&page=1&limit=50&order=${sortOrder}&sort=${sort}`;
+            url = `/atomicmarket/v1/assets?owner=${wallet}&page=1&limit=50&order=${sortOrder}&sort=${sort}`;
         }
         else {
             throw new Error(`Unknown type ${type}`);
@@ -85,8 +121,7 @@ export function getWalletTemplateIds(wallet, status, type = 'sales', sort = 'upd
 export function getLastSold(templateId, status) {
     return __awaiter(this, void 0, void 0, function* () {
         const assetCount = 5;
-        const host = 'https://atomic-wax-mainnet.wecan.dev';
-        const url = `${host}/atomicmarket/v2/sales?symbol=WAX&state=3&max_assets=1&template_id=${templateId}&page=1&limit=${assetCount}&order=desc&sort=updated`;
+        const url = `/atomicmarket/v2/sales?symbol=WAX&state=3&max_assets=1&template_id=${templateId}&page=1&limit=${assetCount}&order=desc&sort=updated`;
         const response = yield atomicFetch(url, status);
         const data = yield response.json();
         if (!data || !data.data || data.data.length === 0) {
@@ -133,7 +168,7 @@ export function getLastSold(templateId, status) {
 }
 export function getFloorListing(templateId, status) {
     return __awaiter(this, void 0, void 0, function* () {
-        const url = `https://wax.api.atomicassets.io/atomicmarket/v2/sales?symbol=WAX&state=1&max_assets=1&template_id=${templateId}&page=1&limit=5&order=asc&sort=price`;
+        const url = `/atomicmarket/v2/sales?symbol=WAX&state=1&max_assets=1&template_id=${templateId}&page=1&limit=5&order=asc&sort=price`;
         const response = yield atomicFetch(url, status);
         const data = yield response.json();
         if (data.data.length === 0) {
